@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="WADUH — Wadah Akses Digital Unit Hunian BITC. Reservasi Working Space, Co-Working Space, dan Convention Hall Gedung BITC Cimahi secara online.">
+    <meta name="description" content="WADUH Wadah Akses Digital Unit Hunian BITC. Reservasi Working Space, Co-Working Space, dan Convention Hall Gedung BITC Cimahi secara online.">
     <title>WADUH | Wadah Akses Digital Unit Hunian BITC</title>
     <link href="{{ asset('vendor/fonts/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
@@ -140,7 +140,7 @@
                 <div class="col-lg-7" data-reveal>
                     <span class="badge-acr d-inline-block mb-3"><i class="bi bi-stars me-1"></i>Wadah Akses Digital Unit Hunian BITC</span>
                     <h1>Reservasi ruang di <span class="grad">Gedung BITC</span>, semudah beberapa klik.</h1>
-                    <p class="lead-copy mt-3">WADUH adalah layanan resmi reservasi fasilitas Baros Information Technology Creative (BITC) Cimahi — mulai dari kubikal co-working, ruang kerja privat, sampai convention hall. Pilih ruang, atur jadwal, pantau status. Tanpa antre.</p>
+                    <p class="lead-copy mt-3">WADUH adalah layanan resmi reservasi fasilitas Baros Information Technology Creative Center (BITC) - Mulai dari kubikal co-working, ruang kerja privat, sampai convention hall. Pilih ruang, atur jadwal, pantau status. Tanpa antrian.</p>
                     <div class="d-flex flex-wrap gap-3 mt-4">
                         <a href="{{ route('reservasi.index') }}" class="btn-hero solid text-decoration-none">Reservasi Sekarang <i class="bi bi-arrow-up-right"></i></a>
                         <a href="{{ route('cek-status.form') }}" class="btn-hero ghost text-decoration-none"><i class="bi bi-search"></i> Cek Status Reservasi</a>
@@ -178,9 +178,9 @@
             <div class="row gy-4 align-items-center">
                 <div class="col-lg-6" data-reveal>
                     <p class="eyebrow">Tentang BITC</p>
-                    <h2>Baros Information Technology Creative — rumah ekosistem digital Cimahi.</h2>
+                    <h2>Baros Information Technology Creative Center rumah ekosistem digital Cimahi.</h2>
                     <p class="text-muted mt-3" style="line-height:1.85">Gedung <strong>BITC</strong> di Jalan Raya Baros No. 78 dikelola oleh <strong>UPTD Cimahi Techno Park</strong> sebagai pusat pengembangan industri teknologi informasi dan ekonomi kreatif Kota Cimahi. Di dalamnya tersedia unit hunian usaha yang dapat disewa: ruang kerja privat, kubikal co-working, hingga convention hall untuk acara berskala besar.</p>
-                    <p class="text-muted" style="line-height:1.85"><strong>WADUH (Wadah Akses Digital Unit Hunian)</strong> hadir agar seluruh proses — melihat ketersediaan per lantai, mengajukan reservasi, verifikasi dokumen, sampai penerbitan faktur — berlangsung digital, transparan, dan cepat.</p>
+                    <p class="text-muted" style="line-height:1.85"><strong>WADUH (Wadah Akses Digital Unit Hunian)</strong> hadir agar seluruh proses melihat ketersediaan per lantai, mengajukan reservasi, dan cek status reservasi.</p>
 
                     {{-- Jam operasional (digabung ke Tentang BITC) --}}
                     <div class="xcard mt-4 overflow-hidden">
@@ -193,16 +193,16 @@
                             <div class="d-flex justify-content-between py-2 small"><span class="text-muted">Minggu & Hari Libur</span><strong>Tutup</strong></div>
                         </div>
                         <div class="px-3 py-2 small text-muted" style="background:#fbfdfe; border-top:1px solid var(--line)">
-                            <i class="bi bi-info-circle me-1"></i>Reservasi online lewat WADUH tetap bisa 24 jam. Pemakaian di luar jam layanan diatur lewat persetujuan admin.
+                            <!-- <i class="bi bi-info-circle me-1"></i>Reservasi online lewat WADUH tetap bisa 24 jam. Pemakaian di luar jam layanan diatur lewat persetujuan admin. -->
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6" data-reveal>
                     <div class="row g-3">
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-geo-alt fs-3" style="color:var(--l1)"></i><h3 class="h6 mt-2 mb-1">Lokasi Strategis</h3><p class="small text-muted mb-0">Jl. Raya Baros No. 78, Cimahi Selatan — akses mudah dari tol Baros.</p></div></div>
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-wifi fs-3" style="color:var(--l3a)"></i><h3 class="h6 mt-2 mb-1">Fasilitas Penunjang</h3><p class="small text-muted mb-0">Internet, area parkir, lift, musala, dan ruang publik kreatif.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-geo-alt fs-3" style="color:var(--l1)"></i><h3 class="h6 mt-2 mb-1">Lokasi Strategis</h3><p class="small text-muted mb-0">Jl. Raya Baros No. 78, Cimahi Selatan akses mudah dari tol Baros.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-wifi fs-3" style="color:var(--l3a)"></i><h3 class="h6 mt-2 mb-1">Fasilitas Penunjang</h3><p class="small text-muted mb-0">Internet, area parkir, lift, mushola, dan ruang publik kreatif.</p></div></div>
                         <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-shield-check fs-3" style="color:var(--l2)"></i><h3 class="h6 mt-2 mb-1">Dikelola Resmi</h3><p class="small text-muted mb-0">UPTD Cimahi Techno Park, Pemerintah Kota Cimahi.</p></div></div>
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-lightning-charge fs-3" style="color:var(--l3b)"></i><h3 class="h6 mt-2 mb-1">Proses Digital</h3><p class="small text-muted mb-0">Reservasi, verifikasi, dan faktur — semuanya online lewat WADUH.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-lightning-charge fs-3" style="color:var(--l3b)"></i><h3 class="h6 mt-2 mb-1">Proses Digital</h3><p class="small text-muted mb-0">Lihat Ruangan sampai checkout semuanya lewat WADUH.</p></div></div>
                     </div>
                 </div>
             </div>
@@ -214,7 +214,7 @@
         <div class="container">
             <div class="text-center mb-5" data-reveal>
                 <p class="eyebrow justify-content-center" style="justify-content:center">Fasilitas per Lantai</p>
-                <h2>Lima lantai, tiga jenis ruang — pilih yang pas untukmu.</h2>
+                <h2>Lima lantai, tiga jenis ruang pilih yang pas untukmu.</h2>
                 <p class="text-muted mt-2">Klik lantai untuk langsung melihat denah & ketersediaannya hari ini.</p>
             </div>
             <div class="row g-4">
@@ -255,7 +255,7 @@
                 <div class="col-lg-6" data-reveal>
                     <p class="eyebrow">Kontak</p>
                     <h2>Butuh bantuan? Hubungi admin BITC.</h2>
-                    <p class="text-muted mt-3" style="line-height:1.85">Punya pertanyaan soal ketersediaan ruang, dokumen persyaratan, atau pembayaran? Tim admin BITC siap membantu — cara tercepat lewat WhatsApp.</p>
+                    <p class="text-muted mt-3" style="line-height:1.85">Mau reservasi secara langsung atau ingin melakukan pembayaran? Tim admin BITC siap membantu, cara tercepat lewat WhatsApp.</p>
                     <a class="btn-hero solid text-decoration-none mt-2" style="background:#25d366; box-shadow:0 12px 26px rgba(37,211,102,.3)"
                        href="https://wa.me/{{ config('institusi.whatsapp') }}?text={{ urlencode('Halo Admin BITC, saya ingin bertanya tentang reservasi fasilitas lewat WADUH.') }}"
                        target="_blank" rel="noopener">
@@ -284,8 +284,8 @@
             </div>
             <div class="row g-4">
                 <div class="col-md-3" data-reveal><div class="xcard step-card h-100"><span class="n" style="background:var(--l1)">1</span><h3 class="h6">Pilih Ruang</h3><p class="small text-muted mb-0">Telusuri kategori & denah per lantai, lihat ketersediaan real-time.</p></div></div>
-                <div class="col-md-3" data-reveal><div class="xcard step-card h-100"><span class="n" style="background:var(--l3a)">2</span><h3 class="h6">Atur Jadwal</h3><p class="small text-muted mb-0">Sewa per jam, harian, atau bulanan — bisa beberapa ruang sekaligus.</p></div></div>
-                <div class="col-md-3" data-reveal><div class="xcard step-card h-100"><span class="n" style="background:var(--l3b)">3</span><h3 class="h6">Checkout</h3><p class="small text-muted mb-0">Isi data diri sekali, unggah dokumen (untuk sewa bulanan), dapat kode.</p></div></div>
+                <div class="col-md-3" data-reveal><div class="xcard step-card h-100"><span class="n" style="background:var(--l3a)">2</span><h3 class="h6">Atur Jadwal</h3><p class="small text-muted mb-0">Sewa per jam, harian, atau bulanan bisa beberapa ruang sekaligus.</p></div></div>
+                <div class="col-md-3" data-reveal><div class="xcard step-card h-100"><span class="n" style="background:var(--l3b)">3</span><h3 class="h6">Checkout</h3><p class="small text-muted mb-0">Isi data diri sekali, unggah dokumen (untuk sewa bulanan), dapat kode reservasi.</p></div></div>
                 <div class="col-md-3" data-reveal><div class="xcard step-card h-100"><span class="n" style="background:var(--l5)">4</span><h3 class="h6">Pantau & Gunakan</h3><p class="small text-muted mb-0">Cek status persetujuan dengan kode reservasi, lalu gunakan ruangmu.</p></div></div>
             </div>
         </div>
@@ -297,7 +297,7 @@
             <div class="cta-band d-flex flex-wrap justify-content-between align-items-center gap-3" data-reveal>
                 <div>
                     <h2 class="h3 mb-1">Siap pakai ruang di BITC?</h2>
-                    <p class="mb-0" style="opacity:.8">Mulai reservasi sekarang — gratis, cepat, dan resmi.</p>
+                    <p class="mb-0" style="opacity:.8">Mulai reservasi sekarang</p>
                 </div>
                 <a href="{{ route('reservasi.index') }}" class="btn-hero solid text-decoration-none" style="background:#fff; color:var(--primary)">Mulai Reservasi <i class="bi bi-arrow-up-right"></i></a>
             </div>
