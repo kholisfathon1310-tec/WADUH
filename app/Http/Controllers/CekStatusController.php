@@ -28,7 +28,13 @@ class CekStatusController extends Controller
         $kode = trim($data['kode']);
 
         $reservasi = Reservasi::query()
-            ->with(['tarifSewa.fasilitas', 'tarifSewa.jenisSewa', 'pemesan'])
+            ->with([
+                'tarifSewa.fasilitas.lantai',
+                'tarifSewa.jenisSewa',
+                'pemesan',
+                'dokumenPersyaratan',
+                'riwayatStatus' => fn ($q) => $q->orderBy('tanggal_perubahan'),
+            ])
             ->where('kode_transaksi', $kode)
             ->orWhere('kode_reservasi', $kode)
             ->orderBy('id_reservasi')

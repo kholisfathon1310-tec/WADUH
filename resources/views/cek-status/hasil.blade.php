@@ -7,7 +7,19 @@
 
 @section('content')
 <style>
-    .tracker { display:flex; align-items:flex-start; gap:0; margin:.75rem 0 .25rem; }
+    /* Header hasil — segaris dengan hero halaman form */
+    .rs-head { background:linear-gradient(118deg,#124f6b 0%,#176b87 45%,#1b9487 100%); border-radius:1.4rem; position:relative; overflow:hidden; }
+    .rs-head::before { content:''; position:absolute; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,.07); top:-140px; right:-70px; }
+    .rs-head .inner { position:relative; z-index:1; }
+    .rs-kode { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:.08em; }
+    .btn-salin { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:.6rem; font-size:.8rem; font-weight:700; }
+    .btn-salin:hover { background:rgba(255,255,255,.24); color:#fff; }
+    .rs-stat { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.16); border-radius:.9rem; min-width:8.5rem; }
+    .rs-stat .v { font-size:1.15rem; font-weight:800; }
+    .rs-stat .k { font-size:.72rem; color:#c9e8ec; }
+
+    /* Tracker status */
+    .tracker { display:flex; align-items:flex-start; gap:0; margin:.9rem 0 .25rem; }
     .tstep { flex:1 1 0; text-align:center; position:relative; min-width:70px; }
     .tstep .tdot { width:2.1rem; height:2.1rem; border-radius:50%; display:grid; place-items:center; margin:0 auto .35rem; background:#e6edf3; color:#8a97a5; font-size:.95rem; position:relative; z-index:1; border:3px solid #fff; box-shadow:0 0 0 1px #e0e8ef; }
     .tstep .tlabel { font-size:.72rem; font-weight:700; color:#8a97a5; }
@@ -26,8 +38,33 @@
     .tstep.off .tlabel { color:#3a4653; }
     .tstep.off::before { background:#3a4653; }
     @keyframes pulse { 0%,100% { transform:scale(1) } 50% { transform:scale(1.12) } }
+
     .res-card { overflow:hidden; }
-    .res-card .thumb { width:100%; height:100%; min-height:150px; object-fit:cover; }
+    .res-card .thumb { width:100%; height:100%; min-height:170px; object-fit:cover; }
+
+    /* Pemberitahuan alasan (ditolak / dibatalkan) */
+    .rs-alasan { border-radius:.8rem; padding:.7rem .9rem; font-size:.85rem; display:flex; gap:.6rem; align-items:flex-start; }
+    .rs-alasan.tolak { background:#fdf1f1; border:1px solid #f0c9c9; color:#7c3a3a; }
+    .rs-alasan.batal { background:#eef1f5; border:1px solid #d8dfe8; color:#4a5568; }
+
+    /* Dokumen persyaratan */
+    .dok-chip { display:inline-flex; align-items:center; gap:.4rem; font-size:.76rem; font-weight:600; padding:.35rem .7rem; border-radius:2rem; border:1px solid; }
+    .dok-chip.menunggu { background:#fff8e6; border-color:#f0dfae; color:#9a6b00; }
+    .dok-chip.valid { background:#e2f7ef; border-color:#bce8d6; color:#0d8a5f; }
+    .dok-chip.tidak-valid { background:#fde4e4; border-color:#f3c2c2; color:#c02929; }
+
+    /* Riwayat status (timeline) */
+    .btn-riwayat { font-size:.78rem; font-weight:700; color:var(--primary); background:none; border:0; padding:0; }
+    .btn-riwayat:hover { color:var(--primary-dark); }
+    .btn-riwayat[aria-expanded="true"] .bi-chevron-down { transform:rotate(180deg); }
+    .btn-riwayat .bi-chevron-down { transition:transform .2s; display:inline-block; }
+    .timeline { list-style:none; margin:.75rem 0 0; padding:0 0 0 1.1rem; border-left:2px solid #e2e9f0; }
+    .timeline li { position:relative; padding:0 0 .85rem .9rem; }
+    .timeline li:last-child { padding-bottom:.1rem; }
+    .timeline li::before { content:''; position:absolute; left:-1.48rem; top:.28rem; width:.72rem; height:.72rem; border-radius:50%; background:#cdd8e2; border:2px solid #fff; box-shadow:0 0 0 1px #cdd8e2; }
+    .timeline li.hijau::before { background:var(--teal); box-shadow:0 0 0 1px var(--teal); }
+    .timeline li.merah::before { background:#d95757; box-shadow:0 0 0 1px #d95757; }
+    .timeline .tgl { font-size:.72rem; color:var(--muted); }
 </style>
 
     <nav aria-label="breadcrumb"><ol class="breadcrumb">
@@ -35,27 +72,55 @@
         <li class="breadcrumb-item active">{{ $kode }}</li>
     </ol></nav>
 
-    <div class="page-head mb-4 p-4 rounded-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-2" style="background:linear-gradient(115deg,#145f7c,#168b88)">
-        <div>
-            <p class="eyebrow-sm mb-1" style="color:#a9e6dd">Status Reservasi</p>
-            <h1 class="h4 mb-0">Kode: {{ $kode }}</h1>
-        </div>
-        @if ($reservasi->isNotEmpty())
-            <div class="text-center px-3 py-2 rounded-3" style="background:rgba(255,255,255,.15)">
-                <div class="fs-4 fw-bold">{{ $reservasi->count() }}</div>
-                <small>reservasi ditemukan</small>
-            </div>
-        @endif
-    </div>
-
     @if ($reservasi->isEmpty())
-        <div class="xcard p-5 text-center">
-            <div class="icon-tile mx-auto mb-3"><i class="bi bi-emoji-neutral"></i></div>
-            <h2 class="h6">Tidak ada reservasi dengan kode tersebut</h2>
-            <p class="text-muted small mb-3">Pastikan kode diketik lengkap, termasuk awalan TRX- atau RSV-.</p>
-            <a href="{{ route('cek-status.form') }}" class="btn btn-brand-outline btn-sm px-4">Coba Lagi</a>
+        {{-- ===== Tidak ditemukan ===== --}}
+        <div class="xcard p-5 text-center mx-auto" style="max-width:560px;">
+            <div class="icon-tile mx-auto mb-3" style="background:#fff4d6; color:#9a6b00;"><i class="bi bi-search"></i></div>
+            <h1 class="h5 mb-2">Kode <span style="color:var(--primary)">{{ $kode }}</span> tidak ditemukan</h1>
+            <p class="text-muted small mb-4">Pastikan kode diketik lengkap beserta awalannya — <strong>TRX-</strong> untuk satu pemesanan utuh atau <strong>RSV-</strong> untuk satu ruangan. Huruf besar/kecil tidak berpengaruh, namun tanda hubung harus ikut ditulis.</p>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="{{ route('cek-status.form') }}" class="btn btn-brand px-4"><i class="bi bi-arrow-counterclockwise me-1"></i>Coba Lagi</a>
+                <a href="{{ route('reservasi.index') }}" class="btn btn-brand-outline px-4">Buat Reservasi Baru</a>
+            </div>
         </div>
     @else
+        @php
+            $pemesan = $reservasi->first()->pemesan;
+            $totalSemua = $reservasi->sum('total_biaya');
+            $diajukanPada = $reservasi->min('created_at');
+        @endphp
+
+        {{-- ===== Header ringkasan ===== --}}
+        <div class="rs-head p-4 p-md-5 mb-4 text-white">
+            <div class="inner d-flex flex-wrap justify-content-between align-items-end gap-3">
+                <div>
+                    <p class="eyebrow-sm mb-2" style="color:#a9e6dd">Hasil Pencarian</p>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h1 class="h3 fw-bold mb-0 rs-kode">{{ $kode }}</h1>
+                        <button type="button" class="btn btn-sm btn-salin" data-salin="{{ $kode }}">
+                            <i class="bi bi-clipboard me-1"></i>Salin
+                        </button>
+                    </div>
+                    <p class="mb-0 mt-2 small" style="color:#d3ecf1">
+                        <i class="bi bi-person me-1"></i>{{ $pemesan->nama_lengkap }}
+                        @if ($diajukanPada)
+                            <span class="mx-1">·</span><i class="bi bi-calendar-plus me-1"></i>diajukan {{ $diajukanPada->translatedFormat('d M Y H:i') }}
+                        @endif
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <div class="rs-stat text-center px-3 py-2">
+                        <div class="v">{{ $reservasi->count() }}</div>
+                        <div class="k">Ruang Dipesan</div>
+                    </div>
+                    <div class="rs-stat text-center px-3 py-2">
+                        <div class="v">Rp {{ number_format($totalSemua, 0, ',', '.') }}</div>
+                        <div class="k">Total Biaya</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="d-flex flex-column gap-3">
         @foreach ($reservasi as $r)
             @php
@@ -73,6 +138,11 @@
                     'Menunggu'   => [['Diajukan','done','send'], ['Diverifikasi','now','hourglass-split'], ['Disetujui','','check-lg']],
                     default      => [['Diajukan','done','send'], ['Diverifikasi','done','hourglass-split'], ['Disetujui','done','check-lg']], // Disetujui / Selesai
                 };
+
+                // Alasan penolakan/pembatalan diambil dari riwayat status terakhir yang relevan.
+                $alasan = in_array($status, ['Ditolak', 'Dibatalkan'], true)
+                    ? $r->riwayatStatus->last(fn ($h) => $h->status_baru->value === $status)?->keterangan
+                    : null;
             @endphp
             <div class="xcard res-card">
                 <div class="row g-0">
@@ -81,6 +151,11 @@
                         <span class="avail position-absolute top-0 start-0 m-2" style="background:rgba(255,255,255,.92); color:{{ $meta['warna'] }}">
                             <i class="bi {{ $meta['ikon'] }}"></i> {{ $r->tarifSewa->fasilitas->kategori_fasilitas }}
                         </span>
+                        @if ($r->tarifSewa->fasilitas->lantai)
+                            <span class="avail position-absolute bottom-0 start-0 m-2" style="background:rgba(21,36,59,.75); color:#fff">
+                                <i class="bi bi-layers"></i> Lantai {{ $r->tarifSewa->fasilitas->lantai->nomor_lantai }}
+                            </span>
+                        @endif
                     </div>
                     <div class="col-md-9">
                         <div class="p-3 p-md-4">
@@ -92,12 +167,12 @@
                                     <div class="small text-muted">
                                         <span class="me-2"><i class="bi bi-upc"></i> {{ $r->kode_reservasi }}</span>
                                         <span class="me-2"><i class="bi bi-receipt"></i> {{ $r->kode_transaksi }}</span>
-                                        <span><i class="bi bi-person"></i> {{ $r->pemesan->nama_lengkap }}</span>
+                                        @if ($r->keperluan)<span><i class="bi bi-chat-left-text"></i> {{ \Illuminate\Support\Str::limit($r->keperluan, 60) }}</span>@endif
                                     </div>
                                 </div>
                                 <div class="text-end">
                                     <div class="fw-bold fs-5" style="color:var(--primary)">Rp {{ number_format($r->total_biaya, 0, ',', '.') }}</div>
-                                    <small class="text-muted">{{ $r->durasi }} {{ strtolower($r->tarifSewa->jenisSewa->satuan->value) }} · {{ $r->jumlah_pengguna }} org</small>
+                                    <small class="text-muted">{{ $r->durasi }} {{ strtolower($r->tarifSewa->jenisSewa->satuan->value) }} × Rp {{ number_format($r->harga_satuan, 0, ',', '.') }} · {{ $r->jumlah_pengguna }} org</small>
                                 </div>
                             </div>
 
@@ -111,12 +186,54 @@
                                 @endforeach
                             </div>
 
-                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="badge text-bg-light border py-2"><i class="bi bi-calendar3 me-1"></i>{{ $r->tanggal_mulai->translatedFormat('d M Y') }}@if($r->tanggal_selesai->ne($r->tanggal_mulai)) → {{ $r->tanggal_selesai->translatedFormat('d M Y') }}@endif</span>
-                                    @if($r->jam_mulai)<span class="badge text-bg-light border py-2"><i class="bi bi-clock me-1"></i>{{ \Illuminate\Support\Str::substr($r->jam_mulai,0,5) }}–{{ \Illuminate\Support\Str::substr($r->jam_selesai,0,5) }} WIB</span>@endif
-                                    <span class="badge text-bg-light border py-2">Per {{ $r->tarifSewa->jenisSewa->satuan->value }}</span>
+                            {{-- Alasan ditolak/dibatalkan --}}
+                            @if ($status === 'Ditolak')
+                                <div class="rs-alasan tolak mt-2">
+                                    <i class="bi bi-exclamation-octagon flex-shrink-0 mt-1"></i>
+                                    <div><strong>Alasan penolakan:</strong> {{ $alasan ?: 'Tidak dicantumkan. Silakan hubungi pengelola gedung untuk informasi lebih lanjut.' }}</div>
                                 </div>
+                            @elseif ($status === 'Dibatalkan')
+                                <div class="rs-alasan batal mt-2">
+                                    <i class="bi bi-slash-circle flex-shrink-0 mt-1"></i>
+                                    <div>Reservasi ini telah dibatalkan{{ $alasan ? ' — ' . $alasan : ' oleh pemesan.' }}</div>
+                                </div>
+                            @elseif ($status === 'Disetujui' && $r->tanggal_diproses)
+                                <div class="small mt-2" style="color:#0d8a5f"><i class="bi bi-patch-check-fill me-1"></i>Disetujui pada {{ $r->tanggal_diproses->translatedFormat('d M Y H:i') }} — tunjukkan kode reservasi Anda saat datang.</div>
+                            @endif
+
+                            {{-- Jadwal --}}
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <span class="badge text-bg-light border py-2"><i class="bi bi-calendar3 me-1"></i>{{ $r->tanggal_mulai->translatedFormat('d M Y') }}@if($r->tanggal_selesai->ne($r->tanggal_mulai)) → {{ $r->tanggal_selesai->translatedFormat('d M Y') }}@endif</span>
+                                @if($r->jam_mulai)<span class="badge text-bg-light border py-2"><i class="bi bi-clock me-1"></i>{{ \Illuminate\Support\Str::substr($r->jam_mulai,0,5) }}–{{ \Illuminate\Support\Str::substr($r->jam_selesai,0,5) }} WIB</span>@endif
+                                <span class="badge text-bg-light border py-2">Per {{ $r->tarifSewa->jenisSewa->satuan->value }}</span>
+                            </div>
+
+                            {{-- Dokumen persyaratan --}}
+                            @if ($r->dokumenPersyaratan->isNotEmpty())
+                                <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                                    <span class="small text-muted fw-semibold"><i class="bi bi-folder2-open me-1"></i>Dokumen:</span>
+                                    @foreach ($r->dokumenPersyaratan as $dok)
+                                        @php
+                                            $vs = $dok->status_verifikasi->value; // Menunggu | Valid | Tidak Valid
+                                            $vClass = ['Menunggu' => 'menunggu', 'Valid' => 'valid', 'Tidak Valid' => 'tidak-valid'][$vs] ?? 'menunggu';
+                                            $vIkon = ['Menunggu' => 'bi-hourglass-split', 'Valid' => 'bi-check-circle-fill', 'Tidak Valid' => 'bi-x-circle-fill'][$vs] ?? 'bi-hourglass-split';
+                                        @endphp
+                                        <span class="dok-chip {{ $vClass }}" title="{{ $dok->nama_file }} — {{ $vs }}">
+                                            <i class="bi {{ $vIkon }}"></i>{{ $dok->jenis_dokumen }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Riwayat + aksi --}}
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+                                @if ($r->riwayatStatus->isNotEmpty())
+                                    <button class="btn-riwayat" type="button" data-bs-toggle="collapse" data-bs-target="#riwayat-{{ $r->id_reservasi }}" aria-expanded="false">
+                                        <i class="bi bi-clock-history me-1"></i>Riwayat Status <i class="bi bi-chevron-down ms-1"></i>
+                                    </button>
+                                @else
+                                    <span></span>
+                                @endif
                                 @if ($bolehBatal)
                                     <form method="POST" action="{{ route('reservasi.batalkan', $r->kode_reservasi) }}"
                                           data-confirm="Reservasi {{ $r->kode_reservasi }} akan dibatalkan dan tidak dapat dikembalikan."
@@ -127,11 +244,50 @@
                                     </form>
                                 @endif
                             </div>
+
+                            @if ($r->riwayatStatus->isNotEmpty())
+                                <div class="collapse" id="riwayat-{{ $r->id_reservasi }}">
+                                    <ul class="timeline">
+                                        <li class="hijau">
+                                            <div class="fw-semibold small">Reservasi diajukan</div>
+                                            <div class="tgl">{{ $r->created_at?->translatedFormat('d M Y H:i') }}</div>
+                                        </li>
+                                        @foreach ($r->riwayatStatus as $h)
+                                            @php
+                                                $sb = $h->status_baru->value;
+                                                $liClass = $sb === 'Ditolak' ? 'merah' : (in_array($sb, ['Disetujui', 'Selesai'], true) ? 'hijau' : '');
+                                            @endphp
+                                            <li class="{{ $liClass }}">
+                                                <div class="fw-semibold small">{{ $sb === 'Menunggu' ? 'Diverifikasi' : $sb }}</div>
+                                                @if ($h->keterangan)<div class="small text-muted">{{ $h->keterangan }}</div>@endif
+                                                <div class="tgl">{{ $h->tanggal_perubahan?->translatedFormat('d M Y H:i') }}</div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         @endforeach
         </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ route('cek-status.form') }}" class="btn btn-brand-outline btn-sm px-4"><i class="bi bi-search me-1"></i>Cek Kode Lain</a>
+        </div>
     @endif
+
+    <script>
+        // Tombol salin kode — umpan balik langsung di tombol, tanpa ketergantungan pustaka.
+        document.querySelectorAll('[data-salin]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(btn.dataset.salin); }
+                catch { /* clipboard tidak tersedia (mis. non-HTTPS) */ }
+                const asli = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersalin!';
+                setTimeout(() => { btn.innerHTML = asli; }, 1800);
+            });
+        });
+    </script>
 @endsection
