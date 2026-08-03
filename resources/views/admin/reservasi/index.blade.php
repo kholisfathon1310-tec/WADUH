@@ -2,8 +2,8 @@
 @section('title', 'Data Reservasi')
 
 @section('content')
-    <form method="GET" class="xcard p-3 mb-3">
-        <div class="row g-2">
+    <form method="GET" class="xcard p-3 p-md-4 mb-4" data-reveal>
+        <div class="row g-2 g-md-3">
             <div class="col-md-3"><label class="form-label mb-1">Nama pemesan</label><input name="pemesan" class="form-control form-control-sm" placeholder="Cari nama…" value="{{ $filter['pemesan'] ?? '' }}"></div>
             <div class="col-md-2">
                 <label class="form-label mb-1">Kategori</label>
@@ -38,7 +38,7 @@
 
     @forelse ($grup as $kodeTransaksi => $baris)
         @php $first = $baris->first(); @endphp
-        <div class="xcard mb-3 overflow-hidden">
+        <div class="xcard mb-3 mb-md-4 overflow-hidden" data-reveal>
             {{-- Header pemesanan: satu tombol Detail untuk seluruh ruangan --}}
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 py-3"
                  style="background:linear-gradient(90deg,#f2f8fb,#fbfdfe); border-bottom:1px solid var(--line)">

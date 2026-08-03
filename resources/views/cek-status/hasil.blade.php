@@ -8,13 +8,14 @@
 @section('content')
 <style>
     /* Header hasil — segaris dengan hero halaman form */
-    .rs-head { background:linear-gradient(118deg,#124f6b 0%,#176b87 45%,#1b9487 100%); border-radius:1.4rem; position:relative; overflow:hidden; }
+    .rs-head { background:linear-gradient(118deg,#0d2a3a 0%,#176b87 45%,#1b9487 100%); border-radius:1.6rem; position:relative; overflow:hidden; box-shadow:0 24px 50px -20px rgba(13,42,58,.45); }
     .rs-head::before { content:''; position:absolute; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,.07); top:-140px; right:-70px; }
+    .rs-head::after { content:''; position:absolute; inset:0; background:radial-gradient(28rem 16rem at 10% 120%, rgba(36,170,154,.28), transparent 60%); }
     .rs-head .inner { position:relative; z-index:1; }
     .rs-kode { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:.08em; }
-    .btn-salin { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:.6rem; font-size:.8rem; font-weight:700; }
+    .btn-salin { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:.7rem; font-size:.8rem; font-weight:700; transition:background .15s ease; }
     .btn-salin:hover { background:rgba(255,255,255,.24); color:#fff; }
-    .rs-stat { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.16); border-radius:.9rem; min-width:8.5rem; }
+    .rs-stat { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.16); border-radius:1rem; min-width:8.5rem; backdrop-filter:blur(6px); }
     .rs-stat .v { font-size:1.15rem; font-weight:800; }
     .rs-stat .k { font-size:.72rem; color:#c9e8ec; }
 
@@ -39,7 +40,8 @@
     .tstep.off::before { background:#3a4653; }
     @keyframes pulse { 0%,100% { transform:scale(1) } 50% { transform:scale(1.12) } }
 
-    .res-card { overflow:hidden; }
+    .res-card { overflow:hidden; transition:box-shadow .2s ease; }
+    .res-card:hover { box-shadow:0 16px 34px -12px rgba(21,36,59,.14); }
     .res-card .thumb { width:100%; height:100%; min-height:170px; object-fit:cover; }
 
     /* Pemberitahuan alasan (ditolak / dibatalkan) */
@@ -91,7 +93,7 @@
         @endphp
 
         {{-- ===== Header ringkasan ===== --}}
-        <div class="rs-head p-4 p-md-5 mb-4 text-white">
+        <div class="rs-head p-4 p-md-5 mb-4 text-white" data-reveal>
             <div class="inner d-flex flex-wrap justify-content-between align-items-end gap-3">
                 <div>
                     <p class="eyebrow-sm mb-2" style="color:#a9e6dd">Hasil Pencarian</p>
@@ -144,7 +146,7 @@
                     ? $r->riwayatStatus->last(fn ($h) => $h->status_baru->value === $status)?->keterangan
                     : null;
             @endphp
-            <div class="xcard res-card">
+            <div class="xcard res-card" data-reveal>
                 <div class="row g-0">
                     <div class="col-md-3 d-none d-md-block position-relative">
                         <img src="{{ $meta['gambar'] }}" class="thumb" alt="{{ $r->tarifSewa->fasilitas->kategori_fasilitas }}">
@@ -234,15 +236,20 @@
                                 @else
                                     <span></span>
                                 @endif
-                                @if ($bolehBatal)
-                                    <form method="POST" action="{{ route('reservasi.batalkan', $r->kode_reservasi) }}"
-                                          data-confirm="Reservasi {{ $r->kode_reservasi }} akan dibatalkan dan tidak dapat dikembalikan."
-                                          data-confirm-title="Batalkan reservasi ini?" data-icon="warning"
-                                          data-confirm-text="Ya, batalkan" data-confirm-color="#d95757">
-                                        @csrf
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle me-1"></i>Batalkan</button>
-                                    </form>
-                                @endif
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('cek-status.bukti-reservasi', $r->kode_reservasi) }}" class="btn btn-sm btn-brand-outline">
+                                        <i class="bi bi-file-earmark-arrow-down me-1"></i>Unduh Bukti Reservasi
+                                    </a>
+                                    @if ($bolehBatal)
+                                        <form method="POST" action="{{ route('reservasi.batalkan', $r->kode_reservasi) }}"
+                                              data-confirm="Reservasi {{ $r->kode_reservasi }} akan dibatalkan dan tidak dapat dikembalikan."
+                                              data-confirm-title="Batalkan reservasi ini?" data-icon="warning"
+                                              data-confirm-text="Ya, batalkan" data-confirm-color="#d95757">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle me-1"></i>Batalkan</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
 
                             @if ($r->riwayatStatus->isNotEmpty())

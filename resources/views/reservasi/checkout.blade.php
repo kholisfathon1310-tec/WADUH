@@ -6,7 +6,12 @@
 @endsection
 
 @section('content')
-    <div class="page-head mb-4">
+    <style>
+        .list-group-item { transition:background .15s ease; }
+        .list-group-item:hover { background:#fbfdfe; }
+    </style>
+
+    <div class="page-head mb-4" data-reveal>
         <p class="eyebrow-sm mb-1">Langkah 5 dari 5</p>
         <h1 class="h3 mb-1">Checkout Reservasi</h1>
         <p class="text-muted mb-0">Periksa keranjang Anda, isi data diri sekali untuk semua fasilitas, lalu kirim.</p>
@@ -14,7 +19,7 @@
 
     <div class="row g-4">
         {{-- Ringkasan keranjang --}}
-        <div class="col-lg-5">
+        <div class="col-lg-5" data-reveal>
             <div class="xcard overflow-hidden">
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background:var(--surface)">
                     <span class="fw-bold"><i class="bi bi-cart3 me-1"></i>Keranjang ({{ count($items) }})</span>
@@ -53,7 +58,7 @@
         </div>
 
         {{-- Data diri + dokumen --}}
-        <div class="col-lg-7">
+        <div class="col-lg-7" data-reveal>
             <div class="xcard p-4">
                 <h2 class="h5 mb-3"><i class="bi bi-person-vcard me-1"></i>Data Diri Pemesan</h2>
                 <form method="POST" action="{{ route('reservasi.checkout') }}" enctype="multipart/form-data">
@@ -70,7 +75,7 @@
                     <div class="mb-3"><label class="form-label">Alamat</label><textarea name="alamat" class="form-control" rows="2" required>{{ old('alamat') }}</textarea></div>
 
                     @if ($hasBulan)
-                        <div class="p-3 rounded-3 mb-3" style="background:#fff8e6; border:1px solid #f1e3b8;">
+                        <div class="p-3 rounded-4 mb-3" style="background:#fff8e6; border:1px solid #f1e3b8;">
                             <p class="fw-bold small mb-1"><i class="bi bi-paperclip me-1"></i>Dokumen Persyaratan — wajib untuk sewa Bulanan</p>
                             <p class="text-muted small mb-2">Company Profile / legalitas perusahaan / fotokopi KTP penanggung jawab (PDF, JPG, PNG, maks 5 MB per file).</p>
                             @foreach ($items as $index => $item)

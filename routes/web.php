@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\FakturController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MonitoringController;
 use App\Http\Controllers\Admin\ReservasiAdminController;
+use App\Http\Controllers\BuktiReservasiController;
 use App\Http\Controllers\CekStatusController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
@@ -50,6 +51,7 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
 
 Route::get('/cek-status', [CekStatusController::class, 'form'])->name('cek-status.form');
 Route::post('/cek-status', [CekStatusController::class, 'hasil'])->name('cek-status.hasil');
+Route::get('/cek-status/{kodeReservasi}/bukti-reservasi', [BuktiReservasiController::class, 'unduh'])->name('cek-status.bukti-reservasi');
 
 /*
 | Alur Admin — Stage 3. Guard `admin` (tabel admin terpisah dari users).

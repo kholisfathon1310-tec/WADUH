@@ -20,7 +20,7 @@
     </ol></nav>
 
     <div class="row g-4">
-        <div class="col-lg-5">
+        <div class="col-lg-5" data-reveal>
             <div class="xcard h-100 overflow-hidden d-flex flex-column">
                 {{-- Foto fasilitas --}}
                 <div class="position-relative">
@@ -38,7 +38,7 @@
                         <span class="badge text-bg-light border py-2 px-3"><i class="bi bi-aspect-ratio me-1"></i>{{ $fasilitas->luas }} m²</span>
                     </div>
 
-                    <div class="p-3 rounded-3 mb-3" style="background:var(--surface)">
+                    <div class="p-3 rounded-4 mb-3" style="background:linear-gradient(120deg,#eef8f7,#eef6fb); border:1px solid var(--line)">
                         <span class="text-muted small d-block">Tarif per {{ $satuan }} @if($satuan === 'Hari')<span class="fw-semibold">(1 hari = 8 jam)</span>@endif</span>
                         <span class="h4 fw-bold" style="color:var(--primary)">Rp {{ number_format($tarif->harga, 0, ',', '.') }}</span>
                     </div>
@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div class="col-lg-7">
+        <div class="col-lg-7" data-reveal>
             <div class="xcard p-4">
                 <h2 class="h5 mb-1">Isi Jadwal <span class="badge text-bg-light border align-middle">Per {{ $satuan }}</span></h2>
                 <p class="text-muted small mb-3">Lengkapi jadwal pemakaian, lalu tambahkan ke keranjang.</p>

@@ -13,20 +13,24 @@
                 --surface:#f6f9fc; --line:#e4ebf2;
                 --l1:#2f7fd1; --l2:#24aa9a; --l3a:#7c5cd6; --l3b:#e8833a; --l5:#d6527c; }
         html { scroll-behavior:smooth; scroll-padding-top:86px; }
-        body { font-family:'DM Sans',sans-serif; color:var(--ink); background:#fff; }
+        body { font-family:'DM Sans',sans-serif; color:var(--ink); background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased; }
         h1,h2,h3,h4,.navbar-brand { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:-.04em; }
+        ::selection { background:#bfe3ea; color:var(--primary-dark); }
+        a:focus-visible, button:focus-visible, .nav-link:focus-visible { outline:2px solid var(--primary); outline-offset:2px; border-radius:.35rem; }
 
-        /* Navbar */
-        .navbar { padding:1rem 0; transition:all .25s; }
-        .navbar.scrolled { padding:.6rem 0; background:rgba(255,255,255,.95); box-shadow:0 6px 24px rgba(21,36,59,.08); backdrop-filter:blur(14px); }
-        .navbar-brand { font-weight:800; color:var(--ink); font-size:1.25rem; }
-        .brand-mark { display:inline-grid; width:2.3rem; height:2.3rem; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.7rem; box-shadow:0 7px 16px rgba(23,107,135,.25); }
-        .nav-link { color:#4e5c70; font-weight:600; font-size:.92rem; }
-        .nav-link:hover,.nav-link.active { color:var(--primary); }
-        .btn-nav { color:#fff !important; background:var(--primary); border-radius:.65rem; padding:.55rem 1rem; font-weight:700; font-size:.9rem; }
-        .btn-nav:hover { background:var(--primary-dark); }
-        .dropdown-menu { border:1px solid var(--line); border-radius:.9rem; box-shadow:0 18px 40px rgba(21,36,59,.12); padding:.5rem; }
-        .dropdown-item { border-radius:.55rem; font-weight:600; font-size:.88rem; padding:.5rem .75rem; }
+        /* Navbar — floating pill, senada dengan halaman reservasi */
+        .navbar { padding:1.1rem 0; transition:all .3s ease; }
+        .navbar .container { background:rgba(255,255,255,.7); border:1px solid rgba(228,235,242,.9); border-radius:1.5rem; padding:.5rem .5rem .5rem 1.1rem; backdrop-filter:blur(16px); box-shadow:0 14px 34px -20px rgba(21,36,59,.22); transition:box-shadow .3s ease, background .3s ease; }
+        .navbar.scrolled { padding:.65rem 0; }
+        .navbar.scrolled .container { background:rgba(255,255,255,.92); box-shadow:0 16px 36px -18px rgba(21,36,59,.22); }
+        .navbar-brand { font-weight:800; color:var(--ink); font-size:1.2rem; }
+        .brand-mark { display:inline-grid; width:2.25rem; height:2.25rem; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.75rem; box-shadow:0 7px 16px rgba(23,107,135,.25); }
+        .nav-link { color:#4e5c70; font-weight:600; font-size:.9rem; border-radius:.75rem; padding:.55rem .95rem !important; transition:background .15s ease, color .15s ease; }
+        .nav-link:hover,.nav-link.active { color:var(--primary); background:#eef6f9; }
+        .btn-nav { color:#fff !important; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:.85rem; padding:.6rem 1.1rem; font-weight:700; font-size:.88rem; box-shadow:0 8px 18px -8px rgba(23,107,135,.5); transition:transform .15s ease, box-shadow .15s ease; }
+        .btn-nav:hover { transform:translateY(-1px); box-shadow:0 10px 22px -8px rgba(23,107,135,.6); }
+        .dropdown-menu { border:1px solid var(--line); border-radius:1rem; box-shadow:0 18px 40px rgba(21,36,59,.12); padding:.5rem; }
+        .dropdown-item { border-radius:.6rem; font-weight:600; font-size:.88rem; padding:.5rem .75rem; }
         .dropdown-item .dot { display:inline-block; width:.65rem; height:.65rem; border-radius:50%; margin-right:.5rem; }
 
         /* Hero */
@@ -44,8 +48,10 @@
         .btn-hero.ghost { color:var(--primary); background:#fff; border:1.5px solid #c3d9e2; }
         .btn-hero.ghost:hover { border-color:var(--primary); }
         .hero-stats { display:flex; flex-wrap:wrap; gap:1rem; margin-top:2.4rem; }
-        .hstat { background:#fff; border:1px solid var(--line); border-radius:1rem; padding:.9rem 1.3rem; box-shadow:0 10px 26px rgba(21,36,59,.06); }
-        .hstat b { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.4rem; color:var(--primary); display:block; }
+        .hstat { display:flex; align-items:center; gap:.75rem; background:#fff; border:1px solid var(--line); border-radius:1.15rem; padding:.85rem 1.3rem .85rem .85rem; box-shadow:0 10px 26px rgba(21,36,59,.06); transition:transform .2s ease, box-shadow .2s ease; }
+        .hstat:hover { transform:translateY(-3px); box-shadow:0 16px 32px -8px rgba(21,36,59,.12); }
+        .hstat .hstat-ic { display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:.85rem; background:linear-gradient(135deg,#e5f4f3,#dcf0ee); color:var(--primary); font-size:1.1rem; flex:none; }
+        .hstat b { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.4rem; color:var(--primary); display:block; line-height:1.1; }
         .hstat span { color:var(--muted); font-size:.78rem; font-weight:600; }
         .hero-art { position:relative; }
         .floor-stack { display:flex; flex-direction:column-reverse; gap:.55rem; max-width:340px; margin:auto; }
@@ -63,23 +69,28 @@
         .xcard:hover { transform:translateY(-5px); box-shadow:0 18px 40px rgba(21,36,59,.1); }
 
         /* Lantai cards */
-        .lantai-card { position:relative; overflow:hidden; border-radius:1.15rem; border:1px solid var(--line); background:#fff; height:100%; }
-        .lantai-card .head { padding:1.2rem 1.3rem; color:#fff; display:flex; justify-content:space-between; align-items:center; }
+        .lantai-card { position:relative; overflow:hidden; border-radius:1.35rem; border:1px solid var(--line); background:#fff; height:100%; transition:transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease; }
+        .lantai-card .head { padding:1.3rem 1.4rem; color:#fff; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden; }
+        .lantai-card .head::after { content:''; position:absolute; right:-2rem; bottom:-2.5rem; width:6.5rem; height:6.5rem; border-radius:50%; background:rgba(255,255,255,.14); }
         .lantai-card .head .big { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.9rem; font-weight:800; line-height:1; }
-        .lantai-card .body { padding:1.1rem 1.3rem 1.3rem; }
-        .lantai-card:hover { transform:translateY(-5px); box-shadow:0 18px 40px rgba(21,36,59,.14); transition:all .2s; }
+        .lantai-card .body { padding:1.2rem 1.4rem 1.4rem; }
+        .lantai-card:hover { transform:translateY(-6px) scale(1.015); box-shadow:0 22px 44px -14px rgba(21,36,59,.2); }
         .pill { display:inline-flex; align-items:center; gap:.35rem; padding:.32rem .7rem; border-radius:2rem; font-size:.76rem; font-weight:700; }
 
         /* Jam operasional */
-        .jam-panel { background:linear-gradient(120deg,#12303f,#176b87 60%,#1c8f80); color:#fff; border-radius:1.4rem; padding:2.6rem; position:relative; overflow:hidden; }
+        .jam-panel { background:linear-gradient(120deg,#12303f,#176b87 60%,#1c8f80); color:#fff; border-radius:1.5rem; padding:2.6rem; position:relative; overflow:hidden; box-shadow:0 24px 50px -20px rgba(13,42,58,.4); }
         .jam-panel::after { content:''; position:absolute; right:-5rem; top:-9rem; width:18rem; height:18rem; border:2.6rem solid rgba(255,255,255,.07); border-radius:50%; }
-        .jam-row { display:flex; justify-content:space-between; gap:1rem; padding:.7rem 0; border-bottom:1px dashed rgba(255,255,255,.22); font-size:.95rem; }
+        .jam-panel::before { content:''; position:absolute; inset:0; background:radial-gradient(30rem 16rem at -10% 110%, rgba(36,170,154,.35), transparent 60%); }
+        .jam-row { position:relative; display:flex; justify-content:space-between; gap:1rem; padding:.7rem 0; border-bottom:1px dashed rgba(255,255,255,.22); font-size:.95rem; }
         .jam-row b { font-family:'Plus Jakarta Sans',sans-serif; }
 
-        .step-card { text-align:center; padding:1.6rem 1.2rem; }
-        .step-card .n { display:grid; place-items:center; width:3.4rem; height:3.4rem; margin:0 auto 1rem; border-radius:1rem; color:#fff; font-weight:800; font-family:'Plus Jakarta Sans',sans-serif; font-size:1.15rem; }
+        .step-card { text-align:center; padding:1.7rem 1.3rem; transition:transform .2s ease, box-shadow .2s ease; }
+        .step-card:hover { transform:translateY(-4px); box-shadow:0 18px 36px -12px rgba(21,36,59,.15); }
+        .step-card .n { display:grid; place-items:center; width:3.4rem; height:3.4rem; margin:0 auto 1rem; border-radius:1.1rem; color:#fff; font-weight:800; font-family:'Plus Jakarta Sans',sans-serif; font-size:1.15rem; box-shadow:0 10px 22px -8px rgba(21,36,59,.3); }
 
-        .cta-band { background:linear-gradient(115deg,#145f7c,#168b88); border-radius:1.5rem; color:#fff; padding:3rem; }
+        .cta-band { background:linear-gradient(115deg,#0d2a3a,#145f7c 55%,#168b88); border-radius:1.6rem; color:#fff; padding:3rem; position:relative; overflow:hidden; box-shadow:0 24px 50px -20px rgba(13,42,58,.45); }
+        .cta-band::after { content:''; position:absolute; right:-4rem; top:-6rem; width:16rem; height:16rem; border-radius:50%; background:rgba(255,255,255,.06); }
+        .cta-band > * { position:relative; }
         .site-footer { padding:2.4rem 0; color:var(--muted); border-top:1px solid var(--line); font-size:.85rem; }
 
         [data-reveal] { opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease; }
@@ -146,10 +157,10 @@
                         <a href="{{ route('cek-status.form') }}" class="btn-hero ghost text-decoration-none"><i class="bi bi-search"></i> Cek Status Reservasi</a>
                     </div>
                     <div class="hero-stats" data-reveal>
-                        <div class="hstat"><b>{{ $daftarLantai->sum('total') }}</b><span>Total Unit Ruang</span></div>
-                        <div class="hstat"><b>{{ $daftarLantai->sum('tersedia') }}</b><span>Siap Direservasi</span></div>
-                        <div class="hstat"><b>{{ $daftarLantai->count() }}</b><span>Lantai Aktif</span></div>
-                        <div class="hstat"><b>3</b><span>Jenis Sewa (Jam/Hari/Bulan)</span></div>
+                        <div class="hstat"><span class="hstat-ic"><i class="bi bi-grid-3x3-gap-fill"></i></span><span><b>{{ $daftarLantai->sum('total') }}</b><span>Total Unit Ruang</span></span></div>
+                        <div class="hstat"><span class="hstat-ic"><i class="bi bi-check-circle-fill"></i></span><span><b>{{ $daftarLantai->sum('tersedia') }}</b><span>Siap Direservasi</span></span></div>
+                        <div class="hstat"><span class="hstat-ic"><i class="bi bi-building"></i></span><span><b>{{ $daftarLantai->count() }}</b><span>Lantai Aktif</span></span></div>
+                        <div class="hstat"><span class="hstat-ic"><i class="bi bi-clock-history"></i></span><span><b>3</b><span>Jenis Sewa (Jam/Hari/Bulan)</span></span></div>
                     </div>
                 </div>
                 <div class="col-lg-5" data-reveal>
@@ -199,10 +210,10 @@
                 </div>
                 <div class="col-lg-6" data-reveal>
                     <div class="row g-3">
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-geo-alt fs-3" style="color:var(--l1)"></i><h3 class="h6 mt-2 mb-1">Lokasi Strategis</h3><p class="small text-muted mb-0">Jl. Raya Baros No. 78, Cimahi Selatan akses mudah dari tol Baros.</p></div></div>
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-wifi fs-3" style="color:var(--l3a)"></i><h3 class="h6 mt-2 mb-1">Fasilitas Penunjang</h3><p class="small text-muted mb-0">Internet, area parkir, lift, mushola, dan ruang publik kreatif.</p></div></div>
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-shield-check fs-3" style="color:var(--l2)"></i><h3 class="h6 mt-2 mb-1">Dikelola Resmi</h3><p class="small text-muted mb-0">UPTD Cimahi Techno Park, Pemerintah Kota Cimahi.</p></div></div>
-                        <div class="col-6"><div class="xcard p-4 h-100"><i class="bi bi-lightning-charge fs-3" style="color:var(--l3b)"></i><h3 class="h6 mt-2 mb-1">Proses Digital</h3><p class="small text-muted mb-0">Lihat Ruangan sampai checkout semuanya lewat WADUH.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><span class="d-inline-grid mb-2" style="width:2.9rem;height:2.9rem;border-radius:.9rem;place-items:center;background:color-mix(in srgb, var(--l1) 14%, #fff);color:var(--l1)"><i class="bi bi-geo-alt fs-5"></i></span><h3 class="h6 mb-1">Lokasi Strategis</h3><p class="small text-muted mb-0">Jl. Raya Baros No. 78, Cimahi Selatan akses mudah dari tol Baros.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><span class="d-inline-grid mb-2" style="width:2.9rem;height:2.9rem;border-radius:.9rem;place-items:center;background:color-mix(in srgb, var(--l3a) 14%, #fff);color:var(--l3a)"><i class="bi bi-wifi fs-5"></i></span><h3 class="h6 mb-1">Fasilitas Penunjang</h3><p class="small text-muted mb-0">Internet, area parkir, lift, mushola, dan ruang publik kreatif.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><span class="d-inline-grid mb-2" style="width:2.9rem;height:2.9rem;border-radius:.9rem;place-items:center;background:color-mix(in srgb, var(--l2) 14%, #fff);color:var(--l2)"><i class="bi bi-shield-check fs-5"></i></span><h3 class="h6 mb-1">Dikelola Resmi</h3><p class="small text-muted mb-0">UPTD Cimahi Techno Park, Pemerintah Kota Cimahi.</p></div></div>
+                        <div class="col-6"><div class="xcard p-4 h-100"><span class="d-inline-grid mb-2" style="width:2.9rem;height:2.9rem;border-radius:.9rem;place-items:center;background:color-mix(in srgb, var(--l3b) 14%, #fff);color:var(--l3b)"><i class="bi bi-lightning-charge fs-5"></i></span><h3 class="h6 mb-1">Proses Digital</h3><p class="small text-muted mb-0">Lihat Ruangan sampai checkout semuanya lewat WADUH.</p></div></div>
                     </div>
                 </div>
             </div>
@@ -307,7 +318,7 @@
 
 <footer class="site-footer">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <span><span class="fw-bold" style="color:var(--ink)">WADUH</span> — Wadah Akses Digital Unit Hunian BITC · UPTD Cimahi Techno Park</span>
+        <span class="d-flex align-items-center gap-2"><span class="brand-mark" style="width:1.7rem;height:1.7rem;border-radius:.55rem;font-size:.85rem"><i class="bi bi-building"></i></span><span class="fw-bold" style="color:var(--ink)">WADUH</span> — Wadah Akses Digital Unit Hunian BITC · UPTD Cimahi Techno Park</span>
         <div class="d-flex gap-3">
             <a class="text-decoration-none text-muted" href="#tentang">Tentang</a>
             <a class="text-decoration-none text-muted" href="#fasilitas">Fasilitas</a>

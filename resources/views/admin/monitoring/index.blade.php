@@ -7,8 +7,8 @@
 @endphp
 
 @section('content')
-    <div class="rounded-4 p-4 mb-3 text-white d-flex flex-wrap justify-content-between align-items-center gap-3"
-         style="background:linear-gradient(120deg, {{ $wl }}, {{ $wl }}bb)">
+    <div class="rounded-4 p-4 mb-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-3"
+         style="background:linear-gradient(120deg, {{ $wl }}, {{ $wl }}bb); box-shadow:0 16px 34px -14px rgba(21,36,59,.35)" data-reveal>
         <div>
             <p class="mb-1" style="opacity:.8; font-size:.85rem"><i class="bi bi-grid-3x3-gap me-1"></i>Monitoring Fasilitas</p>
             <h2 class="h4 mb-0">Lantai {{ $lantai?->nomor_lantai }} · {{ $fasilitas->first()?->kategori_fasilitas ?? '-' }}</h2>
@@ -19,9 +19,9 @@
         </div>
     </div>
 
-    <form method="GET" class="xcard p-3 mb-3">
+    <form method="GET" class="xcard p-3 p-md-4 mb-4" data-reveal>
         <input type="hidden" name="lantai" value="{{ $lantai?->id_lantai }}">
-        <div class="row g-2 align-items-end">
+        <div class="row g-2 g-md-3 align-items-end">
             <div class="col-6 col-md-3"><label class="form-label mb-1">Tanggal</label><input type="date" name="tanggal_mulai" class="form-control form-control-sm" value="{{ $slot['tanggal_mulai'] }}"></div>
             <div class="col-6 col-md-3"><label class="form-label mb-1">s/d tanggal</label><input type="date" name="tanggal_selesai" class="form-control form-control-sm" value="{{ $slot['tanggal_selesai'] }}"></div>
             <div class="col-6 col-md-2"><button class="btn btn-brand btn-sm w-100"><i class="bi bi-search me-1"></i>Cek</button></div>

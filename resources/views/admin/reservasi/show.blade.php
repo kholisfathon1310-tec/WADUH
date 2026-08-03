@@ -14,27 +14,28 @@
 @section('content')
 <style>
     .info-grid { display:grid; grid-template-columns:38% 1fr; }
-    .info-grid > div { padding:.55rem .9rem; border-bottom:1px solid #eef3f8; font-size:.9rem; }
+    .info-grid > div { padding:.6rem .95rem; border-bottom:1px solid #eef3f8; font-size:.9rem; }
     .info-grid > div:nth-child(4n+1), .info-grid > div:nth-child(4n+2) { background:#fbfdfe; }
     .info-grid .k { color:var(--muted); font-weight:600; }
     .info-grid > div:nth-last-child(-n+2) { border-bottom:0; }
     .timeline { position:relative; padding-left:1.4rem; }
     .timeline::before { content:''; position:absolute; left:.42rem; top:.4rem; bottom:.4rem; width:2px; background:#dfe8f0; border-radius:2px; }
-    .timeline .titem { position:relative; padding:.35rem 0 .9rem; }
-    .timeline .titem::before { content:''; position:absolute; left:-1.4rem; top:.5rem; width:.9rem; height:.9rem; border-radius:50%; background:#fff; border:3px solid var(--teal); }
+    .timeline .titem { position:relative; padding:.35rem 0 1rem; }
+    .timeline .titem::before { content:''; position:absolute; left:-1.4rem; top:.5rem; width:.9rem; height:.9rem; border-radius:50%; background:#fff; border:3px solid var(--teal); box-shadow:0 2px 6px rgba(21,36,59,.12); }
     .timeline .titem.first::before { border-color:var(--primary); }
     .hero-strip { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); }
-    .hero-strip .hs { flex:1 1 140px; padding:.85rem 1.1rem; border-right:1px solid var(--line); }
+    .hero-strip .hs { flex:1 1 140px; padding:.95rem 1.15rem; border-right:1px solid var(--line); }
     .hero-strip .hs:last-child { border-right:0; }
     .hero-strip .hs small { color:var(--muted); font-weight:600; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; display:block; }
     .hero-strip .hs .val { font-weight:700; }
-    .room-card { border:1px solid var(--line); border-radius:.9rem; overflow:hidden; }
-    .room-card + .room-card { margin-top:.9rem; }
-    .room-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:.5rem; padding:.75rem 1rem; background:#f7fafc; border-bottom:1px solid var(--line); }
+    .room-card { border:1px solid var(--line); border-radius:1rem; overflow:hidden; transition:box-shadow .2s ease; }
+    .room-card:hover { box-shadow:0 6px 18px rgba(21,36,59,.07); }
+    .room-card + .room-card { margin-top:1rem; }
+    .room-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:.5rem; padding:.85rem 1.1rem; background:#f7fafc; border-bottom:1px solid var(--line); }
 </style>
 
     {{-- Hero pemesanan --}}
-    <div class="xcard overflow-hidden mb-3">
+    <div class="xcard overflow-hidden mb-3" data-reveal>
         <div class="p-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
                 <small class="text-muted fw-semibold text-uppercase" style="letter-spacing:.06em">Kode Reservasi</small>
@@ -60,7 +61,7 @@
         </div>
     </div>
 
-    <div class="row g-3">
+    <div class="row g-3" data-reveal>
         {{-- Kiri --}}
         <div class="col-lg-7">
             {{-- Ruangan yang dipesan --}}

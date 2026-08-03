@@ -3,29 +3,31 @@
 
 @section('content')
 <style>
-    .cs-hero { background:linear-gradient(118deg,#124f6b 0%,#176b87 45%,#1b9487 100%); border-radius:1.4rem; position:relative; overflow:hidden; }
+    .cs-hero { background:linear-gradient(118deg,#0d2a3a 0%,#176b87 45%,#1b9487 100%); border-radius:1.6rem; position:relative; overflow:hidden; box-shadow:0 24px 50px -20px rgba(13,42,58,.45); }
     .cs-hero::before, .cs-hero::after { content:''; position:absolute; border-radius:50%; background:rgba(255,255,255,.07); }
     .cs-hero::before { width:340px; height:340px; top:-160px; right:-90px; }
     .cs-hero::after { width:220px; height:220px; bottom:-120px; left:-60px; }
+    .cs-hero-mesh { position:absolute; inset:0; background:radial-gradient(34rem 18rem at 15% 120%, rgba(36,170,154,.3), transparent 60%); }
     .cs-hero .inner { position:relative; z-index:1; }
     .cs-badge { display:inline-flex; align-items:center; gap:.4rem; background:rgba(255,255,255,.14); color:#c9f2ea; font-size:.74rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:.35rem .85rem; border-radius:2rem; border:1px solid rgba(255,255,255,.18); }
-    .cs-search { background:#fff; border-radius:1rem; padding:.45rem; box-shadow:0 18px 44px rgba(10,40,55,.35); display:flex; gap:.45rem; }
+    .cs-search { background:#fff; border-radius:1.15rem; padding:.45rem; box-shadow:0 18px 44px rgba(10,40,55,.35); display:flex; gap:.45rem; }
     .cs-search input { border:0; font-size:1.05rem; font-weight:600; letter-spacing:.06em; box-shadow:none !important; }
     .cs-search input::placeholder { font-weight:500; letter-spacing:.02em; color:#9aa8b8; }
-    .cs-search .btn { border-radius:.75rem; white-space:nowrap; }
+    .cs-search .btn { border-radius:.85rem; white-space:nowrap; }
     .cs-hint { color:#bfe3de; font-size:.83rem; }
     .cs-hint code { background:rgba(255,255,255,.16); color:#fff; padding:.1rem .45rem; border-radius:.4rem; font-weight:700; }
 
-    .legend-card { border-radius:1rem; height:100%; transition:transform .2s, box-shadow .2s; }
-    .legend-card:hover { transform:translateY(-3px); box-shadow:0 12px 26px rgba(21,36,59,.09); }
-    .legend-dot { width:2.5rem; height:2.5rem; border-radius:.8rem; display:grid; place-items:center; font-size:1.1rem; flex:none; }
+    .legend-card { border-radius:1.25rem; height:100%; transition:transform .2s ease, box-shadow .2s ease; }
+    .legend-card:hover { transform:translateY(-4px); box-shadow:0 16px 32px -10px rgba(21,36,59,.14); }
+    .legend-dot { width:2.6rem; height:2.6rem; border-radius:.9rem; display:grid; place-items:center; font-size:1.1rem; flex:none; }
 
     .how-step { display:flex; gap:.85rem; align-items:flex-start; }
-    .how-num { width:1.9rem; height:1.9rem; border-radius:50%; background:#e5f4f3; color:var(--primary); display:grid; place-items:center; font-weight:800; font-size:.85rem; flex:none; }
+    .how-num { width:1.9rem; height:1.9rem; border-radius:50%; background:linear-gradient(135deg,#e5f4f3,#dcf0ee); color:var(--primary); display:grid; place-items:center; font-weight:800; font-size:.85rem; flex:none; }
 </style>
 
     {{-- Hero + kolom pencarian --}}
-    <div class="cs-hero p-4 p-md-5 mb-4 text-white">
+    <div class="cs-hero p-4 p-md-5 mb-4 text-white" data-reveal>
+        <div class="cs-hero-mesh"></div>
         <div class="inner mx-auto text-center" style="max-width:640px;">
             <span class="cs-badge mb-3"><i class="bi bi-shield-check"></i> Lacak Reservasi Anda</span>
             <h1 class="h3 fw-bold mt-3 mb-2">Cek Status Reservasi</h1>
@@ -50,7 +52,7 @@
 
     {{-- Legenda status --}}
     <p class="eyebrow-sm mb-2">Arti Status</p>
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4" data-reveal>
         @foreach ([
             ['bi-hourglass-split', '#9a6b00', '#fff4d6', 'Diverifikasi', 'Reservasi sedang diperiksa admin. Anda masih dapat membatalkannya pada tahap ini.'],
             ['bi-check-circle',    '#0d8a5f', '#e2f7ef', 'Disetujui',    'Reservasi diterima — fasilitas siap digunakan sesuai jadwal yang dipesan.'],
@@ -70,7 +72,7 @@
     </div>
 
     {{-- Panduan singkat --}}
-    <div class="row g-3">
+    <div class="row g-3" data-reveal>
         <div class="col-lg-7">
             <div class="xcard p-4 h-100">
                 <h2 class="h6 fw-bold mb-3"><i class="bi bi-signpost-2 me-2" style="color:var(--primary)"></i>Bagaimana cara kerjanya?</h2>

@@ -6,7 +6,7 @@
 @endsection
 
 @section('content')
-    <div class="page-head mb-4 p-4 rounded-4 text-white" style="background:linear-gradient(115deg,#145f7c,#168b88)">
+    <div class="page-head mb-4 p-4 p-md-5 rounded-4 text-white" style="background:linear-gradient(115deg,#0d2a3a,#145f7c 55%,#168b88)" data-reveal>
         <p class="eyebrow-sm mb-1" style="color:#a9e6dd">Langkah 1 dari 5</p>
         <h1 class="h3 mb-1">Mau reservasi ruang apa? ✨</h1>
         <p class="mb-0" style="opacity:.85">Pilih jenis fasilitas BITC — lengkap dengan gambaran ruang & fasilitas yang Anda dapatkan.</p>
@@ -15,7 +15,7 @@
     @if ($kategori->isEmpty())
         <div class="alert alert-warning">Belum ada fasilitas aktif yang tersedia.</div>
     @else
-        <div class="row g-3">
+        <div class="row g-3" data-reveal>
             @foreach ($kategori as $kat)
                 @php $meta = \App\Support\KategoriMeta::get($kat); @endphp
                 <div class="col-md-4">

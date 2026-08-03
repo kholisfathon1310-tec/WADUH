@@ -2,8 +2,8 @@
 @section('title', 'Laporan Data Fasilitas')
 
 @section('content')
-    <form method="GET" action="{{ route('admin.laporan') }}" class="xcard p-3 mb-3">
-        <div class="row g-2 align-items-end">
+    <form method="GET" action="{{ route('admin.laporan') }}" class="xcard p-3 p-md-4 mb-4" data-reveal>
+        <div class="row g-2 g-md-3 align-items-end">
             <div class="col-6 col-md-3">
                 <label class="form-label mb-1">Lantai</label>
                 <select name="lantai" class="form-select form-select-sm">
@@ -34,16 +34,16 @@
     </form>
     {{-- Tombol Ekspor PDF dipindah ke bawah tabel --}}
 
-    <div class="row g-3 mb-3">
+    <div class="row g-3 mb-4" data-reveal>
         <div class="col-6 col-md-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#3a4653,#5d6b7a)"><i class="ic bi bi-lock"></i><div class="v">{{ $totalIsi }}</div><small>ISI (terpakai / non-aktif)</small></div>
+            <div class="stat-card h-100" style="background:linear-gradient(135deg,#3a4653,#5d6b7a)"><i class="ic bi bi-lock"></i><div class="v">{{ $totalIsi }}</div><small>ISI (terpakai / non-aktif)</small></div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#0d8a5f,#25b47e)"><i class="ic bi bi-unlock"></i><div class="v">{{ $totalAvailable }}</div><small>Available</small></div>
+            <div class="stat-card h-100" style="background:linear-gradient(135deg,#0d8a5f,#25b47e)"><i class="ic bi bi-unlock"></i><div class="v">{{ $totalAvailable }}</div><small>Available</small></div>
         </div>
     </div>
 
-    <div class="xcard">
+    <div class="xcard" data-reveal>
         <div class="xhead">
             <span><i class="bi bi-table me-1"></i>Data Fasilitas Gedung BITC per/{{ $judulTanggal }}</span>
             @if ($rows->count() > 10)

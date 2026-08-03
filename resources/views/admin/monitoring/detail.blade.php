@@ -7,7 +7,7 @@
 
 @section('content')
     <div class="row g-3">
-        <div class="col-lg-5">
+        <div class="col-lg-5" data-reveal>
             <div class="xcard h-100">
                 <div class="xhead"><span><i class="bi bi-door-open me-1"></i>{{ $fasilitas->nama_fasilitas }}</span>
                     <span class="badge text-bg-{{ $fasilitas->status_aktif->value === 'Aktif' ? 'success' : 'secondary' }}">{{ $fasilitas->status_aktif->value }}</span>
@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-7">
+        <div class="col-lg-7" data-reveal>
             <div class="xcard h-100">
                 <div class="xhead"><span><i class="bi bi-calendar-week me-1"></i>Reservasi aktif — {{ $slot['tanggal_mulai'] }}@if($slot['tanggal_selesai'] !== $slot['tanggal_mulai']) → {{ $slot['tanggal_selesai'] }}@endif</span></div>
                 <div class="table-responsive">

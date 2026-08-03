@@ -20,13 +20,13 @@
         <li class="breadcrumb-item active">{{ $kategori }}</li>
     </ol></nav>
 
-    <div class="page-head mb-4 p-4 rounded-4 text-white" style="background:linear-gradient(115deg,#145f7c,#168b88)">
+    <div class="page-head mb-4 p-4 p-md-5 rounded-4 text-white" style="background:linear-gradient(115deg,#0d2a3a,#145f7c 55%,#168b88)" data-reveal>
         <p class="eyebrow-sm mb-1" style="color:#a9e6dd">Langkah 2 dari 5 · {{ $kategori }}</p>
         <h1 class="h3 mb-1">Berapa lama Anda akan menyewa? ⏱️</h1>
         <p class="mb-0" style="opacity:.85">Pilih satuan sewa yang tersedia untuk kategori ini.</p>
     </div>
 
-    <div class="row g-3">
+    <div class="row g-3" data-reveal>
         @foreach ($jenis as $j)
             <div class="col-md-4">
                 <a href="{{ route('reservasi.lantai', ['kategori' => $kategori, 'jenis' => $j->id_jenis_sewa]) }}" class="xcard hover h-100 p-4">
