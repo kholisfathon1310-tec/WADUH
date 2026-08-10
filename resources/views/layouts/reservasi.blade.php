@@ -8,7 +8,12 @@
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
     <style>
-        :root { --ink:#15243b; --muted:#637189; --primary:#176b87; --primary-dark:#0f526b; --teal:#24aa9a; --surface:#f6f9fc; --line:#e4ebf2; }
+        :root {
+            --ink:#0f172a; --muted:#64748b; --soft:#94a3b8;
+            --primary:#0e6b7d; --primary-dark:#084b58; --primary-soft:#e6f2f4;
+            --teal:#14b8a6;
+            --surface:#f7f9fc; --line:#e5e9ef;
+        }
         * { scrollbar-color: #c3d5de transparent; }
         body {
             font-family:'DM Sans',sans-serif; color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
@@ -33,14 +38,19 @@
             border-radius:1.5rem; box-shadow:0 14px 34px -18px rgba(21,36,59,.28); padding:.4rem .5rem;
             max-width:1200px; margin:0 auto; transition:box-shadow .2s ease;
         }
-        .navbar-brand { font-weight:800; color:var(--ink); font-size:1.15rem; padding-left:.4rem; }
-        .navbar-brand span.t { color:var(--teal); }
-        .brand-mark { display:inline-grid; width:2.15rem; height:2.15rem; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.75rem; box-shadow:0 6px 14px rgba(23,107,135,.28); }
+        .navbar-brand { padding:0; margin:0; }
+        .navbar-brand .brand-logo {
+            height:2.75rem; width:auto; object-fit:contain; display:block;
+            margin:-.25rem 0;
+            filter:drop-shadow(0 3px 8px rgba(15,23,42,.14));
+        }
+        @media (max-width: 575px) { .navbar-brand .brand-logo { height:2.35rem; } }
+        .brand-mark { display:inline-grid; width:1.7rem; height:1.7rem; place-items:center; color:#fff; background:var(--primary); border-radius:.55rem; font-size:.85rem; box-shadow:0 4px 10px rgba(14,107,125,.28); }
         .topnav .nav-link { color:#4e5c70; font-weight:600; font-size:.9rem; border-radius:.8rem; padding:.55rem 1rem; transition:background .15s ease, color .15s ease; }
         .topnav .nav-link:hover, .topnav .nav-link.active { color:var(--primary); background:#eef6f9; }
-        .btn-cart { position:relative; color:#fff; border:none; border-radius:.85rem; font-weight:700; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); box-shadow:0 8px 18px -8px rgba(23,107,135,.5); transition:all .15s ease; }
-        .btn-cart:hover { color:#fff; transform:translateY(-1px); box-shadow:0 10px 22px -8px rgba(23,107,135,.6); }
-        .btn-cart .badge { position:absolute; top:-7px; right:-7px; background:var(--teal); }
+        .btn-cart { position:relative; color:#fff; border:none; border-radius:.85rem; font-weight:700; background:var(--primary); box-shadow:0 10px 22px -8px rgba(14,107,125,.5); transition:all .15s ease; }
+        .btn-cart:hover { color:#fff; background:var(--primary-dark); transform:translateY(-1px); }
+        .btn-cart .badge { position:absolute; top:-7px; right:-7px; background:#f59e0b; }
 
         /* Stepper — pill progress yang lebih hidup */
         .stepper { display:flex; gap:.3rem; overflow-x:auto; padding:.3rem 0 .6rem; }
@@ -95,9 +105,8 @@
     <div class="nav-shell">
     <nav class="navbar navbar-expand-lg topnav">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url('/') }}">
-                <span class="brand-mark"><i class="bi bi-building"></i></span>
-                <span>WADUH<span class="t">.</span></span>
+            <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
+                <img src="{{ asset('images/logo_bitc.png') }}" alt="BITC" class="brand-logo">
             </a>
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
                 <i class="bi bi-list fs-3"></i>
