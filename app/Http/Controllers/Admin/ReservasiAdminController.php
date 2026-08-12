@@ -15,6 +15,8 @@ use App\Services\ReservasiApprovalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ReservasiAdminController extends Controller
@@ -155,15 +157,54 @@ class ReservasiAdminController extends Controller
         return back()->with('success', "Reservasi {$reservasi->kode_transaksi} ditolak ({$pending->count()} ruangan).");
     }
 
-    /** Set status_verifikasi satu dokumen persyaratan. */
+    /**
+     * Hapus SELURUH pemesanan (semua ruangan dalam kode_transaksi ini) secara permanen —
+     * konsisten dengan Setujui/Tolak yang juga berlaku untuk seluruh transaksi. Anak-anak
+     * baris (dokumen, riwayat status, faktur) di-restrictOnDelete di DB, jadi dihapus lebih
+     * dulu; file dokumen fisik di disk 'public' ikut dibersihkan supaya tidak jadi sampah.
+     */
+    public function hapus(string $kodeReservasi): RedirectResponse
+    {
+        $reservasi = $this->cari($kodeReservasi);
+
+        $items = Reservasi::where('kode_transaksi', $reservasi->kode_transaksi)
+            ->with('dokumenPersyaratan')
+            ->get();
+
+        DB::transaction(function () use ($items) {
+            foreach ($items as $item) {
+                foreach ($item->dokumenPersyaratan as $dok) {
+                    Storage::disk('public')->delete($dok->lokasi_file);
+                }
+                $item->dokumenPersyaratan()->delete();
+                $item->riwayatStatus()->delete();
+                $item->faktur()->delete();
+                $item->delete();
+            }
+        });
+
+        return redirect()->route('admin.reservasi.index')
+            ->with('success', "Pemesanan {$reservasi->kode_transaksi} ({$items->count()} ruangan) berhasil dihapus.");
+    }
+
+    /**
+     * Dokumen sewa Bulan disalin ke tiap baris Reservasi dalam satu kode_transaksi
+     * (lihat ReservasiController::simpanDokumen) supaya checklist kelayakan tiap ruangan
+     * tetap independen — tapi di halaman detail cuma DITAMPILKAN satu kartu per file.
+     * Makanya verifikasi di sini ikut menyamakan status semua salinannya sekaligus,
+     * supaya checklist tiap ruangan tetap konsisten walau yang tampak cuma satu.
+     */
     public function verifikasiDokumen(Request $request, DokumenPersyaratan $dokumen): RedirectResponse
     {
         $data = $request->validate([
             'status_verifikasi' => ['required', 'string', 'in:'.implode(',', array_map(fn ($c) => $c->value, StatusVerifikasi::cases()))],
         ]);
 
-        $dokumen->status_verifikasi = $data['status_verifikasi'];
-        $dokumen->save();
+        $kodeTransaksi = $dokumen->reservasi->kode_transaksi;
+
+        DokumenPersyaratan::whereHas('reservasi', fn ($q) => $q->where('kode_transaksi', $kodeTransaksi))
+            ->where('nama_file', $dokumen->nama_file)
+            ->update(['status_verifikasi' => $data['status_verifikasi']]);
 
         return back()->with('success', 'Status dokumen diperbarui.');
     }

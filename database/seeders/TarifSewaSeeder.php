@@ -9,11 +9,12 @@ use App\Support\HargaTarif;
 use Illuminate\Database\Seeder;
 
 /**
- * Tarif sesuai db-spec-fasilitas-final.md bagian 3:
- * - Flat: WS Jam 50rb/Hari 400rb; CWS Jam 40rb/Hari 250rb; CH Hari 1,8jt (tanpa Jam/Bulan).
- * - Bulan (WS & CWS): Rp 150.000 × luas fasilitas — dihitung saat seeding; kalau luas
- *   masih default sementara, jalankan ulang `php artisan tarif:hitung-ulang-bulanan`
- *   setelah data luas real diisi.
+ * Tarif sesuai docs/hargasewa.md (master data):
+ * - Flat: WS Jam 50rb/Hari 400rb; CWS Jam 40rb/Hari 250rb; CH Hari 1,8jt (tanpa Jam/Bulan) —
+ *   HargaTarif::FLAT, seragam per kategori, sudah cocok dengan hargasewa.md.
+ * - Bulan (WS & CWS): angka PERSIS dari kolom "Harga/Bulan" di hargasewa.md
+ *   (config/harga-sewa-master.php) — bukan hasil hitung ulang luas × Rp150.000, karena
+ *   beberapa baris di master data tidak pas dibagi rata (lihat catatan di file config).
  * Hanya untuk fasilitas AKTIF.
  */
 class TarifSewaSeeder extends Seeder
@@ -21,9 +22,9 @@ class TarifSewaSeeder extends Seeder
     public function run(): void
     {
         $jenisMap = JenisSewa::all()->keyBy(fn (JenisSewa $j) => $j->satuan->value); // 'Jam'|'Hari'|'Bulan'
-        $pakaiDefault = [];
+        $master = config('harga-sewa-master');
 
-        Fasilitas::where('status_aktif', 'Aktif')->get()->each(function (Fasilitas $fasilitas) use ($jenisMap, &$pakaiDefault) {
+        Fasilitas::where('status_aktif', 'Aktif')->get()->each(function (Fasilitas $fasilitas) use ($jenisMap, $master) {
             $kategori = $fasilitas->kategori_fasilitas;
 
             // Tarif flat (Jam/Hari) sesuai kategori.
@@ -34,12 +35,10 @@ class TarifSewaSeeder extends Seeder
                 );
             }
 
-            // Tarif Bulan = 150.000 × luas (WS & CWS saja).
+            // Tarif Bulan (WS & CWS saja) = angka persis dari master data, per kode_fasilitas.
             if (in_array($kategori, HargaTarif::PUNYA_BULAN, true)) {
-                [$harga, $default] = HargaTarif::hargaBulan($fasilitas);
-                if ($default) {
-                    $pakaiDefault[] = $fasilitas->kode_fasilitas;
-                }
+                $harga = $master[$fasilitas->kode_fasilitas]['bulan']
+                    ?? throw new \RuntimeException("Tidak ada harga Bulan di config/harga-sewa-master.php untuk {$fasilitas->kode_fasilitas}.");
 
                 TarifSewa::updateOrCreate(
                     ['id_fasilitas' => $fasilitas->id_fasilitas, 'id_jenis_sewa' => $jenisMap['Bulan']->id_jenis_sewa],
@@ -47,10 +46,5 @@ class TarifSewaSeeder extends Seeder
                 );
             }
         });
-
-        if ($pakaiDefault !== []) {
-            $this->command?->warn('Tarif Bulan memakai DEFAULT luas untuk: '.implode(', ', $pakaiDefault)
-                .' — update kolom luas lalu jalankan `php artisan tarif:hitung-ulang-bulanan`.');
-        }
     }
 }

@@ -63,9 +63,9 @@
                 <h2 class="dash-hero-title">Selamat datang, {{ $me?->nama_admin }}</h2>
                 <p class="dash-hero-sub">
                     @if ($statistik['menunggu'] > 0)
-                        Terdapat <strong>{{ $statistik['menunggu'] }} reservasi menunggu</strong> persetujuan Anda hari ini.
+                        Ada <strong>{{ $statistik['menunggu'] }} reservasi menunggu</strong> persetujuan Anda hari ini.
                     @else
-                        Tidak ada antrean persetujuan. Semua reservasi telah tertangani.
+                        Tidak ada antrean persetujuan — semua reservasi sudah ditangani.
                     @endif
                 </p>
             </div>

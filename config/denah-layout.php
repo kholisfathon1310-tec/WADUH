@@ -107,54 +107,54 @@ return [
     ],
 
     // ─────────────────────────────────────────────────────────────
-    // LANTAI 3A — Co-Working Space (27 kubikal K + 4 ruangan R)
+    // LANTAI 3A — Co-Working Space (27 kubikal K) + Working Space (6 ruangan R)
     // ─────────────────────────────────────────────────────────────
     '3A' => [
         'title' => 'LANTAI 3A',
-        'info'  => 'Co-Working: 27 kubikal · Working Space: 4 ruangan',
+        'info'  => 'Co-Working: 27 kubikal · Working Space: 6 ruangan',
         'grid_main' => [
             'cols' => 11, // kolom 1-10 = grid kubikal, kolom 11 = R5/R4/R3 di sisi kanan
             'cells' => [
                 // Baris 1: K19-K27 (kubikal) + R5 (ruangan angled di kanan)
-                ['kode' => '3A-M19', 'label' => 'K19', 'luas' => 4.00, 'col' => 1, 'row' => 1],
-                ['kode' => '3A-M20', 'label' => 'K20', 'luas' => 4.00, 'col' => 2, 'row' => 1],
-                ['kode' => '3A-M21', 'label' => 'K21', 'luas' => 4.00, 'col' => 3, 'row' => 1],
-                ['kode' => '3A-M22', 'label' => 'K22', 'luas' => 4.00, 'col' => 4, 'row' => 1],
-                ['kode' => '3A-M23', 'label' => 'K23', 'luas' => 4.00, 'col' => 5, 'row' => 1],
-                ['kode' => '3A-M24', 'label' => 'K24', 'luas' => 4.00, 'col' => 6, 'row' => 1],
-                ['kode' => '3A-M25', 'label' => 'K25', 'luas' => 4.00, 'col' => 7, 'row' => 1],
-                ['kode' => '3A-M26', 'label' => 'K26', 'luas' => 4.00, 'col' => 8, 'row' => 1],
-                ['kode' => '3A-M27', 'label' => 'K27', 'luas' => 4.00, 'col' => 9, 'row' => 1],
+                ['kode' => '3A-K19', 'label' => 'K19', 'luas' => 4.00, 'col' => 1, 'row' => 1],
+                ['kode' => '3A-K20', 'label' => 'K20', 'luas' => 4.00, 'col' => 2, 'row' => 1],
+                ['kode' => '3A-K21', 'label' => 'K21', 'luas' => 4.00, 'col' => 3, 'row' => 1],
+                ['kode' => '3A-K22', 'label' => 'K22', 'luas' => 4.00, 'col' => 4, 'row' => 1],
+                ['kode' => '3A-K23', 'label' => 'K23', 'luas' => 4.00, 'col' => 5, 'row' => 1],
+                ['kode' => '3A-K24', 'label' => 'K24', 'luas' => 4.00, 'col' => 6, 'row' => 1],
+                ['kode' => '3A-K25', 'label' => 'K25', 'luas' => 4.00, 'col' => 7, 'row' => 1],
+                ['kode' => '3A-K26', 'label' => 'K26', 'luas' => 4.00, 'col' => 8, 'row' => 1],
+                ['kode' => '3A-K27', 'label' => 'K27', 'luas' => 4.00, 'col' => 9, 'row' => 1],
                 // Ruangan sisi kanan (kolom 11)
                 ['kode' => '3A-R5', 'label' => 'R5', 'luas' => 14.70, 'col' => 11, 'row' => 1, 'shape' => 'angled'],
 
                 // Baris 2: K17-K18 (kubikal kiri) + R4 di kanan
-                ['kode' => '3A-M17', 'label' => 'K17', 'luas' => 4.00, 'col' => 1, 'row' => 2],
-                ['kode' => '3A-M18', 'label' => 'K18', 'luas' => 4.00, 'col' => 2, 'row' => 2],
+                ['kode' => '3A-K17', 'label' => 'K17', 'luas' => 4.00, 'col' => 1, 'row' => 2],
+                ['kode' => '3A-K18', 'label' => 'K18', 'luas' => 4.00, 'col' => 2, 'row' => 2],
                 ['kode' => '3A-R4', 'label' => 'R4', 'luas' => 20.97, 'col' => 11, 'row' => 2],
 
                 // Baris 3: K7-K16 (10 kubikal) + R3 di kanan
-                ['kode' => '3A-M7',  'label' => 'K7',  'luas' => 4.00, 'col' => 1, 'row' => 3],
-                ['kode' => '3A-M8',  'label' => 'K8',  'luas' => 4.00, 'col' => 2, 'row' => 3],
-                ['kode' => '3A-M9',  'label' => 'K9',  'luas' => 4.00, 'col' => 3, 'row' => 3],
-                ['kode' => '3A-M10', 'label' => 'K10', 'luas' => 4.00, 'col' => 4, 'row' => 3],
-                ['kode' => '3A-M11', 'label' => 'K11', 'luas' => 4.00, 'col' => 5, 'row' => 3],
-                ['kode' => '3A-M12', 'label' => 'K12', 'luas' => 4.00, 'col' => 6, 'row' => 3],
-                ['kode' => '3A-M13', 'label' => 'K13', 'luas' => 4.00, 'col' => 7, 'row' => 3],
-                ['kode' => '3A-M14', 'label' => 'K14', 'luas' => 4.00, 'col' => 8, 'row' => 3],
-                ['kode' => '3A-M15', 'label' => 'K15', 'luas' => 4.00, 'col' => 9, 'row' => 3],
-                ['kode' => '3A-M16', 'label' => 'K16', 'luas' => 4.00, 'col' => 10, 'row' => 3],
+                ['kode' => '3A-K7',  'label' => 'K7',  'luas' => 4.00, 'col' => 1, 'row' => 3],
+                ['kode' => '3A-K8',  'label' => 'K8',  'luas' => 4.00, 'col' => 2, 'row' => 3],
+                ['kode' => '3A-K9',  'label' => 'K9',  'luas' => 4.00, 'col' => 3, 'row' => 3],
+                ['kode' => '3A-K10', 'label' => 'K10', 'luas' => 4.00, 'col' => 4, 'row' => 3],
+                ['kode' => '3A-K11', 'label' => 'K11', 'luas' => 4.00, 'col' => 5, 'row' => 3],
+                ['kode' => '3A-K12', 'label' => 'K12', 'luas' => 4.00, 'col' => 6, 'row' => 3],
+                ['kode' => '3A-K13', 'label' => 'K13', 'luas' => 4.00, 'col' => 7, 'row' => 3],
+                ['kode' => '3A-K14', 'label' => 'K14', 'luas' => 4.00, 'col' => 8, 'row' => 3],
+                ['kode' => '3A-K15', 'label' => 'K15', 'luas' => 4.00, 'col' => 9, 'row' => 3],
+                ['kode' => '3A-K16', 'label' => 'K16', 'luas' => 4.00, 'col' => 10, 'row' => 3],
                 ['kode' => '3A-R3', 'label' => 'R3', 'luas' => 17.80, 'col' => 11, 'row' => 3],
             ],
         ],
         // Baris SETELAH grid (K1-K6 + R2 + R1)
         'rows_after' => [
-            ['kode' => '3A-M1', 'label' => 'K1', 'luas' => 4.00, 'flex' => 1],
-            ['kode' => '3A-M2', 'label' => 'K2', 'luas' => 4.00, 'flex' => 1],
-            ['kode' => '3A-M3', 'label' => 'K3', 'luas' => 4.00, 'flex' => 1],
-            ['kode' => '3A-M4', 'label' => 'K4', 'luas' => 4.00, 'flex' => 1],
-            ['kode' => '3A-M5', 'label' => 'K5', 'luas' => 4.00, 'flex' => 1],
-            ['kode' => '3A-M6', 'label' => 'K6', 'luas' => 4.00, 'flex' => 1],
+            ['kode' => '3A-K1', 'label' => 'K1', 'luas' => 4.00, 'flex' => 1],
+            ['kode' => '3A-K2', 'label' => 'K2', 'luas' => 4.00, 'flex' => 1],
+            ['kode' => '3A-K3', 'label' => 'K3', 'luas' => 4.00, 'flex' => 1],
+            ['kode' => '3A-K4', 'label' => 'K4', 'luas' => 4.00, 'flex' => 1],
+            ['kode' => '3A-K5', 'label' => 'K5', 'luas' => 4.00, 'flex' => 1],
+            ['kode' => '3A-K6', 'label' => 'K6', 'luas' => 4.00, 'flex' => 1],
             ['kode' => '3A-R2', 'label' => 'R2', 'luas' => 8.75, 'flex' => 2.2],
             ['kode' => '3A-R1', 'label' => 'R1', 'luas' => 6.95, 'flex' => 2.2],
         ],
@@ -180,29 +180,29 @@ return [
     '3B' => [
         'title'    => 'LANTAI 3B',
         'subtitle' => 'GEDUNG BITC',
-        'info'     => 'Total Working Space: 19',
+        'info'     => 'Co-Working: 16 kubikal · Working Space: 3 ruangan',
         'grid_main' => [
             'cols' => 11, // kolom 1-9 = kubikal, 10 = R2, 11 = R1 (angled)
             'cells' => [
                 // Baris 1 kubikal
-                ['kode' => '3B-M2',  'label' => 'K2',  'luas' => 8.00, 'col' => 1, 'row' => 1],
-                ['kode' => '3B-M4',  'label' => 'K4',  'luas' => 8.00, 'col' => 2, 'row' => 1],
-                ['kode' => '3B-M6',  'label' => 'K6',  'luas' => 8.00, 'col' => 3, 'row' => 1],
-                ['kode' => '3B-M8',  'label' => 'K8',  'luas' => 9.50, 'col' => 4, 'row' => 1],
-                ['kode' => '3B-M10', 'label' => 'K10', 'luas' => 7.60, 'col' => 5, 'row' => 1],
-                ['kode' => '3B-M12', 'label' => 'K12', 'luas' => 7.90, 'col' => 6, 'row' => 1],
-                ['kode' => '3B-M14', 'label' => 'K14', 'luas' => 7.80, 'col' => 7, 'row' => 1],
-                ['kode' => '3B-M15', 'label' => 'K15', 'luas' => 7.50, 'col' => 8, 'row' => 1],
-                ['kode' => '3B-M16', 'label' => 'K16', 'luas' => 7.92, 'col' => 9, 'row' => 1],
+                ['kode' => '3B-K2',  'label' => 'K2',  'luas' => 8.00, 'col' => 1, 'row' => 1],
+                ['kode' => '3B-K4',  'label' => 'K4',  'luas' => 8.00, 'col' => 2, 'row' => 1],
+                ['kode' => '3B-K6',  'label' => 'K6',  'luas' => 8.00, 'col' => 3, 'row' => 1],
+                ['kode' => '3B-K8',  'label' => 'K8',  'luas' => 9.50, 'col' => 4, 'row' => 1],
+                ['kode' => '3B-K10', 'label' => 'K10', 'luas' => 7.60, 'col' => 5, 'row' => 1],
+                ['kode' => '3B-K12', 'label' => 'K12', 'luas' => 7.90, 'col' => 6, 'row' => 1],
+                ['kode' => '3B-K14', 'label' => 'K14', 'luas' => 7.80, 'col' => 7, 'row' => 1],
+                ['kode' => '3B-K15', 'label' => 'K15', 'luas' => 7.50, 'col' => 8, 'row' => 1],
+                ['kode' => '3B-K16', 'label' => 'K16', 'luas' => 7.92, 'col' => 9, 'row' => 1],
 
                 // Baris 2 kubikal
-                ['kode' => '3B-M1',  'label' => 'K1',  'luas' => 8.00, 'col' => 1, 'row' => 2],
-                ['kode' => '3B-M3',  'label' => 'K3',  'luas' => 7.80, 'col' => 2, 'row' => 2],
-                ['kode' => '3B-M5',  'label' => 'K5',  'luas' => 7.90, 'col' => 3, 'row' => 2],
-                ['kode' => '3B-M7',  'label' => 'K7',  'luas' => 7.80, 'col' => 4, 'row' => 2],
-                ['kode' => '3B-M9',  'label' => 'K9',  'luas' => 8.04, 'col' => 5, 'row' => 2],
-                ['kode' => '3B-M11', 'label' => 'K11', 'luas' => 7.60, 'col' => 6, 'row' => 2],
-                ['kode' => '3B-M13', 'label' => 'K13', 'luas' => 7.60, 'col' => 7, 'row' => 2],
+                ['kode' => '3B-K1',  'label' => 'K1',  'luas' => 8.00, 'col' => 1, 'row' => 2],
+                ['kode' => '3B-K3',  'label' => 'K3',  'luas' => 7.80, 'col' => 2, 'row' => 2],
+                ['kode' => '3B-K5',  'label' => 'K5',  'luas' => 7.90, 'col' => 3, 'row' => 2],
+                ['kode' => '3B-K7',  'label' => 'K7',  'luas' => 7.80, 'col' => 4, 'row' => 2],
+                ['kode' => '3B-K9',  'label' => 'K9',  'luas' => 8.04, 'col' => 5, 'row' => 2],
+                ['kode' => '3B-K11', 'label' => 'K11', 'luas' => 7.60, 'col' => 6, 'row' => 2],
+                ['kode' => '3B-K13', 'label' => 'K13', 'luas' => 7.60, 'col' => 7, 'row' => 2],
 
                 // Ruangan besar sisi kanan (row_span 2)
                 ['kode' => '3B-R2', 'label' => 'R2', 'luas' => 49.40, 'col' => 10, 'row' => 1, 'row_span' => 2, 'shape' => 'angled'],

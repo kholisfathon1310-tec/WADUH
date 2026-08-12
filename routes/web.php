@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FakturController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MonitoringController;
+use App\Http\Controllers\Admin\ProfilController;
 use App\Http\Controllers\Admin\ReservasiAdminController;
 use App\Http\Controllers\BuktiReservasiController;
 use App\Http\Controllers\CekStatusController;
@@ -80,6 +81,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reservasi/{kodeReservasi}', [ReservasiAdminController::class, 'show'])->name('reservasi.show');
         Route::post('/reservasi/{kodeReservasi}/setujui', [ReservasiAdminController::class, 'setujui'])->name('reservasi.setujui');
         Route::post('/reservasi/{kodeReservasi}/tolak', [ReservasiAdminController::class, 'tolak'])->name('reservasi.tolak');
+        Route::delete('/reservasi/{kodeReservasi}', [ReservasiAdminController::class, 'hapus'])->name('reservasi.hapus');
         Route::post('/dokumen/{dokumen}/verifikasi', [ReservasiAdminController::class, 'verifikasiDokumen'])->name('reservasi.dokumen.verifikasi');
 
         // Faktur — SATU faktur per kode reservasi/transaksi (multi-ruangan digabung 1 PDF).
@@ -89,5 +91,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Laporan.
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
         Route::get('/laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.pdf');
+
+        // Profil admin (data akun, foto, ubah email/kata sandi).
+        Route::get('/profil', [ProfilController::class, 'edit'])->name('profil');
+        Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+        Route::post('/profil/foto', [ProfilController::class, 'foto'])->name('profil.foto');
+        Route::put('/profil/password', [ProfilController::class, 'password'])->name('profil.password');
     });
 });

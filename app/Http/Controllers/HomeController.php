@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusAktif;
+use App\Models\Admin;
 use App\Models\Lantai;
 use Illuminate\View\View;
 
@@ -20,15 +21,28 @@ class HomeController extends Controller
             ->map(function (Lantai $l) {
                 $aktif = $l->fasilitas->where('status_aktif', StatusAktif::Aktif);
 
+                // Lantai bisa campur kategori (mis. 3A/3B: mayoritas Co-Working + beberapa
+                // Working Space) — tampilkan kategori dengan jumlah ruangan terbanyak, bukan
+                // sekadar baris pertama yang urutannya bisa acak.
+                $kategoriUtama = $l->fasilitas
+                    ->countBy('kategori_fasilitas')
+                    ->sortDesc()
+                    ->keys()
+                    ->first();
+
                 return [
                     'id'       => $l->id_lantai,
                     'nomor'    => $l->nomor_lantai,
-                    'kategori' => $l->fasilitas->first()?->kategori_fasilitas ?? '-',
+                    'kategori' => $kategoriUtama ?? '-',
                     'total'    => $l->fasilitas->count(),
                     'tersedia' => $aktif->count(),
                 ];
             });
 
-        return view('home', ['daftarLantai' => $lantai]);
+        // Kontak WhatsApp/alamat di section Kontak diambil dari biodata admin (halaman Profil),
+        // supaya tombol WA pemesan langsung ke nomor admin yang sebenarnya, bukan placeholder.
+        $admin = Admin::orderBy('id_admin')->first();
+
+        return view('home', ['daftarLantai' => $lantai, 'adminKontak' => $admin]);
     }
 }

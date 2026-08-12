@@ -7,6 +7,7 @@
 */
 
 return [
+    'logo_path'               => 'images/logofaktur.png',
     'nama'                    => 'PEMERINTAH KOTA CIMAHI',
     'departemen'              => 'DINAS PERDAGANGAN, KOPERASI, USAHA KECIL DAN MENENGAH DAN PERINDUSTRIAN',
     'unit'                    => 'UNIT CIMAHI TECHNO PARK',

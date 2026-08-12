@@ -167,6 +167,33 @@
             width:100%; height:220px; object-fit:cover; display:block;
             background:#f7f9fc;
         }
+        .fp-carousel .carousel-item .foto { border-radius:0; }
+        .fp-carousel .carousel-indicators { margin-bottom:.6rem; }
+        .fp-carousel .carousel-indicators [data-bs-target] {
+            width:.5rem; height:.5rem; border-radius:50%; background:#fff; opacity:.6;
+        }
+        .fp-carousel .carousel-indicators .active { opacity:1; }
+        .fp-carousel .carousel-control-prev, .fp-carousel .carousel-control-next { width:2.75rem; opacity:0; transition:opacity .15s ease; }
+        .fp-carousel:hover .carousel-control-prev, .fp-carousel:hover .carousel-control-next { opacity:1; }
+
+        /* Foto yang bisa diklik untuk diperbesar (lightbox) */
+        .fp-zoomable { cursor:zoom-in; transition:filter .15s ease; }
+        .fp-zoomable:hover { filter:brightness(.92); }
+
+        .fp-lightbox {
+            position:fixed; inset:0; z-index:2000; background:rgba(8,15,25,.9);
+            display:none; align-items:center; justify-content:center; padding:2.5rem;
+            cursor:zoom-out;
+        }
+        .fp-lightbox.show { display:flex; }
+        .fp-lightbox img { max-width:100%; max-height:100%; border-radius:.9rem; box-shadow:0 24px 60px rgba(0,0,0,.5); cursor:default; }
+        .fp-lightbox .fp-lightbox-close {
+            position:absolute; top:1.2rem; right:1.4rem; width:2.6rem; height:2.6rem; border-radius:50%;
+            border:none; background:rgba(255,255,255,.15); color:#fff; font-size:1.3rem;
+            display:grid; place-items:center; cursor:pointer; transition:background .15s ease;
+        }
+        .fp-lightbox .fp-lightbox-close:hover { background:rgba(255,255,255,.28); }
+
         .fp-hero .cat-badge {
             position:absolute; top:.85rem; left:.85rem;
             background:rgba(255,255,255,.95); backdrop-filter:blur(6px);
@@ -263,6 +290,11 @@
         @media (max-width: 991.98px) {
             .fp-mini .thumb { width:5.5rem; height:5.5rem; }
         }
+        @media (max-width: 575.98px) {
+            /* Nama fasilitas termasuk (mis. "Pemakaian bersama Pantry") kepanjangan untuk
+               2 kolom di layar sempit — turunkan jadi 1 kolom, sama seperti pola .info-grid. */
+            .fp-includes ul { grid-template-columns:1fr; }
+        }
     </style>
 
     <div class="fp-page">
@@ -300,13 +332,10 @@
 
                     @foreach ($semuaRuangan as $f)
                         @php
-                            $fMeta = \App\Support\KategoriMeta::get($f->kategori_fasilitas);
-                            $fFoto = $f->foto
-                                ? \Illuminate\Support\Facades\Storage::url($f->foto)
-                                : $fMeta['gambar'];
+                            $fFoto = $f->fotoUrls()[0];
                         @endphp
                         <div class="fp-mini">
-                            <div class="thumb" style="background-image:url('{{ $fFoto }}')"></div>
+                            <div class="thumb fp-zoomable" data-zoom-src="{{ $fFoto }}" style="background-image:url('{{ $fFoto }}')" role="button" tabindex="0" aria-label="Perbesar foto {{ $f->nama_fasilitas }}"></div>
                             <div class="info">
                                 <span class="eyebrow">Lantai {{ $f->lantai->nomor_lantai }} · {{ $f->kode_fasilitas }}</span>
                                 <h3>{{ $f->nama_fasilitas }}</h3>
@@ -349,13 +378,36 @@
                 @else
                     {{-- MODE SINGLE: hero card besar --}}
                     @php
-                        $fotoUtama = $fasilitas->foto
-                            ? \Illuminate\Support\Facades\Storage::url($fasilitas->foto)
-                            : $meta['gambar'];
+                        $fotoList = $fasilitas->fotoUrls();
                     @endphp
                     <div class="fp-hero">
                         <div class="foto-wrap">
-                            <img src="{{ $fotoUtama }}" alt="{{ $fasilitas->nama_fasilitas }}" class="foto">
+                            @if (count($fotoList) > 1)
+                                <div id="fpCarousel" class="carousel slide fp-carousel">
+                                    <div class="carousel-inner">
+                                        @foreach ($fotoList as $i => $src)
+                                            <div class="carousel-item @if ($i === 0) active @endif">
+                                                <img src="{{ $src }}" alt="{{ $fasilitas->nama_fasilitas }} — foto {{ $i + 1 }}" class="foto fp-zoomable" data-zoom-src="{{ $src }}">
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#fpCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Sebelumnya</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#fpCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Berikutnya</span>
+                                    </button>
+                                    <div class="carousel-indicators">
+                                        @foreach ($fotoList as $i => $src)
+                                            <button type="button" data-bs-target="#fpCarousel" data-bs-slide-to="{{ $i }}" @if ($i === 0) class="active" @endif aria-label="Foto {{ $i + 1 }}"></button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <img src="{{ $fotoList[0] }}" alt="{{ $fasilitas->nama_fasilitas }}" class="foto fp-zoomable" data-zoom-src="{{ $fotoList[0] }}">
+                            @endif
                             <span class="cat-badge"><i class="bi {{ $meta['ikon'] }}"></i>{{ $fasilitas->kategori_fasilitas }}</span>
                         </div>
                         <div class="body">
@@ -422,13 +474,22 @@
                         <input type="hidden" name="antrian" value="{{ request('antrian') }}">
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-{{ $satuan === 'Jam' ? '4' : '6' }} mb-3">
                                 <label class="form-label">{{ $sehariSaja ? 'Tanggal pemakaian' : 'Tanggal mulai' }}</label>
                                 <input type="date" name="tanggal_mulai" class="form-control" required
                                        min="{{ now()->toDateString() }}"
                                        value="{{ old('tanggal_mulai', request('tanggal_mulai')) }}">
                             </div>
-                            @if ($sehariSaja)
+                            @if ($satuan === 'Jam')
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Jam mulai</label>
+                                    @include('reservasi.partials.pilih-jam', ['name' => 'jam_mulai', 'value' => old('jam_mulai')])
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Jam selesai</label>
+                                    @include('reservasi.partials.pilih-jam', ['name' => 'jam_selesai', 'value' => old('jam_selesai')])
+                                </div>
+                            @elseif ($sehariSaja)
                                 <div class="col-md-6 mb-3 d-flex align-items-end">
                                     <div class="fp-info-slot">
                                         <i class="bi bi-clock-history"></i>
@@ -466,7 +527,7 @@
                         @elseif ($satuan === 'Jam')
                             <div class="fp-note">
                                 <i class="bi bi-clock"></i>
-                                <span><strong>8 jam otomatis</strong> mengikuti jam layanan gedung (08:00&ndash;16:00).</span>
+                                <span>Pilih jam mulai &amp; selesai sesuai kebutuhan, mengikuti <strong>jam operasional gedung 08.00&ndash;16.00 WIB</strong>.</span>
                             </div>
                         @elseif ($satuan === 'Bulan')
                             <div class="fp-note">
@@ -484,4 +545,38 @@
             </div>
         </div>
     </div>
+
+    {{-- Lightbox foto — dipakai bersama oleh hero/carousel & thumb mini-card --}}
+    <div class="fp-lightbox" id="fpLightbox">
+        <button type="button" class="fp-lightbox-close" aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
+        <img src="" alt="" id="fpLightboxImg">
+    </div>
+    <script>
+        (function () {
+            const overlay = document.getElementById('fpLightbox');
+            const img = document.getElementById('fpLightboxImg');
+            if (!overlay || !img) return;
+
+            const buka = (src, alt) => {
+                img.src = src;
+                img.alt = alt || '';
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            };
+            const tutup = () => {
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            };
+
+            document.querySelectorAll('.fp-zoomable').forEach((el) => {
+                el.addEventListener('click', () => buka(el.dataset.zoomSrc, el.alt || el.getAttribute('aria-label')));
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); buka(el.dataset.zoomSrc, el.alt || el.getAttribute('aria-label')); }
+                });
+            });
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) tutup(); });
+            overlay.querySelector('.fp-lightbox-close').addEventListener('click', tutup);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tutup(); });
+        })();
+    </script>
 @endsection

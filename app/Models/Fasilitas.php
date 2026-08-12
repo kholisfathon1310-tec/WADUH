@@ -30,6 +30,7 @@ class Fasilitas extends Model
     protected $casts = [
         'luas' => 'decimal:2',
         'status_aktif' => StatusAktif::class,
+        'foto' => 'array',
     ];
 
     public function lantai(): BelongsTo
@@ -40,5 +41,15 @@ class Fasilitas extends Model
     public function tarifSewa(): HasMany
     {
         return $this->hasMany(TarifSewa::class, 'id_fasilitas', 'id_fasilitas');
+    }
+
+    /** URL foto ruangan (public/images/*); jatuh ke gambar stok kategori kalau belum ada foto. */
+    public function fotoUrls(): array
+    {
+        if (! empty($this->foto)) {
+            return collect($this->foto)->map(fn (string $f) => asset('images/'.$f))->all();
+        }
+
+        return [asset(\App\Support\KategoriMeta::get($this->kategori_fasilitas)['gambar'])];
     }
 }

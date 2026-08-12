@@ -34,7 +34,7 @@ class DenahSupportTest extends TestCase
 
     public function test_label_pendek(): void
     {
-        $this->assertSame('M1', Denah::labelPendek('3A-M1'));
+        $this->assertSame('K1', Denah::labelPendek('3A-K1'));
         $this->assertSame('HALL', Denah::labelPendek('L5-HALL'));
         $this->assertSame('R8', Denah::labelPendek('L2-R8'));
         $this->assertSame('TANPADASH', Denah::labelPendek('TANPADASH'));

@@ -66,6 +66,7 @@ class BuktiReservasiController extends Controller
         })->all();
 
         $data = [
+            'inst'          => config('institusi'),
             'kodeTransaksi' => $anchor->kode_transaksi,
             'pemesan'       => $anchor->pemesan->nama_lengkap,
             'items'         => $baris,

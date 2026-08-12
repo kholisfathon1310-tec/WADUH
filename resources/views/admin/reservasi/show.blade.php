@@ -123,17 +123,19 @@
                 </div>
             </div>
 
-            {{-- Dokumen persyaratan seluruh ruangan --}}
-            @php $semuaDokumen = $items->flatMap(fn ($it) => $it->dokumenPersyaratan->map(fn ($d) => ['dok' => $d, 'ruang' => $it->tarifSewa->fasilitas->nama_fasilitas])); @endphp
+            {{-- Dokumen persyaratan pemesanan — satu file yang sama disalin ke tiap ruangan
+                 Bulan dalam transaksi ini (lihat ReservasiController::simpanDokumen), jadi
+                 di sini dikelompokkan per nama file supaya tampil satu kartu saja per dokumen. --}}
+            @php $semuaDokumen = $items->flatMap(fn ($it) => $it->dokumenPersyaratan)->groupBy('nama_file'); @endphp
             <div class="xcard">
                 <div class="xhead"><span><i class="bi bi-paperclip me-1"></i>Dokumen Persyaratan</span>
                     <span class="badge text-bg-light border">{{ $semuaDokumen->count() }} file</span></div>
                 <div class="p-3">
-                    @forelse ($semuaDokumen as $row)
-                        @php $dok = $row['dok']; @endphp
+                    @forelse ($semuaDokumen as $grup)
+                        @php $dok = $grup->first(); @endphp
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 {{ ! $loop->last ? 'border-bottom' : '' }} py-2">
                             <div>
-                                <div class="cell-main small">{{ $dok->jenis_dokumen }} <span class="text-muted fw-normal">· {{ $row['ruang'] }}</span></div>
+                                <div class="cell-main small">{{ $dok->jenis_dokumen }}</div>
                                 <a href="{{ \Illuminate\Support\Facades\Storage::url($dok->lokasi_file) }}" target="_blank" class="cell-sub text-decoration-none">{{ $dok->nama_file }} <i class="bi bi-box-arrow-up-right"></i></a>
                                 <span class="badge text-bg-{{ ['Menunggu'=>'warning','Valid'=>'success','Tidak Valid'=>'danger'][$dok->status_verifikasi->value] }} ms-1">{{ $dok->status_verifikasi->value }}</span>
                             </div>
@@ -199,7 +201,7 @@
                 </div>
             </div>
 
-            <div class="xcard">
+            <div class="xcard mb-3">
                 <div class="xhead"><span><i class="bi bi-clock-history me-1"></i>Riwayat Status</span></div>
                 <div class="p-3">
                     <div class="timeline">
@@ -213,6 +215,22 @@
                             <p class="text-muted small mb-0">Belum ada perubahan status.</p>
                         @endforelse
                     </div>
+                </div>
+            </div>
+
+            {{-- Zona berbahaya --}}
+            <div class="xcard" style="border-color:#f0c9c9">
+                <div class="xhead" style="background:#fdf6f6"><span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Zona Berbahaya</span></div>
+                <div class="p-3">
+                    <p class="small text-muted mb-2">Menghapus pemesanan ini menghilangkan seluruh data ({{ $items->count() }} ruangan, dokumen, riwayat, dan faktur) secara permanen. Tindakan ini tidak bisa dibatalkan.</p>
+                    <form method="POST" action="{{ route('admin.reservasi.hapus', $r->kode_reservasi) }}"
+                          data-confirm="Seluruh data pemesanan {{ $r->kode_transaksi }} ({{ $items->count() }} ruangan) akan dihapus permanen dan tidak bisa dikembalikan."
+                          data-confirm-title="Hapus pemesanan ini?" data-icon="warning"
+                          data-confirm-text="Ya, hapus permanen" data-confirm-color="#d95757">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-outline-danger w-100"><i class="bi bi-trash3 me-1"></i>Hapus Pemesanan Ini</button>
+                    </form>
                 </div>
             </div>
         </div>

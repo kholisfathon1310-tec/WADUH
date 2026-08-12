@@ -39,7 +39,6 @@
         </div>
         <div class="d-flex justify-content-end gap-2 mt-3 pt-3" style="border-top:1px solid var(--line)">
             <a href="{{ route('admin.reservasi.index') }}" class="btn btn-brand-outline btn-sm px-3" data-filter-reset><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</a>
-            <button class="btn btn-brand btn-sm px-3"><i class="bi bi-funnel me-1"></i>Terapkan</button>
         </div>
     </form>
 

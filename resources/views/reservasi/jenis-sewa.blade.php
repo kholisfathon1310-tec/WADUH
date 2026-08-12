@@ -22,7 +22,7 @@
 
     <div class="page-head mb-4 p-4 p-md-5 rounded-4 text-white" style="background:linear-gradient(115deg,#0d2a3a,#145f7c 55%,#168b88)" data-reveal>
         <p class="eyebrow-sm mb-1" style="color:#a9e6dd">Langkah 2 dari 5 · {{ $kategori }}</p>
-        <h1 class="h3 mb-1">Berapa lama Anda akan menyewa? ⏱️</h1>
+        <h1 class="h3 mb-1">Pilih Jenis Sewa</h1>
         <p class="mb-0" style="opacity:.85">Pilih satuan sewa yang tersedia untuk kategori ini.</p>
     </div>
 

@@ -153,12 +153,16 @@ class LayananTest extends TestCase
 
     public function test_command_tarif_hitung_ulang_bulanan(): void
     {
-        $tarifBulan = $this->tarif('Bulan', ['kategori_fasilitas' => 'Working Space', 'luas' => 25]);
+        // Tarif Bulan L1-R1 (data seeded, master data: Rp6.741.000) sengaja dirusak dulu.
+        $fasilitas = Fasilitas::where('kode_fasilitas', 'L1-R1')->firstOrFail();
+        $jenisBulan = JenisSewa::where('satuan', 'Bulan')->firstOrFail();
+        $tarifBulan = TarifSewa::where('id_fasilitas', $fasilitas->id_fasilitas)
+            ->where('id_jenis_sewa', $jenisBulan->id_jenis_sewa)
+            ->firstOrFail();
+        $tarifBulan->update(['harga' => 999_999]);
 
-        // Data luas real masuk → command menghitung ulang 150rb × luas baru.
-        $tarifBulan->fasilitas->update(['luas' => 40]);
         $this->artisan('tarif:hitung-ulang-bulanan')->assertSuccessful();
 
-        $this->assertSame(150_000.0 * 40, (float) $tarifBulan->fresh()->harga);
+        $this->assertSame(6_741_000.0, (float) $tarifBulan->fresh()->harga);
     }
 }

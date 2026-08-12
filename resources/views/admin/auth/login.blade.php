@@ -75,7 +75,7 @@
             </div>
             <div>
                 <h1 class="lv-headline">Kelola reservasi fasilitas BITC dalam satu sistem</h1>
-                <p class="lv-sub">Pantau pengajuan, verifikasi dokumen, dan terbitkan laporan reservasi secara terpusat.</p>
+                <p class="lv-sub">Pantau pengajuan, verifikasi dokumen, sampai buat laporan reservasi.</p>
                 <ul class="lv-points">
                     <li><span class="ic"><i class="bi bi-journal-check"></i></span>Verifikasi dan persetujuan reservasi</li>
                     <li><span class="ic"><i class="bi bi-grid-3x3-gap"></i></span>Monitoring okupansi tiap lantai</li>

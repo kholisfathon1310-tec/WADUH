@@ -95,7 +95,7 @@
         // tampil & tetap ruangan biasa, bukan kategori/warna terpisah.
         if ($isRuang && ($tidakAktif || $bukanKategoriIni || $rawStatus === 'merah')) {
             $status = 'terisi';
-            $statusLabel = $bukanKategoriIni ? 'Bukan bagian dari kategori '.$kategori : 'Penuh';
+            $statusLabel = $bukanKategoriIni ? 'Bukan '.$kategori : 'Penuh';
         } elseif ($isRuang && $rawStatus === 'kuning') {
             $status = 'kuning';
             $statusLabel = 'Sebagian terisi';
@@ -411,7 +411,7 @@
 
         /* Kartu detail saat kursor di atas ruangan (mengambang, mengikuti kursor). */
         .dn-card {
-            position: fixed; z-index: 1080; min-width: 12rem; max-width: 16rem;
+            position: fixed; z-index: 1080; width: max-content; max-width: 16rem;
             background: #0f172a; color: #f1f5f9; border-radius: .85rem; padding: .7rem .85rem;
             font-size: .78rem; font-family: 'DM Sans', sans-serif; box-shadow: 0 14px 30px rgba(2,6,23,.28);
             pointer-events: none; transition: opacity .1s ease;

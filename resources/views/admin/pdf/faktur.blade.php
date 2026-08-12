@@ -25,9 +25,9 @@
   table { border-collapse: collapse; }
   .hdr-table { width:100%; border:none; }
   .hdr-table td { vertical-align: top; border:none; padding:0; }
-  .logo-cell { width:120px; text-align:center; }
+  .logo-cell { width:190px; text-align:center; }
   /* dompdf tidak mendukung flex — pakai line-height agar teks LOGO benar-benar di tengah kotak */
-  .logo-box { width:96px; height:96px; border:1px dashed #999; text-align:center; line-height:96px; font-size:10px; color:#999; margin:0 auto; }
+  .logo-box { width:170px; height:113px; border:1px dashed #999; text-align:center; line-height:113px; font-size:10px; color:#999; margin:0 auto; }
   .inst { text-align:center; }
   .inst .l1 { font-weight:bold; font-size:16px; line-height:1.25; }
   .inst .l2 { font-weight:bold; font-size:16px; line-height:1.25; }
@@ -87,7 +87,7 @@
     <tr>
       <td class="logo-cell">
         @if(!empty($inst['logo_path']) && file_exists(public_path($inst['logo_path'])))
-          <img src="{{ public_path($inst['logo_path']) }}" style="width:96px;height:auto;">
+          <img src="{{ public_path($inst['logo_path']) }}" style="width:170px;height:auto;">
         @else
           <div class="logo-box">LOGO</div>
         @endif
@@ -103,7 +103,7 @@
           Surel {{ $inst['email'] }}
         </div>
       </td>
-      <td style="width:120px;"></td>
+      <td style="width:50px;"></td>
     </tr>
   </table>
 

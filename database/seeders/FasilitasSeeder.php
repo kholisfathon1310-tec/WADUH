@@ -4,198 +4,166 @@ namespace Database\Seeders;
 
 use App\Models\Fasilitas;
 use App\Models\Lantai;
-use App\Models\Reservasi;
-use App\Models\TarifSewa;
 use Illuminate\Database\Seeder;
 
 /**
- * Data Fasilitas real sesuai denah gedung BITC (menggantikan dummy generik Stage 2).
- * Ruangan yang disewa tenant existing tetap di-seed sebagai baris TIDAK AKTIF,
- * tanpa menyimpan nama penyewa di mana pun.
+ * Data Fasilitas real sesuai denah gedung BITC — 64 ruangan total.
+ * Aturan kode: "-K" = Co-Working Space, "-R" = Working Space, "HALL" = Convention Hall.
+ * Kondisi awal sistem: seluruh ruangan berstatus AKTIF dan siap dipesan.
  */
 class FasilitasSeeder extends Seeder
 {
-    /** nomor_lantai => [kategori, [kode => status_aktif]]. */
+    /** nomor_lantai => daftar kode_fasilitas. */
     private const DENAH = [
-        '1' => ['Working Space', [
-            'L1-R1' => 'Tidak Aktif', 'L1-R2' => 'Tidak Aktif', 'L1-R3' => 'Tidak Aktif',
-        ]],
-        '2' => ['Working Space', [
-            'L2-R1' => 'Tidak Aktif', 'L2-R2' => 'Aktif', 'L2-R3' => 'Tidak Aktif',
-            'L2-R4' => 'Tidak Aktif', 'L2-R5' => 'Tidak Aktif', 'L2-R6' => 'Aktif',
-            'L2-R7' => 'Aktif', 'L2-R8' => 'Aktif',
-        ]],
-        '3A' => ['Co-Working Space', [
-            '3A-M1' => 'Tidak Aktif', '3A-M2' => 'Aktif', '3A-M3' => 'Tidak Aktif', '3A-M4' => 'Aktif',
-            '3A-M5' => 'Aktif', '3A-M6' => 'Tidak Aktif', '3A-M7' => 'Tidak Aktif', '3A-M8' => 'Aktif',
-            '3A-M9' => 'Tidak Aktif', '3A-M10' => 'Aktif', '3A-M11' => 'Aktif', '3A-M12' => 'Tidak Aktif',
-            '3A-M13' => 'Tidak Aktif', '3A-M14' => 'Tidak Aktif', '3A-M15' => 'Tidak Aktif', '3A-M16' => 'Tidak Aktif',
-            '3A-M17' => 'Tidak Aktif', '3A-M18' => 'Tidak Aktif', '3A-M19' => 'Tidak Aktif', '3A-M20' => 'Tidak Aktif',
-            '3A-M21' => 'Aktif', '3A-M22' => 'Aktif', '3A-M23' => 'Aktif', '3A-M24' => 'Aktif',
-            '3A-M25' => 'Aktif', '3A-M26' => 'Aktif', '3A-M27' => 'Tidak Aktif',
-            '3A-R1' => 'Tidak Aktif', '3A-R2' => 'Tidak Aktif', '3A-R3' => 'Tidak Aktif', '3A-R4' => 'Aktif',
-        ]],
-        // 3B: 16 kubikal aktif + 2 ruangan tenant (Tidak Aktif) + 3B-R3 eks Ruang Kaca
-        // (Working Space, bisa dipesan) — total 19 unit.
-        '3B' => ['Co-Working Space', [
-            '3B-M1' => 'Aktif', '3B-M2' => 'Aktif', '3B-M3' => 'Aktif', '3B-M4' => 'Aktif',
-            '3B-M5' => 'Aktif', '3B-M6' => 'Aktif', '3B-M7' => 'Aktif', '3B-M8' => 'Aktif',
-            '3B-M9' => 'Aktif', '3B-M10' => 'Aktif', '3B-M11' => 'Aktif', '3B-M12' => 'Aktif',
-            '3B-M13' => 'Aktif', '3B-M14' => 'Aktif', '3B-M15' => 'Aktif', '3B-M16' => 'Aktif',
-            '3B-R1' => 'Tidak Aktif', '3B-R2' => 'Tidak Aktif',
-            '3B-R3' => 'Aktif',
-        ]],
-        '5' => ['Convention Hall', [
-            'L5-HALL' => 'Aktif',
-        ]],
+        '1' => ['L1-R1', 'L1-R2', 'L1-R3'],
+        '2' => ['L2-R1', 'L2-R2', 'L2-R3', 'L2-R4', 'L2-R5', 'L2-R6', 'L2-R7', 'L2-R8'],
+        '3A' => [
+            '3A-K1', '3A-K2', '3A-K3', '3A-K4', '3A-K5', '3A-K6', '3A-K7', '3A-K8', '3A-K9', '3A-K10',
+            '3A-K11', '3A-K12', '3A-K13', '3A-K14', '3A-K15', '3A-K16', '3A-K17', '3A-K18', '3A-K19', '3A-K20',
+            '3A-K21', '3A-K22', '3A-K23', '3A-K24', '3A-K25', '3A-K26', '3A-K27',
+            '3A-R1', '3A-R2', '3A-R3', '3A-R4', '3A-R5', '3A-R6',
+        ],
+        '3B' => [
+            '3B-K1', '3B-K2', '3B-K3', '3B-K4', '3B-K5', '3B-K6', '3B-K7', '3B-K8',
+            '3B-K9', '3B-K10', '3B-K11', '3B-K12', '3B-K13', '3B-K14', '3B-K15', '3B-K16',
+            '3B-R1', '3B-R2', '3B-R3',
+        ],
+        '5' => ['L5-HALL'],
     ];
 
-    /**
-     * Kode 3B versi lama yang digantikan denah baru. Kosong: pembersihan R3/R4 lama
-     * sudah selesai, dan kode 3B-R3 kini DIPAKAI ULANG untuk eks Ruang Kaca — jangan
-     * dimasukkan lagi ke daftar ini.
-     */
-    private const OBSOLETE_3B = [];
-
-    /** Kode lama → kode baru (format nama ruangan standar, tanpa "RK"/"Ruang Kaca"). */
+    /** Kode lama → kode baru. Aman dijalankan berulang (skip kalau target sudah ada). */
     private const RENAME = ['L2-RK' => 'L2-R8', '3A-RK' => '3A-R4', '3B-RUANGKACA' => '3B-R3'];
 
     /**
-     * Ruangan Working Space yang berada di lantai berkategori lain (bisa dipesan
-     * sebagai Working Space): eks-RK lantai 2 & 3A, eks-Ruang Kaca lantai 3B.
+     * Foto per kelompok ruangan (file di public/images/, 1 foto = 1 elemen array).
+     * Kelompok dipilih ulang-alik (round-robin) per ruangan, kecuali 'l5' (Convention
+     * Hall) yang selalu memakai SEMUA foto sekaligus sebagai galeri.
      */
-    private const RUANG_WS_KHUSUS = ['L2-R8', '3A-R4', '3B-R3'];
+    private const FOTO = [
+        'l1'   => ['lt1.png', 'lt1 (2).png', 'lt1 (3).png'],
+        'l2'   => ['lt2.png', 'lt2 (2).png', 'lt2_ruangrapat (1).png', 'lt2_ruangrapat (2).png', 'lt2_ruangrapat (3).png'],
+        '3a_k' => ['lt3a.png', 'lt3a (2).png', 'lt3a (3).png', 'lt3a (4).png', 'lt3a (5).png'],
+        '3b_k' => ['lt3b.png', 'lt3b (2).png', 'lt3b (3).png', 'lt3b (4).png'],
+        'l5'   => ['lt5.png', 'lt5 (2).png', 'lt5 (3).png', 'lt5 (4).png', 'lt5 (5).png'],
+    ];
 
     public function run(): void
     {
-        // Rename kode lama (RK / RUANGKACA) ke format ruangan standar; tarif & reservasi
-        // mengikuti otomatis karena terikat id_fasilitas, bukan kode.
-        foreach (self::RENAME as $lama => $baru) {
+        // Rename kode lama ke format standar; tarif & reservasi mengikuti otomatis
+        // karena terikat id_fasilitas, bukan kode.
+        $renameMap = self::RENAME;
+        foreach (range(1, 27) as $n) {
+            $renameMap["3A-M{$n}"] = "3A-K{$n}";
+        }
+        foreach (range(1, 16) as $n) {
+            $renameMap["3B-M{$n}"] = "3B-K{$n}";
+        }
+
+        foreach ($renameMap as $lama => $baru) {
             if (! Fasilitas::where('kode_fasilitas', $baru)->exists()) {
                 Fasilitas::where('kode_fasilitas', $lama)->update(['kode_fasilitas' => $baru]);
             }
         }
 
-        $this->bersihkan3BLama();
+        $fotoIndex = []; // nama kelompok foto => posisi berikutnya (ulang-alik)
 
-        foreach (self::DENAH as $nomor => [$kategori, $rooms]) {
+        foreach (self::DENAH as $nomor => $kodeList) {
             $lantai = Lantai::where('nomor_lantai', $nomor)->firstOrFail();
 
-            foreach ($rooms as $kode => $status) {
-                // RK & Ruang Kaca adalah ruangan Working Space walau lantainya kategori lain.
-                $khususWS = in_array($kode, self::RUANG_WS_KHUSUS, true);
-                $kategoriRoom = $khususWS ? 'Working Space' : $kategori;
-                $kapasitas = $khususWS ? 10 : $this->kapasitas($nomor, $kode);
-                $luas = $khususWS ? 25.00 : $this->luas($nomor, $kapasitas);
+            foreach ($kodeList as $kode) {
+                $kategori = $this->kategori($kode);
+                $kapasitas = $this->kapasitas($nomor, $kategori);
+                $luas = $this->luas($kode, $kategori);
+
+                $grupFoto = $this->grupFoto($nomor, $kategori);
+                $urutan = $fotoIndex[$grupFoto] ??= 0;
+                $fotoIndex[$grupFoto]++;
 
                 Fasilitas::updateOrCreate(
                     ['kode_fasilitas' => $kode],
                     [
                         'id_lantai'          => $lantai->id_lantai,
                         'nama_fasilitas'     => $this->nama($kode),
-                        'kategori_fasilitas' => $kategoriRoom,
+                        'kategori_fasilitas' => $kategori,
                         'kapasitas'          => $kapasitas,
                         'luas'               => $luas,
-                        'foto'               => null,
-                        'deskripsi'          => $status === 'Aktif'
-                            ? "{$kategoriRoom} {$kode}."
-                            : 'Sedang tidak tersedia untuk reservasi.',
-                        'status_aktif'       => $status,
+                        'foto'               => $this->foto($grupFoto, $urutan),
+                        'deskripsi'          => "{$kategori} {$kode}.",
+                        'status_aktif'       => 'Aktif',
                     ],
                 );
             }
         }
     }
 
+    /** Kelompok foto per ruangan: L1/L2 pakai fotonya sendiri; ruangan "-R" di lantai 3 pakai set foto L2. */
+    private function grupFoto(string $nomor, string $kategori): string
+    {
+        return match (true) {
+            $kategori === 'Convention Hall'                  => 'l5',
+            $nomor === '1'                                    => 'l1',
+            $nomor === '2'                                    => 'l2',
+            $nomor === '3A' && $kategori === 'Co-Working Space' => '3a_k',
+            $nomor === '3B' && $kategori === 'Co-Working Space' => '3b_k',
+            default                                           => 'l2', // Working Space "-R" di 3A/3B
+        };
+    }
+
+    /** Foto untuk satu ruangan dalam kelompok $grup, di urutan ulang-alik ke-$urutan. */
+    private function foto(string $grup, int $urutan): array
+    {
+        $set = self::FOTO[$grup];
+
+        // Convention Hall: semua foto sekaligus, ditampilkan sebagai galeri.
+        if ($grup === 'l5') {
+            return $set;
+        }
+
+        return [$set[$urutan % count($set)]];
+    }
+
+    /** Kategori murni dari kode: "-K" Co-Working, "HALL" Convention Hall, selain itu ("-R") Working Space. */
+    private function kategori(string $kode): string
+    {
+        return match (true) {
+            str_contains($kode, 'HALL') => 'Convention Hall',
+            str_contains($kode, '-K')   => 'Co-Working Space',
+            default                     => 'Working Space',
+        };
+    }
+
     private function nama(string $kode): string
     {
         return match (true) {
             str_contains($kode, 'HALL') => 'Convention Hall',
-            str_contains($kode, '-M')   => "Kubikal {$kode}",
+            str_contains($kode, '-K')   => "Kubikal {$kode}",
             default                     => "Ruang {$kode}",
         };
     }
 
-    /**
-     * Hapus unit 3B versi lama (R3, R4, RUANGKACA) yang tidak ada di denah baru.
-     * Aman dijalankan berulang: reservasi DUMMY yang menunjuk tarif lama dialihkan ke
-     * tarif aktif satuan sama; reservasi ASLI membuat unit di-skip (hanya warning).
-     * Tarif milik 3B-R1/R2 (kini Tidak Aktif) ikut dirapikan.
-     */
-    private function bersihkan3BLama(): void
+    /** Kapasitas per kategori (db-spec-fasilitas-final.md bagian 1), Co-Working seragam per lantai. */
+    private function kapasitas(string $nomor, string $kategori): int
     {
-        foreach (self::OBSOLETE_3B as $kode) {
-            $f = Fasilitas::where('kode_fasilitas', $kode)->first();
-            if (! $f) {
-                continue;
-            }
+        return match (true) {
+            $kategori === 'Working Space'    => 10,
+            $kategori === 'Convention Hall'  => 75,
+            $nomor === '3A'                  => 2, // Co-Working Space kubikal kecil
+            $nomor === '3B'                  => 4, // Co-Working Space kubikal besar
+            default                          => 10,
+        };
+    }
 
-            $tarifIds = $f->tarifSewa()->pluck('id_tarif_sewa');
-            if ($tarifIds->isNotEmpty()) {
-                // Jangan hapus kalau ada reservasi ASLI (bukan dummy seeder) yang menunjuk ke sini.
-                $adaAsli = Reservasi::whereIn('id_tarif_sewa', $tarifIds)
-                    ->where('kode_reservasi', 'not like', 'RSV-DUMMY%')
-                    ->exists();
-                if ($adaAsli) {
-                    $this->command?->warn("Lewati hapus {$kode}: masih dirujuk reservasi asli.");
-                    continue;
-                }
-
-                // Alihkan reservasi dummy ke tarif aktif lain dengan satuan sewa sama.
-                Reservasi::whereIn('id_tarif_sewa', $tarifIds)->get()->each(function (Reservasi $res) {
-                    $satuan = $res->tarifSewa->jenisSewa->satuan->value;
-                    $pengganti = TarifSewa::where('status_aktif', 'Aktif')
-                        ->whereNotIn('id_tarif_sewa', [$res->id_tarif_sewa])
-                        ->whereHas('jenisSewa', fn ($q) => $q->where('satuan', $satuan))
-                        ->whereHas('fasilitas', fn ($q) => $q->where('status_aktif', 'Aktif')
-                            ->whereNotIn('kode_fasilitas', self::OBSOLETE_3B))
-                        ->first();
-                    if ($pengganti) {
-                        $res->update(['id_tarif_sewa' => $pengganti->id_tarif_sewa]);
-                    }
-                });
-
-                TarifSewa::whereIn('id_tarif_sewa', $tarifIds)->delete();
-            }
-
-            $f->delete();
-            $this->command?->info("Unit lama {$kode} dihapus (digantikan denah 3B baru).");
+    /**
+     * Luas per ruangan — master data dari docs/hargasewa.md (config/harga-sewa-master.php),
+     * bukan lagi nilai seragam per kategori. Convention Hall tidak ada di master data itu,
+     * jadi tetap pakai default lama (600 m²).
+     */
+    private function luas(string $kode, string $kategori): float
+    {
+        if ($kategori === 'Convention Hall') {
+            return 600.00;
         }
 
-        // 3B-R1 & 3B-R2 kini Tidak Aktif → tarif lamanya dilepas (hapus bila tak dirujuk).
-        Fasilitas::whereIn('kode_fasilitas', ['3B-R1', '3B-R2'])->get()->each(function (Fasilitas $f) {
-            $f->tarifSewa->each(function (TarifSewa $t) {
-                Reservasi::where('id_tarif_sewa', $t->id_tarif_sewa)->exists()
-                    ? $t->update(['status_aktif' => 'Tidak Aktif'])
-                    : $t->delete();
-            });
-        });
-    }
-
-    /** Kapasitas SERAGAM per lantai (db-spec-fasilitas-final.md bagian 1). */
-    private function kapasitas(string $nomor, string $kode): int
-    {
-        return match ($nomor) {
-            '1', '2' => 10, // Working Space
-            '3A'     => 2,  // Co-Working Space kubikal kecil
-            '3B'     => 4,  // Co-Working Space kubikal besar
-            '5'      => 75, // Convention Hall
-            default  => 10,
-        };
-    }
-
-    /**
-     * Data luas per fasilitas BELUM final — pakai default sementara
-     * (kubikal 3A/3B = 6 m², ruangan L1/L2 = 25 m², Convention Hall = 600 m²).
-     * Kalau data real sudah ada: update kolom luas lalu jalankan
-     * `php artisan tarif:hitung-ulang-bulanan`.
-     */
-    private function luas(string $nomor, int $kapasitas): float
-    {
-        return match ($nomor) {
-            '3A', '3B' => 6.00,
-            '5'        => 600.00,
-            default    => 25.00, // L1/L2
-        };
+        return config("harga-sewa-master.{$kode}.luas");
     }
 }

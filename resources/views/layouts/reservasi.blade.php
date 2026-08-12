@@ -231,14 +231,46 @@
         @endif
 
         // Tombol salin kode reservasi — umpan balik langsung di tombol, tanpa ketergantungan pustaka.
+        // navigator.clipboard hanya ada di secure context (HTTPS/localhost); di HTTP biasa
+        // (mis. domain .test lokal) ia undefined dan memanggilnya langsung akan melempar error
+        // sinkron yang menghentikan handler sebelum sempat kasih umpan balik apa pun. Makanya
+        // dicek dulu, dengan fallback textarea+execCommand untuk browser/konteks yang tidak
+        // punya Clipboard API.
         document.addEventListener('click', e => {
             const btn = e.target.closest('[data-salin]');
             if (!btn) return;
-            navigator.clipboard.writeText(btn.dataset.salin).catch(() => {});
-            const asli = btn.innerHTML;
-            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersalin!';
-            btn.disabled = true;
-            setTimeout(() => { btn.innerHTML = asli; btn.disabled = false; }, 1800);
+            const teks = btn.dataset.salin || '';
+
+            const sukses = () => {
+                const asli = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersalin!';
+                btn.disabled = true;
+                setTimeout(() => { btn.innerHTML = asli; btn.disabled = false; }, 1800);
+            };
+            const gagal = () => {
+                const asli = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-x-lg me-1"></i>Gagal, salin manual';
+                setTimeout(() => { btn.innerHTML = asli; }, 1800);
+            };
+            const salinFallback = () => {
+                const ta = document.createElement('textarea');
+                ta.value = teks;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+                document.body.removeChild(ta);
+                ok ? sukses() : gagal();
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(teks).then(sukses).catch(salinFallback);
+            } else {
+                salinFallback();
+            }
         });
 
         // ===== Validasi klien yang ramah (mengganti bubble bawaan browser) =====

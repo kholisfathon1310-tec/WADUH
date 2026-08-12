@@ -2,7 +2,7 @@
     <div class="xhead">
         <span><i class="bi bi-table me-1"></i>Laporan Data Reservasi Bulan {{ $judulBulan }}</span>
         @if ($rows->count() > 10)
-            <span class="d-flex align-items-center gap-2">
+            <span class="d-flex flex-wrap align-items-center gap-2">
                 <span class="text-muted small fw-normal" id="infoBaris">10 dari {{ $rows->count() }} data</span>
                 <button type="button" class="btn btn-brand-outline btn-sm" id="btnSemua" onclick="toggleSemuaBaris()">
                     <i class="bi bi-chevron-double-down me-1"></i>Lihat Semua
@@ -50,7 +50,7 @@
 {{-- Ekspor di bawah tabel, rata kanan --}}
 <div class="d-flex justify-content-end mt-3">
     <a href="{{ route('admin.laporan.pdf', request()->query()) }}" class="btn btn-danger"
-       data-confirm="Laporan PDF akan diterbitkan sesuai filter yang aktif dan tercatat dalam riwayat laporan."
+       data-confirm="Laporan PDF akan dibuat sesuai filter yang aktif, dan tersimpan di riwayat laporan."
        data-confirm-title="Ekspor laporan ini?" data-icon="question" data-confirm-text="Ya, ekspor">
         <i class="bi bi-file-earmark-pdf me-1"></i>Ekspor PDF
     </a>

@@ -631,7 +631,7 @@
                     <div class="step-card">
                         <span class="n">3</span>
                         <h3>Checkout</h3>
-                        <p>Isi data diri sekali, unggah dokumen (bila perlu), dapat kode reservasi.</p>
+                        <p>Isi data diri sekali, unggah dokumen, dapat kode reservasi.</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3" data-reveal>
@@ -649,6 +649,13 @@
          KONTAK
          ══════════════════════════════════════════════════════════════ --}}
     <section id="kontak" class="section">
+        @php
+            // Nomor & alamat kontak diambil dari biodata admin (halaman Profil admin), dengan
+            // fallback ke config('institusi') kalau admin belum mengisi biodatanya.
+            $waNomor = $adminKontak?->no_whatsapp ?: ('+'.config('institusi.whatsapp'));
+            $waDigit = preg_replace('/\D/', '', $waNomor);
+            $kontakAlamat = $adminKontak?->alamat ?: 'Jl. Raya Baros No. 78, Cimahi Selatan';
+        @endphp
         <div class="container">
             <div class="row gy-5 align-items-center">
                 <div class="col-lg-6" data-reveal>
@@ -657,7 +664,7 @@
                         <h2>Butuh bantuan? Hubungi admin BITC.</h2>
                         <p class="lead">Mau reservasi secara langsung atau ingin melakukan pembayaran? Tim admin BITC siap membantu. Cara tercepat lewat WhatsApp.</p>
                         <a class="btn-wa mt-3"
-                           href="https://wa.me/{{ config('institusi.whatsapp') }}?text={{ urlencode('Halo Admin BITC, saya ingin bertanya tentang reservasi fasilitas lewat WADUH.') }}"
+                           href="https://wa.me/{{ $waDigit }}?text={{ urlencode('Halo Admin BITC, saya ingin bertanya tentang reservasi fasilitas lewat WADUH.') }}"
                            target="_blank" rel="noopener">
                             <i class="bi bi-whatsapp"></i> Chat WhatsApp Admin BITC
                         </a>
@@ -668,11 +675,10 @@
                         <h3 class="h5"><i class="bi bi-headset me-2"></i>Kontak Resmi Gedung BITC</h3>
                         <div class="jam-row">
                             <span><i class="bi bi-whatsapp me-1"></i>WhatsApp Admin</span>
-                            <b><a href="https://wa.me/{{ config('institusi.whatsapp') }}" target="_blank" rel="noopener">+{{ config('institusi.whatsapp') }}</a></b>
+                            <b><a href="https://wa.me/{{ $waDigit }}" target="_blank" rel="noopener">{{ $waNomor }}</a></b>
                         </div>
-                        <div class="jam-row"><span><i class="bi bi-telephone me-1"></i>Telepon / Faks</span><b>{{ config('institusi.telepon') }}</b></div>
                         <div class="jam-row"><span><i class="bi bi-envelope me-1"></i>Email</span><b>{{ config('institusi.email') }}</b></div>
-                        <div class="jam-row"><span><i class="bi bi-geo-alt me-1"></i>Alamat</span><b class="text-end" style="max-width:60%">Jl. Raya Baros No. 78, Cimahi Selatan</b></div>
+                        <div class="jam-row"><span><i class="bi bi-geo-alt me-1"></i>Alamat</span><b class="text-end" style="max-width:60%">{{ $kontakAlamat }}</b></div>
                     </div>
                 </div>
             </div>

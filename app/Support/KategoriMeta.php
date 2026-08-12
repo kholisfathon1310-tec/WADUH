@@ -14,7 +14,7 @@ class KategoriMeta
             'warna'  => '#176b87',
             'desk'   => 'Ruang kerja privat untuk instansi & perusahaan.',
             'lokasi' => 'Lantai 1 & 2',
-            'gambar' => 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1000&q=80',
+            'gambar' => 'images/lt1(home).png',
             'dapat'  => ['Ruang privat ber-AC', 'WiFi internet cepat', 'Meja & kursi kerja', 'Listrik & stopkontak', 'Akses lift & keamanan gedung', 'Area parkir'],
         ],
         'Co-Working Space' => [
@@ -22,7 +22,7 @@ class KategoriMeta
             'warna'  => '#176b87',
             'desk'   => 'Kubikal & ruang bersama yang fleksibel untuk startup.',
             'lokasi' => 'Lantai 3A & 3B',
-            'gambar' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80',
+            'gambar' => 'images/lt3a(home).png',
             'dapat'  => ['Kubikal / meja kerja', 'WiFi internet cepat', 'Ruang ber-AC', 'Stopkontak per meja', 'Area komunal & diskusi', 'Akses pantry bersama'],
         ],
         'Convention Hall' => [
@@ -30,7 +30,7 @@ class KategoriMeta
             'warna'  => '#176b87',
             'desk'   => 'Aula besar untuk event, seminar, dan konvensi.',
             'lokasi' => 'Lantai 5',
-            'gambar' => 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1000&q=80',
+            'gambar' => 'images/lt5 (5).png',
             'dapat'  => ['Aula luas ber-AC', 'Panggung & area utama', 'Sound system dasar', 'Kursi sesuai kapasitas', 'Area parkir luas', 'Toilet & akses publik'],
         ],
     ];
@@ -40,7 +40,7 @@ class KategoriMeta
         'warna'  => '#176b87',
         'desk'   => 'Fasilitas gedung BITC.',
         'lokasi' => '',
-        'gambar' => 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1000&q=80',
+        'gambar' => 'images/lt1(home).png',
         'dapat'  => ['Ruang ber-AC', 'WiFi internet', 'Akses gedung BITC'],
     ];
 

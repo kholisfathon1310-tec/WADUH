@@ -9,6 +9,12 @@
     <style>
         .list-group-item { transition:background .15s ease; }
         .list-group-item:hover { background:#fbfdfe; }
+        .checkout-cart { position:sticky; top:5.5rem; }
+        @media (max-width: 991.98px) {
+            /* Di layar sempit kolom keranjang & form ditumpuk — kalau tetap sticky,
+               kartu keranjang akan "menempel" di atas dan menyita ruang saat mengisi form. */
+            .checkout-cart { position:static; }
+        }
     </style>
 
     <div class="page-head mb-4" data-reveal>
@@ -20,7 +26,7 @@
     <div class="row g-4">
         {{-- Ringkasan keranjang — sticky supaya tetap terlihat saat form di kanan digulir --}}
         <div class="col-lg-5" data-reveal>
-            <div class="xcard overflow-hidden" style="position:sticky; top:5.5rem;">
+            <div class="xcard overflow-hidden checkout-cart">
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background:var(--surface)">
                     <span class="fw-bold"><i class="bi bi-cart3 me-1"></i>Keranjang ({{ count($items) }})</span>
                     <a href="{{ route('reservasi.index') }}" class="btn btn-brand-outline btn-sm"><i class="bi bi-plus-lg"></i> Tambah fasilitas</a>

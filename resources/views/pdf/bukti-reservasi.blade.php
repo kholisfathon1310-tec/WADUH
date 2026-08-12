@@ -2,11 +2,14 @@
   Template PDF "Bukti Reservasi" — dokumen ringkas untuk pemesan (BUKAN faktur/invoice
   pembayaran; untuk itu lihat resources/views/admin/pdf/faktur.blade.php). Tujuannya
   sebagai bukti tunjuk saat survei lapangan di lokasi BITC, sehingga kode reservasi
-  ditampilkan besar & jelas.
+  ditampilkan besar & jelas. Kop surat & palet warna (hitam-putih) sengaja dibuat SAMA
+  PERSIS dengan admin/pdf/faktur.blade.php supaya kedua dokumen terasa satu keluarga
+  resmi, walau isinya tetap beda (di sini tidak ada info pembayaran/tanda tangan).
   Dirender lewat dompdf (barryvdh/laravel-dompdf) — font DejaVu Sans dipakai (bukan
   DM Sans/Plus Jakarta Sans dari web) karena dompdf tidak bisa memuat webfont .woff2
   tanpa konversi lokal; ini konsisten dengan admin/pdf/faktur.blade.php yang sudah ada.
   Variabel yang diharapkan:
+    $inst          = config('institusi')
     $kodeTransaksi = "TRX-XXXXXX"
     $pemesan       = "Nama Lengkap"
     $items         = [ ['no'=>1,'kode'=>'RSV-xxxx','unit'=>'R1','nama'=>...,'kategori'=>...,
@@ -26,43 +29,52 @@
 <meta charset="utf-8">
 <style>
     * { box-sizing: border-box; }
-    body { font-family: DejaVu Sans, Arial, sans-serif; color:#15243b; margin:0; padding:26px 30px; font-size:12px; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; color:#000; margin:0; padding:24px 28px; font-size:12px; }
     table { border-collapse: collapse; width:100%; }
 
-    /* Header */
-    .hdr-table td { vertical-align: middle; border:none; padding:0; }
-    .brand-mark { width:44px; height:44px; text-align:center; line-height:44px; font-size:20px; font-weight:bold;
-                  color:#fff; background:#176b87; border-radius:10px; }
-    .brand-name { font-size:17px; font-weight:bold; color:#15243b; padding-left:12px; }
-    .brand-name .t { color:#24aa9a; }
-    .brand-sub { font-size:10.5px; color:#637189; padding-left:12px; margin-top:2px; }
-    .hdr-right { text-align:right; font-size:10.5px; color:#637189; }
-    .rule { border:none; border-top:2px solid #176b87; margin:14px 0 0; }
+    /* Header — identik dengan admin/pdf/faktur.blade.php */
+    .hdr-table { border:none; }
+    .hdr-table td { vertical-align: top; border:none; padding:0; }
+    .logo-cell { width:190px; text-align:center; }
+    .logo-box { width:170px; height:113px; border:1px dashed #999; text-align:center; line-height:113px; font-size:10px; color:#999; margin:0 auto; }
+    .inst { text-align:center; }
+    .inst .l1, .inst .l2 { font-weight:bold; font-size:16px; line-height:1.25; }
+    .inst .l3 { font-weight:bold; font-size:16px; line-height:1.25; margin-bottom:4px; }
+    .inst .addr { font-size:12px; line-height:1.5; }
+    .inst .addr .alamat-1baris { white-space:nowrap; font-size:11px; }
+    .rule { border:none; border-top:3px solid #000; margin:10px 0 4px; }
+    .judul { text-align:center; font-size:22px; font-weight:bold; letter-spacing:1px; margin:14px 0 12px; }
 
-    /* Judul + kode besar */
-    .judul-box { text-align:center; margin:18px 0 20px; }
-    .judul { font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#637189; font-weight:bold; margin-bottom:8px; }
-    .kode-besar { font-size:34px; font-weight:bold; letter-spacing:2px; color:#176b87;
-                  border:2px solid #176b87; border-radius:12px; padding:12px 20px; display:inline-block; background:#f0f8f7; }
+    /* Kode besar */
+    .kode-box { text-align:center; margin-bottom:18px; }
+    .kode-besar { font-size:26px; font-weight:bold; letter-spacing:2px; color:#000;
+                  border:2px solid #000; border-radius:6px; padding:9px 22px; display:inline-block; }
 
-    /* Info pemesan */
-    .info-table td { border:none; padding:3px 0; font-size:12px; }
-    .info-table .k { width:110px; color:#637189; }
-    .info-table .v { font-weight:bold; }
+    /* Kepada + meta */
+    .mid-table { width:100%; border:none; margin-bottom:14px; }
+    .mid-table > tbody > tr > td { border:none; vertical-align:top; padding:0; }
+    .to-cell { width:52%; }
+    .to-row td { border:none; padding:2px 0; font-size:13px; }
+    .to-label { width:70px; }
+    .to-colon { width:14px; }
+    .meta { border-collapse:collapse; width:100%; }
+    .meta td { border:1px solid #000; padding:6px 9px; font-size:11.5px; }
+    .meta .k { font-weight:bold; width:42%; }
 
-    /* Tabel item */
-    .items { margin-top:14px; }
-    .items th, .items td { border:1px solid #cfd9e0; padding:7px 6px; font-size:10.5px; text-align:center; vertical-align:middle; }
-    .items th { background:#eef6f9; color:#0f526b; font-weight:bold; text-transform:uppercase; letter-spacing:.4px; font-size:9.5px; }
+    /* Tabel item — palet sama dengan .items admin/pdf/faktur.blade.php */
+    .items { margin-top:4px; }
+    .items th, .items td { border:1px solid #444; padding:7px 6px; font-size:10.5px; text-align:center; vertical-align:middle; }
+    .items th { background:#d9d9d9; font-weight:bold; text-transform:uppercase; letter-spacing:.4px; font-size:9.5px; }
     .items td.left { text-align:left; }
     .items td.kode, .items td.unit { white-space:nowrap; }
-    .items .total-label { text-align:right; font-weight:bold; background:#f6f9fc; }
-    .items .total-val { text-align:right; font-weight:bold; color:#176b87; background:#f6f9fc; }
+    .items td.left .sub { color:#444; }
+    .items .total-label { text-align:right; font-weight:bold; }
+    .items .total-val { text-align:right; font-weight:bold; }
 
     /* Footer */
-    .footer-note { margin-top:22px; padding:10px 12px; background:#f6f9fc; border:1px solid #e4ebf2; border-radius:8px; font-size:10px; color:#637189; }
-    .terbit { margin-top:14px; font-size:10.5px; color:#637189; }
-    .terbit b { color:#15243b; }
+    .footer-note { margin-top:20px; padding:10px 12px; border:1px solid #000; border-radius:4px; font-size:10px; color:#333; }
+    .terbit { margin-top:14px; font-size:10.5px; color:#333; }
+    .terbit b { color:#000; }
 </style>
 </head>
 <body>
@@ -70,29 +82,52 @@
     {{-- ===== HEADER ===== --}}
     <table class="hdr-table">
         <tr>
-            <td style="width:44px;"><div class="brand-mark">W</div></td>
-            <td>
-                <div class="brand-name">WADUH<span class="t">.</span></div>
-                <div class="brand-sub">BITC Cimahi Techno Park (Baros Information Technology Creative Centre)</div>
+            <td class="logo-cell">
+                @if(!empty($inst['logo_path']) && file_exists(public_path($inst['logo_path'])))
+                    <img src="{{ public_path($inst['logo_path']) }}" style="width:170px;height:auto;">
+                @else
+                    <div class="logo-box">LOGO</div>
+                @endif
             </td>
-            <td class="hdr-right">
-                Wadah Akses Digital Unit Hunian<br>
-                Jl. Raya Baros No. 78, Cimahi Selatan
+            <td class="inst">
+                <div class="l1">{{ $inst['nama'] }}</div>
+                <div class="l2">{{ $inst['departemen'] }}</div>
+                <div class="l3">{{ $inst['unit'] }}</div>
+                <div class="addr">
+                    <span class="alamat-1baris">{{ $inst['alamat'] }}</span><br>
+                    Telepon {{ $inst['telepon'] }}, Faks {{ $inst['fax'] }},<br>
+                    Situs {{ $inst['website'] }}<br>
+                    Surel {{ $inst['email'] }}
+                </div>
             </td>
+            <td style="width:50px;"></td>
         </tr>
     </table>
     <hr class="rule">
 
-    {{-- ===== JUDUL + KODE BESAR ===== --}}
-    <div class="judul-box">
-        <div class="judul">Bukti Reservasi</div>
+    <div class="judul">BUKTI RESERVASI</div>
+
+    {{-- ===== KODE BESAR ===== --}}
+    <div class="kode-box">
         <div class="kode-besar">{{ $kodeTransaksi }}</div>
     </div>
 
-    {{-- ===== INFO PEMESAN ===== --}}
-    <table class="info-table">
-        <tr><td class="k">Nama Pemesan</td><td class="v">: {{ $pemesan }}</td></tr>
-        <tr><td class="k">Jumlah Ruangan</td><td class="v">: {{ count($items) }} ruangan</td></tr>
+    {{-- ===== KEPADA + META ===== --}}
+    <table class="mid-table">
+        <tr>
+            <td class="to-cell">
+                <table>
+                    <tr class="to-row"><td class="to-label">Kepada</td><td class="to-colon">:</td><td><strong>{{ $pemesan }}</strong></td></tr>
+                </table>
+            </td>
+            <td>
+                <table class="meta">
+                    <tr><td class="k">Kode Transaksi</td><td>: {{ $kodeTransaksi }}</td></tr>
+                    <tr><td class="k">Jumlah Ruangan</td><td>: {{ count($items) }} ruangan</td></tr>
+                    <tr><td class="k">Tanggal Terbit</td><td>: {{ $diterbitkan }}</td></tr>
+                </table>
+            </td>
+        </tr>
     </table>
 
     {{-- ===== TABEL RUANGAN ===== --}}
@@ -116,7 +151,7 @@
                     <td>{{ $it['no'] }}</td>
                     <td class="kode"><strong>{{ $it['kode'] }}</strong></td>
                     <td class="unit">{{ $it['unit'] }}</td>
-                    <td class="left">{{ $it['nama'] }}<br><span style="color:#637189">{{ $it['kategori'] }}</span></td>
+                    <td class="left">{{ $it['nama'] }}<br><span class="sub">{{ $it['kategori'] }}</span></td>
                     <td>{{ $it['lantai'] }}</td>
                     <td>{{ $it['tanggal'] }}</td>
                     <td>{{ $it['waktu'] ?? '-' }}</td>
@@ -132,9 +167,8 @@
     </table>
 
     <div class="footer-note">
-        Dokumen ini adalah <strong>bukti reservasi</strong> yang diterbitkan otomatis oleh sistem WADUH sebagai
-        konfirmasi bahwa pemesan di atas telah melakukan reservasi fasilitas BITC Cimahi Techno Park. Tunjukkan
-        dokumen ini beserta kode reservasi saat verifikasi di lokasi. Dokumen ini bukan bukti pembayaran resmi.
+        Dokumen ini adalah bukti bahwa reservasi di atas sudah tercatat di sistem WADUH — bukan bukti pembayaran.
+        Bawa dokumen ini beserta kode reservasi saat verifikasi di lokasi BITC.
     </div>
 
     <div class="terbit">Diterbitkan pada: <b>{{ $diterbitkan }}</b></div>

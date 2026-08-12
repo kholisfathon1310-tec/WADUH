@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\TarifSewa;
-use App\Support\HargaTarif;
 use Illuminate\Console\Command;
 
 class TarifHitungUlangBulanan extends Command
@@ -12,32 +11,37 @@ class TarifHitungUlangBulanan extends Command
     protected $signature = 'tarif:hitung-ulang-bulanan';
 
     /** @var string */
-    protected $description = 'Hitung ulang seluruh harga Tarif_Sewa berjenis Bulan (Rp 150.000 × luas terbaru di tabel Fasilitas)';
+    protected $description = 'Samakan ulang seluruh harga Tarif_Sewa berjenis Bulan ke master data di config/harga-sewa-master.php';
 
     public function handle(): int
     {
+        $master = config('harga-sewa-master');
+
         $tarifBulan = TarifSewa::whereHas('jenisSewa', fn ($q) => $q->where('satuan', 'Bulan'))
             ->with('fasilitas')
             ->get();
 
         $diubah = 0;
-        $pakaiDefault = [];
+        $tidakAdaMaster = [];
 
         foreach ($tarifBulan as $tarif) {
-            [$harga, $default] = HargaTarif::hargaBulan($tarif->fasilitas);
+            $kode = $tarif->fasilitas->kode_fasilitas;
+            $harga = $master[$kode]['bulan'] ?? null;
 
-            if ($default) {
-                $pakaiDefault[] = $tarif->fasilitas->kode_fasilitas;
+            if ($harga === null) {
+                $tidakAdaMaster[] = $kode;
+                continue;
             }
-            if ((float) $tarif->harga !== $harga) {
+
+            if ((int) $tarif->harga !== $harga) {
                 $tarif->update(['harga' => $harga]);
                 $diubah++;
             }
         }
 
-        $this->info("Selesai. {$tarifBulan->count()} tarif Bulan diperiksa, {$diubah} diperbarui (Rp ".number_format(HargaTarif::BULAN_PER_M2, 0, ',', '.').'/m²).');
-        if ($pakaiDefault !== []) {
-            $this->warn('Masih memakai DEFAULT luas: '.implode(', ', $pakaiDefault));
+        $this->info("Selesai. {$tarifBulan->count()} tarif Bulan diperiksa, {$diubah} disesuaikan ke config/harga-sewa-master.php.");
+        if ($tidakAdaMaster !== []) {
+            $this->warn('Dilewati (kode tidak ada di master data): '.implode(', ', $tidakAdaMaster));
         }
 
         return self::SUCCESS;

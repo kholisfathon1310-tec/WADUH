@@ -112,7 +112,7 @@
 
         /* Components */
         .xcard { background:#fff; border:1px solid var(--line); border-radius:1.35rem; box-shadow:0 4px 18px -4px rgba(21,60,73,.07); transition:box-shadow .2s ease, transform .2s ease; }
-        .xcard .xhead { padding:1.05rem 1.3rem; border-bottom:1px solid var(--line); font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:.5rem; background:#fbfdfe; border-radius:1.35rem 1.35rem 0 0; }
+        .xcard .xhead { padding:1.05rem 1.3rem; border-bottom:1px solid var(--line); font-weight:700; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:.5rem; background:#fbfdfe; border-radius:1.35rem 1.35rem 0 0; }
         .stat-card { border-radius:1.35rem; border:none; color:#fff; padding:1.3rem 1.4rem; position:relative; overflow:hidden; box-shadow:0 16px 32px -10px rgba(21,36,59,.24); transition:transform .2s ease, box-shadow .2s ease; }
         .stat-card:hover { transform:translateY(-3px); box-shadow:0 20px 38px -10px rgba(21,36,59,.28); }
         .stat-card::after { content:''; position:absolute; right:-2.2rem; bottom:-2.6rem; width:8rem; height:8rem; border-radius:50%; background:rgba(255,255,255,.12); }
@@ -214,7 +214,23 @@
                     <span class="lbl">Laporan</span>
                 </a>
             </li>
+
+            <li>
+                <a class="side-link {{ request()->routeIs('admin.profil*') ? 'active' : '' }}" href="{{ route('admin.profil') }}" title="Profil">
+                    <span class="mic"><i class="bi bi-person-circle"></i></span>
+                    <span class="lbl">Profil</span>
+                </a>
+            </li>
         </ul>
+
+        <div class="side-nav" style="padding-top:.3rem;margin-top:.3rem;border-top:1px solid var(--line)">
+            <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
+                <button type="submit" class="side-link w-100 text-start border-0 bg-transparent" style="color:#c02929" title="Keluar">
+                    <span class="mic" style="color:#c02929"><i class="bi bi-box-arrow-right"></i></span>
+                    <span class="lbl">Keluar</span>
+                </button>
+            </form>
+        </div>
 
         <div class="side-foot">WADUH Admin &copy; {{ now()->year }}</div>
     </aside>
@@ -238,9 +254,13 @@
                     @if ($menungguN > 0)<span class="dot">{{ $menungguN > 99 ? '99+' : $menungguN }}</span>@endif
                 </a>
 
+                @php $fotoAdmin = $me?->fotoUrl(); @endphp
                 <div class="dropdown">
                     <button class="profile-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="avatar">{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}</span>
+                        <span class="avatar">
+                            @if ($fotoAdmin)<img src="{{ $fotoAdmin }}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">
+                            @else{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}@endif
+                        </span>
                         <span class="who d-none d-md-block">
                             <div class="nm">{{ $me?->nama_admin }}</div>
                             <div class="rl">Administrator</div>
@@ -249,12 +269,13 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-end profile-menu">
                         <div class="pm-head">
-                            <span class="avatar">{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}</span>
+                            <span class="avatar">
+                                @if ($fotoAdmin)<img src="{{ $fotoAdmin }}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">
+                                @else{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}@endif
+                            </span>
                             <div><div class="nm">{{ $me?->nama_admin }}</div><div class="em">{{ $me?->email }}</div></div>
                         </div>
-                        <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
-                            <button type="submit" class="dropdown-item text-danger w-100 text-start"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button>
-                        </form>
+                        <a href="{{ route('admin.profil') }}" class="dropdown-item w-100 text-start"><i class="bi bi-person-circle me-2"></i>Lihat Profil</a>
                     </div>
                 </div>
             </div>

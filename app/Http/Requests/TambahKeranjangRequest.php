@@ -23,7 +23,8 @@ class TambahKeranjangRequest extends FormRequest
     /**
      * Convention Hall hanya sewa harian SATU hari (8 jam pemakaian) —
      * tanggal_selesai otomatis disamakan dengan tanggal_mulai, apa pun input user.
-     * Sewa Per Jam juga tanpa pilih jam manual — pemakaian otomatis 08.00–16.00 (jam operasional gedung).
+     * Sewa Per Jam: jam_mulai/jam_selesai diisi manual oleh pemesan (lewat pilih-jam.blade.php
+     * di form), dibatasi jam operasional gedung 08.00–16.00 lewat withValidator() di bawah.
      */
     protected function prepareForValidation(): void
     {
@@ -36,10 +37,6 @@ class TambahKeranjangRequest extends FormRequest
             && $this->filled('tanggal_mulai')
         ) {
             $this->merge(['tanggal_selesai' => $this->input('tanggal_mulai')]);
-        }
-
-        if ($tarif && $tarif->jenisSewa?->satuan === SatuanSewa::Jam) {
-            $this->merge(['jam_mulai' => '08:00', 'jam_selesai' => '16:00']);
         }
     }
 

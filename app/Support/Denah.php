@@ -45,7 +45,7 @@ class Denah
         return [$cx / (6 * $a), $cy / (6 * $a)];
     }
 
-    /** Label pendek tanpa prefix lantai: "3A-M1" → "M1", "L5-HALL" → "HALL". */
+    /** Label pendek tanpa prefix lantai: "3A-K1" → "K1", "L5-HALL" → "HALL". */
     public static function labelPendek(string $kode): string
     {
         $pos = strpos($kode, '-');

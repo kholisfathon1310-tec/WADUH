@@ -44,6 +44,29 @@
     .res-card:hover { box-shadow:0 16px 34px -12px rgba(21,36,59,.14); }
     .res-card .thumb { width:100%; height:100%; min-height:170px; object-fit:cover; }
 
+    /* Galeri foto ruangan — carousel (kalau >1 foto) + zoom, sama seperti halaman detail ruangan */
+    .rs-carousel, .rs-carousel .carousel-inner, .rs-carousel .carousel-item { height:100%; min-height:170px; }
+    .rs-carousel .carousel-indicators { margin-bottom:.5rem; }
+    .rs-carousel .carousel-indicators [data-bs-target] { width:.45rem; height:.45rem; border-radius:50%; background:#fff; opacity:.6; }
+    .rs-carousel .carousel-indicators .active { opacity:1; }
+    .rs-carousel .carousel-control-prev, .rs-carousel .carousel-control-next { width:2.4rem; opacity:0; transition:opacity .15s ease; }
+    .rs-carousel:hover .carousel-control-prev, .rs-carousel:hover .carousel-control-next { opacity:1; }
+
+    .fp-zoomable { cursor:zoom-in; transition:filter .15s ease; }
+    .fp-zoomable:hover { filter:brightness(.92); }
+    .fp-lightbox {
+        position:fixed; inset:0; z-index:2000; background:rgba(8,15,25,.9);
+        display:none; align-items:center; justify-content:center; padding:2.5rem; cursor:zoom-out;
+    }
+    .fp-lightbox.show { display:flex; }
+    .fp-lightbox img { max-width:100%; max-height:100%; border-radius:.9rem; box-shadow:0 24px 60px rgba(0,0,0,.5); cursor:default; }
+    .fp-lightbox .fp-lightbox-close {
+        position:absolute; top:1.2rem; right:1.4rem; width:2.6rem; height:2.6rem; border-radius:50%;
+        border:none; background:rgba(255,255,255,.15); color:#fff; font-size:1.3rem;
+        display:grid; place-items:center; cursor:pointer; transition:background .15s ease;
+    }
+    .fp-lightbox .fp-lightbox-close:hover { background:rgba(255,255,255,.28); }
+
     /* Pemberitahuan alasan (ditolak / dibatalkan) */
     .rs-alasan { border-radius:.8rem; padding:.7rem .9rem; font-size:.85rem; display:flex; gap:.6rem; align-items:flex-start; }
     .rs-alasan.tolak { background:#fdf1f1; border:1px solid #f0c9c9; color:#7c3a3a; }
@@ -145,16 +168,43 @@
                 $alasan = in_array($status, ['Ditolak', 'Dibatalkan'], true)
                     ? $r->riwayatStatus->last(fn ($h) => $h->status_baru->value === $status)?->keterangan
                     : null;
+
+                $fotoList = $r->tarifSewa->fasilitas->fotoUrls();
             @endphp
             <div class="xcard res-card" data-reveal>
                 <div class="row g-0">
                     <div class="col-md-3 d-none d-md-block position-relative">
-                        <img src="{{ $meta['gambar'] }}" class="thumb" alt="{{ $r->tarifSewa->fasilitas->kategori_fasilitas }}">
-                        <span class="avail position-absolute top-0 start-0 m-2" style="background:rgba(255,255,255,.92); color:{{ $meta['warna'] }}">
+                        @if (count($fotoList) > 1)
+                            <div id="rsCarousel{{ $r->id_reservasi }}" class="carousel slide rs-carousel">
+                                <div class="carousel-inner">
+                                    @foreach ($fotoList as $i => $src)
+                                        <div class="carousel-item @if ($i === 0) active @endif">
+                                            <img src="{{ $src }}" class="thumb fp-zoomable" data-zoom-src="{{ $src }}" alt="{{ $r->tarifSewa->fasilitas->nama_fasilitas }} — foto {{ $i + 1 }}">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#rsCarousel{{ $r->id_reservasi }}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Sebelumnya</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#rsCarousel{{ $r->id_reservasi }}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Berikutnya</span>
+                                </button>
+                                <div class="carousel-indicators">
+                                    @foreach ($fotoList as $i => $src)
+                                        <button type="button" data-bs-target="#rsCarousel{{ $r->id_reservasi }}" data-bs-slide-to="{{ $i }}" @if ($i === 0) class="active" @endif aria-label="Foto {{ $i + 1 }}"></button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <img src="{{ $fotoList[0] }}" class="thumb fp-zoomable" data-zoom-src="{{ $fotoList[0] }}" alt="{{ $r->tarifSewa->fasilitas->nama_fasilitas }}">
+                        @endif
+                        <span class="avail position-absolute top-0 start-0 m-2" style="background:rgba(255,255,255,.92); color:{{ $meta['warna'] }}; z-index:5; pointer-events:none;">
                             <i class="bi {{ $meta['ikon'] }}"></i> {{ $r->tarifSewa->fasilitas->kategori_fasilitas }}
                         </span>
                         @if ($r->tarifSewa->fasilitas->lantai)
-                            <span class="avail position-absolute bottom-0 start-0 m-2" style="background:rgba(21,36,59,.75); color:#fff">
+                            <span class="avail position-absolute bottom-0 start-0 m-2" style="background:rgba(21,36,59,.75); color:#fff; z-index:5; pointer-events:none;">
                                 <i class="bi bi-layers"></i> Lantai {{ $r->tarifSewa->fasilitas->lantai->nomor_lantai }}
                             </span>
                         @endif
@@ -283,5 +333,36 @@
         <div class="text-center mt-4">
             <a href="{{ route('cek-status.form') }}" class="btn btn-brand-outline btn-sm px-4"><i class="bi bi-search me-1"></i>Cek Kode Lain</a>
         </div>
+
+        {{-- Lightbox foto — sama seperti halaman detail ruangan, dipakai bersama semua kartu di atas --}}
+        <div class="fp-lightbox" id="fpLightbox">
+            <button type="button" class="fp-lightbox-close" aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
+            <img src="" alt="" id="fpLightboxImg">
+        </div>
+        <script>
+            (function () {
+                const overlay = document.getElementById('fpLightbox');
+                const img = document.getElementById('fpLightboxImg');
+                if (!overlay || !img) return;
+
+                const buka = (src, alt) => {
+                    img.src = src;
+                    img.alt = alt || '';
+                    overlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                };
+                const tutup = () => {
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                };
+
+                document.querySelectorAll('.fp-zoomable').forEach((el) => {
+                    el.addEventListener('click', () => buka(el.dataset.zoomSrc, el.alt));
+                });
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) tutup(); });
+                overlay.querySelector('.fp-lightbox-close').addEventListener('click', tutup);
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tutup(); });
+            })();
+        </script>
     @endif
 @endsection

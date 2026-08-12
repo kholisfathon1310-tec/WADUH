@@ -158,8 +158,8 @@ class AlurAdminTest extends TestCase
     {
         $this->actingAs($this->admin(), 'admin');
 
-        // Detail reservasi (checklist) — pakai dummy seeder.
-        $dummy = Reservasi::firstOrFail();
+        // Detail reservasi (checklist).
+        $dummy = $this->reservasiMenunggu('Hari', 210);
         $this->get(route('admin.reservasi.show', $dummy->kode_reservasi))->assertOk()->assertSee('Checklist');
 
         // Monitoring detail satu fasilitas.

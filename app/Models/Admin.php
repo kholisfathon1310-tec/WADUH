@@ -18,6 +18,9 @@ class Admin extends Authenticatable
         'nama_admin',
         'email',
         'password',
+        'foto',
+        'no_whatsapp',
+        'alamat',
     ];
 
     protected $hidden = [
@@ -28,6 +31,12 @@ class Admin extends Authenticatable
         // Auto-hash (bcrypt) saat atribut password di-set.
         'password' => 'hashed',
     ];
+
+    /** URL foto profil (disk 'public'), null kalau belum pernah unggah. */
+    public function fotoUrl(): ?string
+    {
+        return $this->foto ? \Illuminate\Support\Facades\Storage::url($this->foto) : null;
+    }
 
     public function reservasi(): HasMany
     {
