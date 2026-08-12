@@ -8,8 +8,9 @@
 @php
     $satuan = $jenis->satuan->value;
     $meta = \App\Support\KategoriMeta::get($fasilitas->kategori_fasilitas);
-    // Convention Hall: sewa harian hanya SATU hari (8 jam) — cukup satu field tanggal.
-    $sehariSaja = $fasilitas->kategori_fasilitas === 'Convention Hall' && $satuan === 'Hari';
+    // Sewa Per Jam & Convention Hall (Per Hari): pemakaian selalu 1 hari (otomatis 8 jam) — cukup satu field tanggal,
+    // tidak perlu pilih jam mulai/selesai secara manual.
+    $sehariSaja = $satuan === 'Jam' || ($fasilitas->kategori_fasilitas === 'Convention Hall' && $satuan === 'Hari');
 @endphp
 
 @section('content')
@@ -39,7 +40,7 @@
                     </div>
 
                     <div class="p-3 rounded-4 mb-3" style="background:linear-gradient(120deg,#eef8f7,#eef6fb); border:1px solid var(--line)">
-                        <span class="text-muted small d-block">Tarif per {{ $satuan }} @if($satuan === 'Hari')<span class="fw-semibold">(1 hari = 8 jam)</span>@endif</span>
+                        <span class="text-muted small d-block">Tarif per {{ $satuan }} @if($satuan === 'Hari')<span class="fw-semibold">(1 hari = 8 jam)</span>@elseif($satuan === 'Jam')<span class="fw-semibold">(otomatis 8 jam/hari)</span>@endif</span>
                         <span class="h4 fw-bold" style="color:var(--primary)">Rp {{ number_format($tarif->harga, 0, ',', '.') }}</span>
                     </div>
 
@@ -77,7 +78,7 @@
                             <span class="badge text-bg-light border">{{ $fasilitas->nama_fasilitas }}</span>
                             @foreach ($ruangLain as $rl)<span class="badge text-bg-light border">{{ $rl->nama_fasilitas }}</span>@endforeach
                         </div>
-                        <small class="text-muted">Jadwal & data di bawah berlaku untuk semua ruangan di atas — semuanya langsung masuk keranjang.</small>
+                        <small class="text-muted">Jadwal dan data di bawah berlaku untuk semua ruangan di atas, semuanya langsung masuk keranjang.</small>
                     </div>
                 @endif
                 <form method="POST" action="{{ route('reservasi.keranjang.tambah') }}">
@@ -93,17 +94,8 @@
                                    min="{{ now()->toDateString() }}"
                                    value="{{ old('tanggal_mulai', request('tanggal_mulai')) }}">
                         </div>
-                        @if ($satuan === 'Jam')
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Jam mulai</label>
-                                @include('reservasi.partials.pilih-jam', ['name' => 'jam_mulai', 'value' => old('jam_mulai', request('jam_mulai'))])
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Jam selesai</label>
-                                @include('reservasi.partials.pilih-jam', ['name' => 'jam_selesai', 'value' => old('jam_selesai', request('jam_selesai'))])
-                            </div>
-                        @elseif ($sehariSaja)
-                            {{-- Convention Hall: 1 hari saja — jam otomatis terhitung 8 jam, tanpa field selesai. --}}
+                        @if ($sehariSaja)
+                            {{-- Per Jam & Convention Hall: 1 hari saja — jam otomatis terhitung 8 jam, tanpa field selesai. --}}
                             <div class="col-md-6 mb-3 d-flex align-items-end">
                                 <div class="p-2 px-3 rounded-3 w-100 small" style="background:var(--surface)">
                                     <i class="bi bi-clock-history me-1" style="color:var(--primary)"></i>
@@ -131,6 +123,8 @@
 
                     @if ($satuan === 'Hari')
                         <div class="alert alert-info py-2 small"><i class="bi bi-info-circle me-1"></i>Sewa harian: <strong>1 hari dihitung 8 jam pemakaian</strong> (mengikuti jam layanan gedung).</div>
+                    @elseif ($satuan === 'Jam')
+                        <div class="alert alert-info py-2 small"><i class="bi bi-info-circle me-1"></i>Sewa per jam: <strong>pemakaian otomatis 8 jam</strong> mengikuti jam layanan gedung (08:00–16:00).</div>
                     @elseif ($satuan === 'Bulan')
                         <div class="alert alert-info py-2 small"><i class="bi bi-info-circle me-1"></i>Sewa bulanan memerlukan dokumen persyaratan (Company Profile / legalitas / KTP) yang diunggah saat checkout.</div>
                     @endif

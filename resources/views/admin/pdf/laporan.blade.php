@@ -4,70 +4,71 @@
     <meta charset="utf-8">
     <style>
         * { font-family: DejaVu Sans, sans-serif; }
-        @page { margin: 28px 26px 40px; }
-        body { font-size: 10px; color: #000; background: #fff; }
+        @page { margin: 24px 22px 36px; }
+        body { font-size: 9px; color: #000; background: #fff; }
 
-        h1 { font-size: 15px; font-weight: bold; margin: 0 0 16px; }
+        h1 { font-size: 14px; font-weight: bold; margin: 0 0 12px; }
 
-        table { border-collapse: collapse; width: 100%; background: #fff; }
-        th, td { border: 0.75px solid #333333; padding: 4px 6px; background: #fff; }
+        table { border-collapse: collapse; width: 100%; background: #fff; table-layout: fixed; }
+        th, td { border: 0.75px solid #333333; padding: 3px 5px; background: #fff; overflow-wrap: break-word; }
         thead th { background: #e5e5e5; color: #000; font-weight: bold; text-align: center; }
+        thead { display: table-header-group; } /* judul kolom terulang tiap halaman baru */
+        tr { page-break-inside: avoid; }
 
         .c { text-align: center; }
         .r { text-align: right; }
         .l { text-align: left; }
-        .est { display: block; font-size: 7.5px; color: #888; }
         .total td { font-weight: bold; }
 
-        .footer { position: fixed; bottom: -24px; left: 0; font-size: 8px; color: #888; }
+        .footer { position: fixed; bottom: -20px; left: 0; font-size: 7.5px; color: #888; }
     </style>
 </head>
 <body>
     <div class="footer">Dicetak oleh {{ $adminNama ?? '-' }} pada {{ $cetakWaktu }}</div>
 
-    <h1>Data Fasilitas Gedung BITC per/{{ $judulTanggal }}</h1>
+    <h1>Laporan Data Reservasi Bulan {{ $judulBulan }}</h1>
 
     <table>
+        <colgroup>
+            <col style="width:26px;">
+            <col style="width:85px;">
+            <col style="width:95px;">
+            <col>
+            <col style="width:120px;">
+            <col style="width:75px;">
+            <col style="width:38px;">
+        </colgroup>
         <thead>
             <tr>
-                <th style="width:32px;">Nomor</th>
+                <th>Nomor</th>
+                <th>Kode Reservasi</th>
+                <th class="l">Nama</th>
                 <th class="l">Uraian</th>
-                <th style="width:80px;">Volume</th>
-                <th style="width:38px;">Satuan</th>
-                <th style="width:110px;">Harga Per/Bulan (Rp)</th>
-                <th style="width:70px;">Keterangan</th>
-                <th style="width:34px;">ISI</th>
-                <th style="width:60px;">Available</th>
+                <th>Periode Sewa</th>
+                <th>Total Harga (Rp)</th>
+                <th>Keterangan</th>
             </tr>
         </thead>
         <tbody>
         @forelse ($rows as $row)
             <tr>
                 <td class="c">{{ $row['no'] }}</td>
+                <td class="c">{{ $row['kode_reservasi'] }}</td>
+                <td class="l">{{ $row['nama'] ?: '-' }}</td>
                 <td class="l">{{ $row['uraian'] }}</td>
-                <td class="r">{{ $row['volume'] !== null ? number_format($row['volume'], 2, ',', '.').' m2' : '-' }}</td>
-                <td class="c">1</td>
-                <td class="r">
-                    @if ($row['harga'] !== null)
-                        Rp {{ number_format($row['harga'], 2, ',', '.') }}
-                        @if ($row['estimasi'])<span class="est">({{ $row['estimasi'] }})</span>@endif
-                    @else
-                        -
-                    @endif
-                </td>
+                <td class="c">{{ $row['periode'] }}</td>
+                <td class="r">Rp {{ number_format($row['total_harga'], 0, ',', '.') }}</td>
                 <td class="c">{{ $row['keterangan'] }}</td>
-                <td class="c">{{ $row['isi'] ? 1 : '' }}</td>
-                <td class="c">{{ $row['available'] ? 1 : '' }}</td>
             </tr>
         @empty
-            <tr><td colspan="8" class="c">Tidak ada data untuk filter ini.</td></tr>
+            <tr><td colspan="7" class="c">Belum ada reservasi disetujui pada {{ $judulBulan }}.</td></tr>
         @endforelse
 
         @if ($rows->isNotEmpty())
             <tr class="total">
-                <td colspan="6" class="r">TOTAL</td>
-                <td class="c">{{ $totalIsi }}</td>
-                <td class="c">{{ $totalAvailable }}</td>
+                <td colspan="5" class="r">TOTAL</td>
+                <td class="r">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
+                <td></td>
             </tr>
         @endif
         </tbody>

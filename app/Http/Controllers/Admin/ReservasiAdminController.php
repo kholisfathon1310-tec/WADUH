@@ -48,6 +48,11 @@ class ReservasiAdminController extends Controller
         // Kelompokkan per kode_transaksi mempertahankan urutan terbaru.
         $grup = $reservasi->groupBy('kode_transaksi');
 
+        // Filter/pencarian interaktif: request AJAX cukup dibalas fragmen hasil, tanpa layout.
+        if ($request->ajax()) {
+            return view('admin.reservasi.partials.hasil', compact('grup'));
+        }
+
         return view('admin.reservasi.index', [
             'grup'          => $grup,
             'daftarLantai'  => Lantai::orderBy('id_lantai')->get(),
@@ -124,8 +129,8 @@ class ReservasiAdminController extends Controller
         $data = $request->validate(
             ['alasan' => ['required', 'string', 'max:1000']],
             [
-                'alasan.required' => 'Tulis alasan penolakan — alasan ini akan dilihat pemesan di riwayat status.',
-                'alasan.max'      => 'Alasan terlalu panjang — maksimal 1000 karakter.',
+                'alasan.required' => 'Alasan penolakan wajib diisi. Alasan ini akan ditampilkan kepada pemesan pada riwayat status.',
+                'alasan.max'      => 'Alasan terlalu panjang, maksimal 1000 karakter.',
             ],
         );
 

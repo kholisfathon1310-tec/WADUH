@@ -191,10 +191,10 @@ class SkenarioLengkapTest extends TestCase
         ]);
         $isiKeranjang();
         $this->post('/reservasi/checkout', $this->dataDiri(['email' => 'bulan@example.com']))
-            ->assertSessionHasErrors('dokumen.0');
+            ->assertSessionHasErrors('dokumen');
 
         $this->post('/reservasi/checkout', $this->dataDiri(['email' => 'bulan@example.com']) + [
-            'dokumen' => [0 => [UploadedFile::fake()->create('company-profile.pdf', 120, 'application/pdf')]],
+            'dokumen' => [UploadedFile::fake()->create('company-profile.pdf', 120, 'application/pdf')],
         ])->assertRedirect(route('reservasi.sukses'));
 
         $r = Reservasi::whereHas('pemesan', fn ($q) => $q->where('email', 'bulan@example.com'))->firstOrFail();

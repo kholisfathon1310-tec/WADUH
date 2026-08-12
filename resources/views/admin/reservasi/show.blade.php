@@ -13,20 +13,26 @@
 
 @section('content')
 <style>
-    .info-grid { display:grid; grid-template-columns:38% 1fr; }
-    .info-grid > div { padding:.6rem .95rem; border-bottom:1px solid #eef3f8; font-size:.9rem; }
+    .info-grid { display:grid; grid-template-columns:34% 1fr; }
+    .info-grid > div { padding:.65rem .95rem; border-bottom:1px solid #eef3f8; font-size:.9rem; }
     .info-grid > div:nth-child(4n+1), .info-grid > div:nth-child(4n+2) { background:#fbfdfe; }
     .info-grid .k { color:var(--muted); font-weight:600; }
     .info-grid > div:nth-last-child(-n+2) { border-bottom:0; }
+    @media (max-width: 575.98px) {
+        .info-grid { grid-template-columns:1fr; }
+        .info-grid .k { padding-bottom:0; border-bottom:0 !important; background:transparent !important; }
+        .info-grid > div:not(.k) { padding-top:.15rem; }
+    }
     .timeline { position:relative; padding-left:1.4rem; }
     .timeline::before { content:''; position:absolute; left:.42rem; top:.4rem; bottom:.4rem; width:2px; background:#dfe8f0; border-radius:2px; }
     .timeline .titem { position:relative; padding:.35rem 0 1rem; }
     .timeline .titem::before { content:''; position:absolute; left:-1.4rem; top:.5rem; width:.9rem; height:.9rem; border-radius:50%; background:#fff; border:3px solid var(--teal); box-shadow:0 2px 6px rgba(21,36,59,.12); }
     .timeline .titem.first::before { border-color:var(--primary); }
-    .hero-strip { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); }
-    .hero-strip .hs { flex:1 1 140px; padding:.95rem 1.15rem; border-right:1px solid var(--line); }
+    .hero-strip { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); background:var(--surface); }
+    .hero-strip .hs { flex:1 1 160px; display:flex; align-items:center; gap:.7rem; padding:.95rem 1.15rem; border-right:1px solid var(--line); }
     .hero-strip .hs:last-child { border-right:0; }
-    .hero-strip .hs small { color:var(--muted); font-weight:600; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; display:block; }
+    .hero-strip .hs .ic { display:grid; place-items:center; width:2.3rem; height:2.3rem; border-radius:.7rem; background:#fff; color:var(--primary); font-size:1rem; flex:none; box-shadow:0 2px 8px rgba(21,36,59,.06); }
+    .hero-strip .hs small { color:var(--muted); font-weight:600; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; display:block; }
     .hero-strip .hs .val { font-weight:700; }
     .room-card { border:1px solid var(--line); border-radius:1rem; overflow:hidden; transition:box-shadow .2s ease; }
     .room-card:hover { box-shadow:0 6px 18px rgba(21,36,59,.07); }
@@ -47,17 +53,19 @@
             <div>
                 @if ($adaDisetujui)
                     {{-- Idempotent: klik pertama menerbitkan, berikutnya mengunduh PDF yang sama (1 faktur utk semua ruangan). --}}
-                    <form method="POST" action="{{ route('admin.reservasi.faktur.cetak', $r->kode_reservasi) }}">@csrf
+                    <form method="POST" action="{{ route('admin.reservasi.faktur.cetak', $r->kode_reservasi) }}"
+                          data-confirm="Faktur PDF untuk pemesanan {{ $r->kode_transaksi }} akan diterbitkan/diunduh."
+                          data-confirm-title="Cetak faktur ini?" data-icon="question" data-confirm-text="Ya, cetak">@csrf
                         <button class="btn btn-brand"><i class="bi bi-receipt me-1"></i>Cetak Faktur</button>
                     </form>
                 @endif
             </div>
         </div>
         <div class="hero-strip">
-            <div class="hs"><small>Pemesan</small><span class="val">{{ $r->pemesan->nama_lengkap }}</span></div>
-            <div class="hs"><small>Diajukan</small><span class="val">{{ $r->created_at->format('d/m/Y H:i') }}</span></div>
-            <div class="hs"><small>Jumlah Ruangan</small><span class="val">{{ $items->count() }}</span></div>
-            <div class="hs"><small>Total Keseluruhan</small><span class="val" style="color:var(--primary)">Rp {{ number_format($totalSemua, 0, ',', '.') }}</span></div>
+            <div class="hs"><span class="ic"><i class="bi bi-person"></i></span><div><small>Pemesan</small><span class="val">{{ $r->pemesan->nama_lengkap }}</span></div></div>
+            <div class="hs"><span class="ic"><i class="bi bi-calendar-event"></i></span><div><small>Diajukan</small><span class="val">{{ $r->created_at->format('d/m/Y H:i') }}</span></div></div>
+            <div class="hs"><span class="ic"><i class="bi bi-door-open"></i></span><div><small>Jumlah Ruangan</small><span class="val">{{ $items->count() }}</span></div></div>
+            <div class="hs"><span class="ic"><i class="bi bi-cash-stack"></i></span><div><small>Total Keseluruhan</small><span class="val" style="color:var(--primary)">Rp {{ number_format($totalSemua, 0, ',', '.') }}</span></div></div>
         </div>
     </div>
 
@@ -105,25 +113,13 @@
                                     @foreach ($cl as $c)
                                         <div class="small">
                                             <i class="bi bi-{{ $c['passed'] ? 'check-circle-fill text-success' : 'x-circle-fill text-danger' }}"></i>
-                                            {{ $c['label'] }} <span class="text-muted">— {{ $c['note'] }}</span>
+                                            {{ $c['label'] }} <span class="text-muted">({{ $c['note'] }})</span>
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
                         </div>
                     @endforeach
-                </div>
-            </div>
-
-            {{-- Identitas pemesan (tanpa kotak inisial) --}}
-            <div class="xcard mb-3">
-                <div class="xhead"><span><i class="bi bi-person-vcard me-1"></i>Identitas Pemesan</span></div>
-                <div class="info-grid">
-                    <div class="k">Nama</div><div class="fw-semibold">{{ $r->pemesan->nama_lengkap }}</div>
-                    <div class="k">Email</div><div>{{ $r->pemesan->email }}</div>
-                    <div class="k">No. Telepon</div><div>{{ $r->pemesan->no_telepon }}</div>
-                    <div class="k">Usia · Pekerjaan</div><div>{{ $r->pemesan->usia }} tahun · {{ $r->pemesan->pekerjaan }}</div>
-                    <div class="k">Alamat</div><div>{{ $r->pemesan->alamat }}</div>
                 </div>
             </div>
 
@@ -190,6 +186,18 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Identitas pemesan --}}
+            <div class="xcard mb-3">
+                <div class="xhead"><span><i class="bi bi-person-vcard me-1"></i>Identitas Pemesan</span></div>
+                <div class="info-grid">
+                    <div class="k">Nama</div><div class="fw-semibold">{{ $r->pemesan->nama_lengkap }}</div>
+                    <div class="k">Email</div><div>{{ $r->pemesan->email }}</div>
+                    <div class="k">No. Telepon</div><div>{{ $r->pemesan->no_telepon }}</div>
+                    <div class="k">Usia · Pekerjaan</div><div>{{ $r->pemesan->usia }} tahun · {{ $r->pemesan->pekerjaan }}</div>
+                    <div class="k">Alamat</div><div>{{ $r->pemesan->alamat }}</div>
+                </div>
+            </div>
 
             <div class="xcard">
                 <div class="xhead"><span><i class="bi bi-clock-history me-1"></i>Riwayat Status</span></div>

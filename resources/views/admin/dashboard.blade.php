@@ -4,132 +4,274 @@
 @php
     $me = Auth::guard('admin')->user();
 
-    $cards = [
-        ['Menunggu', $statistik['menunggu'], 'linear-gradient(135deg,#d9a521,#e5b94e)', 'hourglass-split'],
-        ['Disetujui', $statistik['disetujui'], 'linear-gradient(135deg,#0d8a5f,#25b47e)', 'check-circle'],
-        ['Ditolak', $statistik['ditolak'], 'linear-gradient(135deg,#b23030,#d95757)', 'x-circle'],
-        ['Dibatalkan', $statistik['dibatalkan'], 'linear-gradient(135deg,#3a4653,#5d6b7a)', 'slash-circle'],
+    // Palet SEMANTIC status — dipertahankan (biar Menunggu ≠ Disetujui ≠ Ditolak
+    // mudah dibedakan), tapi lebih calm: bg soft + icon berwarna.
+    $statusMeta = [
+        'menunggu'   => ['label' => 'Menunggu',   'ikon' => 'bi-hourglass-split', 'ic' => '#b45309', 'bg' => '#fef3c7', 'dot' => '#f59e0b'],
+        'disetujui'  => ['label' => 'Disetujui',  'ikon' => 'bi-check-circle',    'ic' => '#047857', 'bg' => '#d1fae5', 'dot' => '#10b981'],
+        'ditolak'    => ['label' => 'Ditolak',    'ikon' => 'bi-x-circle',        'ic' => '#b91c1c', 'bg' => '#fee2e2', 'dot' => '#ef4444'],
+        'dibatalkan' => ['label' => 'Dibatalkan', 'ikon' => 'bi-slash-circle',    'ic' => '#475569', 'bg' => '#f1f5f9', 'dot' => '#94a3b8'],
     ];
 
-    // Donut distribusi status (CSS conic-gradient)
+    // Segmen donut (pakai `dot` color, soft tapi masih terbaca).
+    // Dirender sebagai cincin SVG (stroke-dasharray per segmen) — lebih tajam & bisa dianimasikan
+    // dibanding conic-gradient CSS (yang sering meninggalkan celah antisipasi di sudut segmen).
     $total = max(1, $statistik['total']);
-    $seg = [
-        ['Menunggu', $statistik['menunggu'], '#e5b94e'],
-        ['Disetujui', $statistik['disetujui'], '#25b47e'],
-        ['Ditolak', $statistik['ditolak'], '#d95757'],
-        ['Dibatalkan', $statistik['dibatalkan'], '#5d6b7a'],
-    ];
-    $stops = []; $acc = 0;
-    foreach ($seg as [$lbl, $n, $c]) {
-        $from = $acc; $acc += $n / $total * 100;
-        if ($n > 0) $stops[] = "$c {$from}% {$acc}%";
+    $donutR = 50;
+    $donutKeliling = 2 * M_PI * $donutR;
+    $segmen = []; $accPanjang = 0;
+    foreach ($statusMeta as $key => $m) {
+        $jumlah = $statistik[$key];
+        $panjang = $total > 0 ? ($jumlah / $total) * $donutKeliling : 0;
+        $segmen[] = [
+            'label'  => $m['label'],
+            'jumlah' => $jumlah,
+            'warna'  => $m['dot'],
+            'panjang' => $panjang,
+            'offset'  => $accPanjang,
+        ];
+        $accPanjang += $panjang;
     }
-    $donut = $stops ? 'conic-gradient('.implode(', ', $stops).')' : 'conic-gradient(#e4ebf2 0% 100%)';
 
+    // Fasilitas per kategori — warna monokrom (shade teal berbeda) supaya konsisten palet.
     $maxKat = max(1, (int) collect($fasilitasPerKategori)->max());
-    $warnaKat = ['Working Space' => '#2f7fd1', 'Co-Working Space' => '#7c5cd6', 'Convention Hall' => '#d6527c'];
-    $ikonKat = ['Working Space' => 'bi-briefcase', 'Co-Working Space' => 'bi-people', 'Convention Hall' => 'bi-bank'];
+    $kategoriMeta = [
+        'Working Space'    => ['ikon' => 'bi-briefcase', 'shade' => '#0e6b7d'],
+        'Co-Working Space' => ['ikon' => 'bi-people',    'shade' => '#14b8a6'],
+        'Convention Hall'  => ['ikon' => 'bi-bank',      'shade' => '#0891b2'],
+    ];
+
+    // Data untuk bar chart trend 7 hari
+    $maxTrend = max(1, collect($trend7Hari)->max('jumlah'));
+    $trendChartWidth = 100;   // percent-based SVG viewBox
+    $barCount = count($trend7Hari);
+    $barW = 8;                // width bar dalam viewBox unit
+    $gap  = (100 - $barW * $barCount) / max(1, $barCount - 1);
 @endphp
 
 @section('content')
 <div class="dash">
-    {{-- ===== Welcome banner ===== --}}
+
+    {{-- ═══════════════════════════════════════════════════════════
+         HERO — sapaan & shortcut aksi
+         ═══════════════════════════════════════════════════════════ --}}
     <div class="dash-hero" data-reveal>
         <div class="dash-hero-mesh"></div>
-        <div class="dash-hero-grid"></div>
-        <div class="position-relative d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="dash-hero-body">
             <div>
-                <span class="dash-hero-eyebrow"><i class="bi bi-stars me-1"></i>{{ now()->translatedFormat('l, d F Y') }}</span>
-                <h2 class="dash-hero-title">Halo, {{ $me?->nama_admin }} 👋</h2>
+                <span class="dash-hero-eyebrow"><i class="bi bi-calendar3 me-1"></i>{{ now()->translatedFormat('l, d F Y') }}</span>
+                <h2 class="dash-hero-title">Selamat datang, {{ $me?->nama_admin }}</h2>
                 <p class="dash-hero-sub">
                     @if ($statistik['menunggu'] > 0)
-                        Ada <strong>{{ $statistik['menunggu'] }} reservasi menunggu</strong> persetujuanmu hari ini.
+                        Terdapat <strong>{{ $statistik['menunggu'] }} reservasi menunggu</strong> persetujuan Anda hari ini.
                     @else
-                        Tidak ada antrian persetujuan — semua reservasi sudah tertangani. 🎉
+                        Tidak ada antrean persetujuan. Semua reservasi telah tertangani.
                     @endif
                 </p>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('admin.reservasi.index', ['status' => 'Menunggu']) }}" class="dash-btn dash-btn-light"><i class="bi bi-hourglass-split me-1"></i>Proses Antrian</a>
                 <a href="{{ route('admin.monitoring') }}" class="dash-btn dash-btn-ghost"><i class="bi bi-grid-3x3-gap me-1"></i>Monitoring</a>
             </div>
         </div>
     </div>
 
-    {{-- ===== Stat tiles ===== --}}
+    {{-- ═══════════════════════════════════════════════════════════
+         STAT TILES — 4 KPI ringkas
+         ═══════════════════════════════════════════════════════════ --}}
     <div class="dash-tiles">
-        @foreach ($cards as $i => [$label, $nilai, $grad, $ikon])
-            <div class="dash-tile" data-reveal style="--tile-i:{{ $i }}">
-                <span class="dash-tile-ic" style="background:{{ $grad }}"><i class="bi bi-{{ $ikon }}"></i></span>
-                <span class="dash-tile-v">{{ $nilai }}</span>
-                <span class="dash-tile-l">{{ $label }}</span>
+        @foreach ($statusMeta as $key => $m)
+            <div class="dash-tile" data-reveal>
+                <div class="dash-tile-head">
+                    <span class="dash-tile-ic" style="background:{{ $m['bg'] }}; color:{{ $m['ic'] }}"><i class="bi {{ $m['ikon'] }}"></i></span>
+                    <span class="dash-tile-l">{{ $m['label'] }}</span>
+                </div>
+                <div class="dash-tile-v">{{ $statistik[$key] }}</div>
+                <div class="dash-tile-foot">
+                    @if ($statistik['total'] > 0)
+                        <span class="dash-tile-pct" style="color:{{ $m['ic'] }}">
+                            {{ round($statistik[$key] / $statistik['total'] * 100) }}%
+                        </span>
+                        <span class="dash-tile-frac">dari {{ $statistik['total'] }} reservasi</span>
+                    @else
+                        <span class="dash-tile-frac">Belum ada reservasi</span>
+                    @endif
+                </div>
             </div>
         @endforeach
     </div>
 
-    {{-- ===== Bento grid ===== --}}
-    <div class="dash-bento">
-        {{-- Kiri: donut + fasilitas aktif, ditumpuk --}}
-        <div class="dash-col-left">
-            <div class="dash-card" data-reveal>
-                <div class="dash-card-head"><span><i class="bi bi-pie-chart-fill me-2"></i>Distribusi Status</span><span class="dash-pill">{{ $statistik['total'] }} total</span></div>
-                <div class="p-4 text-center">
-                    <div class="dash-donut mx-auto" style="background:{{ $donut }}">
-                        <div class="dash-donut-hole">
-                            <div class="dash-donut-v">{{ $statistik['total'] }}</div>
-                            <small class="text-muted">Reservasi</small>
-                        </div>
-                    </div>
-                    <div class="dash-legend">
-                        @foreach ($seg as [$lbl, $n, $c])
-                            <div class="dash-legend-item">
-                                <span class="dot" style="background:{{ $c }}"></span>
-                                <span class="lbl">{{ $lbl }}</span>
-                                <span class="n">{{ $n }}</span>
-                            </div>
-                        @endforeach
+    {{-- ═══════════════════════════════════════════════════════════
+         ROW 1 — Distribusi Status (donut) + Tren 7 Hari (bar chart BARU)
+         ═══════════════════════════════════════════════════════════ --}}
+    <div class="dash-grid-2">
+        {{-- Donut Distribusi Status --}}
+        <div class="dash-card" data-reveal>
+            <div class="dash-card-head">
+                <span><i class="bi bi-pie-chart-fill"></i> Distribusi Status</span>
+                <span class="dash-pill">{{ $statistik['total'] }} total</span>
+            </div>
+            <div class="dash-card-body">
+                <div class="dash-donut-wrap">
+                    <svg viewBox="0 0 120 120" class="dash-donut-svg" role="img" aria-label="Grafik distribusi status reservasi">
+                        <circle class="donut-track" cx="60" cy="60" r="{{ $donutR }}"/>
+                        @if ($statistik['total'] > 0)
+                            @foreach ($segmen as $i => $s)
+                                @if ($s['jumlah'] > 0)
+                                    <circle class="donut-seg" cx="60" cy="60" r="{{ $donutR }}"
+                                            stroke="{{ $s['warna'] }}"
+                                            stroke-dashoffset="{{ -$s['offset'] }}"
+                                            data-dash="{{ $s['panjang'] }} {{ $donutKeliling }}"
+                                            style="stroke-dasharray:0 {{ $donutKeliling }}; transition-delay:{{ $i * .12 }}s"
+                                            transform="rotate(-90 60 60)">
+                                        <title>{{ $s['label'] }}: {{ $s['jumlah'] }}</title>
+                                    </circle>
+                                @endif
+                            @endforeach
+                        @else
+                            <circle class="donut-track" cx="60" cy="60" r="{{ $donutR }}" stroke="#e5e9ef" stroke-width="14"/>
+                        @endif
+                    </svg>
+                    <div class="dash-donut-hole">
+                        <div class="dash-donut-v">{{ $statistik['total'] }}</div>
+                        <small>Reservasi</small>
                     </div>
                 </div>
-            </div>
-
-            <div class="dash-card" data-reveal>
-                <div class="dash-card-head"><span><i class="bi bi-building me-2"></i>Fasilitas Aktif</span></div>
-                <div class="p-3 pt-2">
-                    @forelse ($fasilitasPerKategori as $kategori => $jumlah)
-                        @php $wk = $warnaKat[$kategori] ?? '#176b87'; $ik = $ikonKat[$kategori] ?? 'bi-door-open'; @endphp
-                        <div class="dash-meter">
-                            <span class="dash-meter-ic" style="background:{{ $wk }}1a; color:{{ $wk }}"><i class="bi {{ $ik }}"></i></span>
-                            <div class="dash-meter-body">
-                                <div class="dash-meter-top"><span>{{ $kategori }}</span><span style="color:{{ $wk }}">{{ $jumlah }}</span></div>
-                                <div class="dash-meter-track"><div class="dash-meter-fill" style="width:{{ round($jumlah / $maxKat * 100) }}%; background:{{ $wk }}"></div></div>
-                            </div>
+                <div class="dash-legend">
+                    @foreach ($segmen as $s)
+                        <div class="dash-legend-item" style="background:{{ $s['warna'] }}14">
+                            <span class="dot" style="background:{{ $s['warna'] }}"></span>
+                            <span class="lbl">{{ $s['label'] }}</span>
+                            <span class="n">{{ $s['jumlah'] }}</span>
                         </div>
-                    @empty
-                        <p class="text-muted small mb-0">Belum ada fasilitas aktif.</p>
-                    @endforelse
-                    <a href="{{ route('admin.laporan') }}" class="dash-btn dash-btn-outline w-100 mt-2 justify-content-center"><i class="bi bi-file-earmark-bar-graph me-1"></i>Lihat Laporan</a>
+                    @endforeach
                 </div>
             </div>
         </div>
 
-        {{-- Kanan: reservasi terbaru, feed modern (bukan tabel) --}}
-        <div class="dash-card dash-col-right" data-reveal>
+        {{-- Bar chart Trend 7 Hari --}}
+        <div class="dash-card" data-reveal>
             <div class="dash-card-head">
-                <span><i class="bi bi-clock-history me-2"></i>Reservasi Terbaru</span>
-                <a href="{{ route('admin.reservasi.index') }}" class="dash-btn dash-btn-outline dash-btn-sm">Semua</a>
+                <span><i class="bi bi-graph-up-arrow"></i> Tren 7 Hari Terakhir</span>
+                <span class="dash-pill">{{ collect($trend7Hari)->sum('jumlah') }} reservasi</span>
+            </div>
+            <div class="dash-card-body">
+                <div class="dash-chart">
+                    {{-- SVG bar chart custom: viewBox 100 unit lebar x 72 unit tinggi + label bawah.
+                         preserveAspectRatio default (xMidYMid meet) dipakai — bukan "none" — supaya
+                         bar/teks/grid selalu diskalakan proporsional, tidak gepeng saat kartu melebar. --}}
+                    <svg viewBox="0 0 100 72" class="dash-chart-svg" role="img" aria-label="Grafik tren reservasi 7 hari">
+                        <defs>
+                            <linearGradient id="barToday" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--teal)"/>
+                                <stop offset="100%" stop-color="var(--dash-primary)"/>
+                            </linearGradient>
+                            <linearGradient id="barSoft" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#cbe8ec"/>
+                                <stop offset="100%" stop-color="var(--dash-primary-soft-2)"/>
+                            </linearGradient>
+                        </defs>
+                        {{-- Gridlines horizontal --}}
+                        @for ($g = 1; $g <= 3; $g++)
+                            <line x1="0" y1="{{ $g * 16 }}" x2="100" y2="{{ $g * 16 }}" stroke="#eef2f6" stroke-width=".25"/>
+                        @endfor
+                        @foreach ($trend7Hari as $i => $d)
+                            @php
+                                $h = $d['jumlah'] > 0 ? max(3, round($d['jumlah'] / $maxTrend * 58)) : 1.5;
+                                $x = $i * ($barW + $gap);
+                                $y = 64 - $h;
+                                $isHariIni = $d['tanggal']->isToday();
+                            @endphp
+                            <rect x="{{ $x }}" y="{{ $y }}" width="{{ $barW }}" height="{{ $h }}"
+                                  rx="1.8" ry="1.8"
+                                  fill="{{ $isHariIni ? 'url(#barToday)' : 'url(#barSoft)' }}"
+                                  class="dash-bar" style="--i:{{ $i }}">
+                                <title>{{ $d['tanggal']->translatedFormat('l, d M') }}: {{ $d['jumlah'] }} reservasi</title>
+                            </rect>
+                            {{-- Angka di atas bar --}}
+                            @if ($d['jumlah'] > 0)
+                                <text x="{{ $x + $barW / 2 }}" y="{{ $y - 1.8 }}"
+                                      text-anchor="middle" font-size="3.4" font-weight="700"
+                                      fill="{{ $isHariIni ? 'var(--dash-primary)' : '#64748b' }}"
+                                      font-family="'Plus Jakarta Sans',sans-serif">{{ $d['jumlah'] }}</text>
+                            @endif
+                            {{-- Label hari di bawah --}}
+                            <text x="{{ $x + $barW / 2 }}" y="70.5"
+                                  text-anchor="middle" font-size="2.9" font-weight="600"
+                                  fill="{{ $isHariIni ? 'var(--dash-primary)' : '#94a3b8' }}"
+                                  font-family="'DM Sans',sans-serif">{{ $d['label'] }}</text>
+                        @endforeach
+                    </svg>
+                </div>
+                <div class="dash-chart-foot">
+                    <span><span class="dot" style="background:var(--dash-primary)"></span> Hari ini</span>
+                    <span><span class="dot" style="background:var(--dash-primary-soft-2)"></span> 6 hari sebelumnya</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══════════════════════════════════════════════════════════
+         ROW 2 — Fasilitas per Kategori + Reservasi Terbaru
+         ═══════════════════════════════════════════════════════════ --}}
+    <div class="dash-grid-2b">
+        {{-- Fasilitas Aktif --}}
+        <div class="dash-card" data-reveal>
+            <div class="dash-card-head">
+                <span><i class="bi bi-building"></i> Fasilitas Aktif</span>
+                <span class="dash-pill">{{ collect($fasilitasPerKategori)->sum() }} unit</span>
+            </div>
+            <div class="dash-card-body">
+                @forelse ($fasilitasPerKategori as $kategori => $jumlah)
+                    @php
+                        $meta = $kategoriMeta[$kategori] ?? ['ikon' => 'bi-door-open', 'shade' => 'var(--dash-primary)'];
+                        $pct = round($jumlah / $maxKat * 100);
+                    @endphp
+                    <div class="dash-meter">
+                        <span class="dash-meter-ic" style="background:{{ $meta['shade'] }}1a; color:{{ $meta['shade'] }}"><i class="bi {{ $meta['ikon'] }}"></i></span>
+                        <div class="dash-meter-body">
+                            <div class="dash-meter-top">
+                                <span class="dash-meter-name">{{ $kategori }}</span>
+                                <span class="dash-meter-count" style="color:{{ $meta['shade'] }}">{{ $jumlah }} <small>unit</small></span>
+                            </div>
+                            <div class="dash-meter-track">
+                                <div class="dash-meter-fill" style="width:{{ $pct }}%; background:{{ $meta['shade'] }}"></div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-muted small mb-0">Belum ada fasilitas aktif.</p>
+                @endforelse
+                <a href="{{ route('admin.laporan') }}" class="dash-btn dash-btn-outline w-100 mt-3 justify-content-center"><i class="bi bi-file-earmark-bar-graph me-1"></i>Lihat Laporan</a>
+            </div>
+        </div>
+
+        {{-- Reservasi Terbaru --}}
+        <div class="dash-card" data-reveal>
+            <div class="dash-card-head">
+                <span><i class="bi bi-clock-history"></i> Reservasi Terbaru</span>
+                <a href="{{ route('admin.reservasi.index') }}" class="dash-btn dash-btn-outline dash-btn-sm">Semua <i class="bi bi-arrow-right ms-1"></i></a>
             </div>
             <div class="dash-feed">
                 @forelse ($terbaru as $r)
+                    @php
+                        $statusKey = strtolower($r->status_reservasi->value);
+                        $sm = $statusMeta[$statusKey] ?? null;
+                    @endphp
                     <a href="{{ route('admin.reservasi.show', $r->kode_reservasi) }}" class="dash-feed-row">
-                        <span class="initial-chip">{{ strtoupper(substr($r->pemesan->nama_lengkap, 0, 1)) }}</span>
+                        <span class="dash-feed-avatar">{{ strtoupper(substr($r->pemesan->nama_lengkap, 0, 1)) }}</span>
                         <span class="dash-feed-body">
                             <span class="dash-feed-main">{{ $r->pemesan->nama_lengkap }}</span>
-                            <span class="dash-feed-sub">{{ $r->tarifSewa->fasilitas->nama_fasilitas }} &middot; {{ $r->kode_reservasi }}</span>
+                            <span class="dash-feed-sub">{{ $r->tarifSewa->fasilitas->nama_fasilitas }} <span class="sep">·</span> {{ $r->kode_reservasi }}</span>
                         </span>
-                        <span class="chip {{ strtolower($r->status_reservasi->value) }}">{{ $r->status_reservasi->value }}</span>
+                        @if ($sm)
+                            <span class="dash-feed-badge" style="background:{{ $sm['bg'] }}; color:{{ $sm['ic'] }}">
+                                <span class="dot" style="background:{{ $sm['dot'] }}"></span>{{ $sm['label'] }}
+                            </span>
+                        @endif
                     </a>
                 @empty
-                    <p class="text-muted small p-3 mb-0">Belum ada reservasi.</p>
+                    <p class="text-muted small p-4 mb-0 text-center">Belum ada reservasi.</p>
                 @endforelse
             </div>
         </div>
@@ -137,83 +279,268 @@
 </div>
 
 <style>
-    /* ===== Dashboard bento redesign — hanya berlaku di halaman ini ===== */
-    .dash { --d-primary:#176b87; --d-teal:#24aa9a; }
+/* ══════════════════════════════════════════════════════════════
+   PALET LOKAL DASHBOARD — monokrom teal, konsisten homepage.
+   ══════════════════════════════════════════════════════════════ */
+.dash {
+    --dash-primary:        #0e6b7d;
+    --dash-primary-dark:   #084b58;
+    --dash-primary-soft:   #e6f2f4;
+    --dash-primary-soft-2: #b8dde4;    /* untuk bar chart yang lebih pale */
+    --dash-ink:            #0f172a;
+    --dash-muted:          #64748b;
+    --dash-soft:           #94a3b8;
+    --dash-line:           #e5e9ef;
+    --dash-line-soft:      #eef2f6;
+    --dash-surface:        #f7f9fc;
+    --dash-radius:         1rem;
+    --dash-radius-lg:      1.25rem;
+    --dash-shadow-sm:      0 6px 16px -6px rgba(15,23,42,.08);
+    --dash-shadow-md:      0 14px 34px -14px rgba(15,23,42,.14);
+}
 
-    @keyframes dashUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
-    [data-reveal] { animation:dashUp .55s cubic-bezier(.2,.7,.3,1) both; }
-    @media (prefers-reduced-motion: reduce) { [data-reveal] { animation:none; } }
+@keyframes dashUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+.dash [data-reveal] { animation:dashUp .55s cubic-bezier(.2,.7,.3,1) both; }
+@media (prefers-reduced-motion: reduce) { .dash [data-reveal] { animation:none; } }
 
-    /* Hero */
-    .dash-hero { position:relative; overflow:hidden; border-radius:1.5rem; padding:2.2rem 2.4rem; margin-bottom:1.25rem;
-        background:linear-gradient(120deg,#0d2a3a,#134f66 45%,#127a72 85%); color:#fff; box-shadow:0 24px 50px -20px rgba(13,42,58,.55); }
-    .dash-hero-mesh { position:absolute; inset:0;
-        background:radial-gradient(38rem 20rem at 100% -20%, rgba(36,170,154,.35), transparent 60%),
-                   radial-gradient(28rem 18rem at -10% 120%, rgba(23,107,135,.5), transparent 60%); }
-    .dash-hero-grid { position:absolute; inset:0; opacity:.12;
-        background-image:linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
-        background-size:28px 28px; mask-image:radial-gradient(60% 60% at 70% 30%, #000, transparent); }
-    .dash-hero-eyebrow { display:inline-flex; align-items:center; font-size:.78rem; font-weight:700; color:#bfe9e0; letter-spacing:.03em; }
-    .dash-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.65rem; margin:.35rem 0 .3rem; }
-    .dash-hero-sub { margin:0; opacity:.92; font-size:.94rem; max-width:34rem; }
-    .dash-btn { display:inline-flex; align-items:center; padding:.6rem 1.1rem; border-radius:.8rem; font-weight:700; font-size:.88rem; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease, background .15s ease; border:1.5px solid transparent; }
-    .dash-btn-light { background:#fff; color:#0f526b; box-shadow:0 10px 22px -8px rgba(0,0,0,.3); }
-    .dash-btn-light:hover { transform:translateY(-2px); color:#0f526b; }
-    .dash-btn-ghost { background:rgba(255,255,255,.08); color:#fff; border-color:rgba(255,255,255,.35); }
-    .dash-btn-ghost:hover { background:rgba(255,255,255,.16); color:#fff; transform:translateY(-2px); }
-    .dash-btn-outline { background:#fff; color:var(--d-primary); border-color:#d6e4ea; }
-    .dash-btn-outline:hover { border-color:var(--d-primary); color:var(--d-primary); background:#f2fafb; }
-    .dash-btn-sm { padding:.4rem .8rem; font-size:.78rem; }
+/* ══════════════════════════════════════════════════════════════
+   HERO — gradient teal clean (dari palet homepage, bukan biru+hijau).
+   ══════════════════════════════════════════════════════════════ */
+.dash-hero {
+    position:relative; overflow:hidden;
+    border-radius:var(--dash-radius-lg);
+    padding:2.5rem 2.5rem;
+    margin-bottom:1.5rem;
+    background:linear-gradient(135deg, var(--dash-primary) 0%, var(--dash-primary-dark) 100%);
+    color:#fff;
+    box-shadow:0 24px 50px -22px rgba(8,75,88,.5);
+}
+.dash-hero-mesh {
+    position:absolute; inset:0; pointer-events:none;
+    background:
+        radial-gradient(28rem 18rem at 105% -10%, rgba(255,255,255,.14), transparent 55%),
+        radial-gradient(22rem 14rem at -10% 110%, rgba(255,255,255,.08), transparent 55%);
+}
+.dash-hero-body {
+    position:relative; z-index:1;
+    display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+    gap:1.5rem;
+}
+.dash-hero-eyebrow {
+    display:inline-flex; align-items:center;
+    font-size:.78rem; font-weight:700; color:rgba(255,255,255,.85);
+    letter-spacing:.02em;
+}
+.dash-hero-title {
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+    font-size:1.75rem; margin:.4rem 0 .35rem; color:#fff; letter-spacing:-.025em;
+}
+.dash-hero-sub { margin:0; opacity:.9; font-size:.95rem; max-width:34rem; line-height:1.6; }
 
-    /* Stat tiles */
-    .dash-tiles { display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:1.25rem; }
-    .dash-tile { background:#fff; border:1px solid #e4ebf2; border-radius:1.15rem; padding:1.15rem 1.25rem; display:flex; flex-direction:column; gap:.6rem;
-        box-shadow:0 3px 14px rgba(21,36,59,.05); transition:transform .2s ease, box-shadow .2s ease; animation-delay:calc(var(--tile-i) * .07s); }
-    .dash-tile:hover { transform:translateY(-3px); box-shadow:0 16px 30px -12px rgba(21,36,59,.18); }
-    .dash-tile-ic { width:2.6rem; height:2.6rem; border-radius:.85rem; display:grid; place-items:center; color:#fff; font-size:1.2rem; box-shadow:0 8px 16px -6px rgba(21,36,59,.35); }
-    .dash-tile-v { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.9rem; line-height:1; color:#15243b; }
-    .dash-tile-l { font-size:.82rem; font-weight:600; color:#637189; }
+.dash-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:.6rem 1.15rem; border-radius:.75rem;
+    font-weight:700; font-size:.87rem; text-decoration:none;
+    border:1.5px solid transparent;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
+}
+.dash-btn-light { background:#fff; color:var(--dash-primary-dark); box-shadow:0 10px 22px -8px rgba(0,0,0,.25); }
+.dash-btn-light:hover { color:var(--dash-primary-dark); transform:translateY(-2px); }
+.dash-btn-ghost { background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.3); }
+.dash-btn-ghost:hover { background:rgba(255,255,255,.18); color:#fff; transform:translateY(-2px); }
+.dash-btn-outline { background:#fff; color:var(--dash-primary); border-color:var(--dash-line); }
+.dash-btn-outline:hover { border-color:var(--dash-primary); color:var(--dash-primary); background:var(--dash-primary-soft); }
+.dash-btn-sm { padding:.4rem .8rem; font-size:.78rem; }
 
-    /* Bento grid */
-    .dash-bento { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.55fr); gap:1.25rem; align-items:start; }
-    .dash-col-left { display:flex; flex-direction:column; gap:1.25rem; }
-    .dash-card { background:#fff; border:1px solid #e4ebf2; border-radius:1.15rem; box-shadow:0 3px 16px rgba(21,36,59,.055); overflow:hidden; }
-    .dash-card-head { padding:1rem 1.25rem; border-bottom:1px solid #eef2f6; font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
-    .dash-pill { background:#eef6f9; color:#0f526b; font-size:.72rem; font-weight:700; padding:.3rem .7rem; border-radius:2rem; }
+/* ══════════════════════════════════════════════════════════════
+   STAT TILES — 4 KPI card putih dengan icon soft.
+   ══════════════════════════════════════════════════════════════ */
+.dash-tiles { display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:1.5rem; }
+.dash-tile {
+    background:#fff; border:1px solid var(--dash-line);
+    border-radius:var(--dash-radius); padding:1.25rem 1.35rem;
+    box-shadow:var(--dash-shadow-sm);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.dash-tile:hover { transform:translateY(-4px); box-shadow:var(--dash-shadow-md); border-color:transparent; }
+.dash-tile-head { display:flex; align-items:center; gap:.7rem; margin-bottom:1rem; }
+.dash-tile-ic {
+    display:grid; place-items:center;
+    width:2.4rem; height:2.4rem;
+    border-radius:.7rem; font-size:1.05rem;
+    flex:none;
+}
+.dash-tile-l { font-size:.85rem; font-weight:700; color:var(--dash-ink); }
+.dash-tile-v {
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+    font-size:2.1rem; line-height:1.05; color:var(--dash-ink); letter-spacing:-.025em;
+    margin-bottom:.5rem;
+}
+.dash-tile-foot { display:flex; align-items:baseline; gap:.5rem; font-size:.78rem; }
+.dash-tile-pct { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:.85rem; }
+.dash-tile-frac { color:var(--dash-muted); font-weight:500; }
 
-    /* Donut */
-    .dash-donut { width:172px; height:172px; border-radius:50%; position:relative; box-shadow:0 12px 28px -10px rgba(21,36,59,.28), inset 0 0 0 7px #fff; }
-    .dash-donut-hole { position:absolute; inset:0; margin:auto; width:110px; height:110px; border-radius:50%; background:#fff; display:grid; place-items:center; box-shadow:0 2px 10px rgba(21,36,59,.08); }
-    .dash-donut-v { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.5rem; color:var(--d-primary); }
-    .dash-legend { display:grid; grid-template-columns:1fr 1fr; gap:.5rem .75rem; margin-top:1.4rem; text-align:left; }
-    .dash-legend-item { display:flex; align-items:center; gap:.45rem; font-size:.82rem; color:#3c4a5f; font-weight:600; }
-    .dash-legend-item .dot { width:.55rem; height:.55rem; border-radius:50%; flex:none; }
-    .dash-legend-item .lbl { flex:1; }
-    .dash-legend-item .n { font-weight:800; color:#15243b; }
+/* ══════════════════════════════════════════════════════════════
+   GRID 2 KOLOM (2 baris)
+   ══════════════════════════════════════════════════════════════ */
+.dash-grid-2  { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.5fr); gap:1.25rem; margin-bottom:1.25rem; align-items:stretch; }
+.dash-grid-2b { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.4fr); gap:1.25rem; align-items:start; }
 
-    /* Fasilitas Aktif meters */
-    .dash-meter { display:flex; align-items:center; gap:.8rem; padding:.5rem 0; }
-    .dash-meter-ic { width:2.3rem; height:2.3rem; border-radius:.7rem; display:grid; place-items:center; font-size:1rem; flex:none; }
-    .dash-meter-body { flex:1; min-width:0; }
-    .dash-meter-top { display:flex; justify-content:space-between; font-size:.83rem; font-weight:600; margin-bottom:.35rem; }
-    .dash-meter-track { height:.5rem; border-radius:1rem; background:#eef2f6; overflow:hidden; }
-    .dash-meter-fill { height:100%; border-radius:1rem; transition:width .6s ease; }
+.dash-card {
+    background:#fff; border:1px solid var(--dash-line);
+    border-radius:var(--dash-radius); overflow:hidden;
+    box-shadow:var(--dash-shadow-sm);
+    display:flex; flex-direction:column;
+}
+.dash-card-head {
+    padding:1.05rem 1.3rem;
+    border-bottom:1px solid var(--dash-line-soft);
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; color:var(--dash-ink); font-size:.95rem;
+    display:flex; justify-content:space-between; align-items:center; gap:.5rem;
+}
+.dash-card-head > span:first-child i { color:var(--dash-primary); margin-right:.5rem; }
+.dash-card-body { padding:1.3rem; flex:1; }
+.dash-pill {
+    background:var(--dash-primary-soft); color:var(--dash-primary-dark);
+    font-size:.72rem; font-weight:700;
+    padding:.35rem .75rem; border-radius:2rem;
+}
 
-    /* Reservasi Terbaru — activity feed */
-    .dash-feed { display:flex; flex-direction:column; }
-    .dash-feed-row { display:flex; align-items:center; gap:.85rem; padding:.85rem 1.25rem; text-decoration:none; color:inherit; border-bottom:1px solid #f1f4f8; transition:background .15s ease; }
-    .dash-feed-row:last-child { border-bottom:0; }
-    .dash-feed-row:hover { background:#f8fbfd; }
-    .dash-feed-body { flex:1; min-width:0; display:flex; flex-direction:column; }
-    .dash-feed-main { font-weight:700; font-size:.9rem; color:#15243b; }
-    .dash-feed-sub { font-size:.78rem; color:#637189; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* ══════════════════════════════════════════════════════════════
+   DONUT — cincin SVG animatif (stroke-dasharray), lebih besar & tajam.
+   ══════════════════════════════════════════════════════════════ */
+.dash-donut-wrap { position:relative; display:grid; place-items:center; padding:.5rem 0 1.2rem; }
+.dash-donut-svg {
+    width:210px; height:210px;
+    filter:drop-shadow(0 10px 22px rgba(15,23,42,.14));
+}
+.donut-track { fill:none; stroke:var(--dash-line-soft); stroke-width:14; }
+.donut-seg {
+    fill:none; stroke-width:14; stroke-linecap:round;
+    transition:stroke-dasharray 1s cubic-bezier(.16,.84,.44,1);
+}
+.dash-donut-hole {
+    position:absolute; inset:0; margin:auto;
+    width:138px; height:138px; border-radius:50%; background:#fff;
+    display:grid; place-items:center; text-align:center;
+    box-shadow:0 2px 14px rgba(15,23,42,.1);
+    animation:donutPop .5s .3s cubic-bezier(.2,.9,.3,1.3) both;
+}
+@keyframes donutPop { from { transform:scale(.85); opacity:0; } to { transform:scale(1); opacity:1; } }
+.dash-donut-v {
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.9rem;
+    color:var(--dash-primary); line-height:1;
+}
+.dash-donut-hole small { color:var(--dash-muted); font-size:.72rem; font-weight:600; margin-top:.2rem; }
 
-    @media (max-width: 991.98px) {
-        .dash-bento { grid-template-columns:1fr; }
-    }
-    @media (max-width: 575.98px) {
-        .dash-tiles { grid-template-columns:repeat(2, 1fr); }
-        .dash-hero { padding:1.6rem 1.4rem; }
-    }
+.dash-legend { display:grid; grid-template-columns:1fr 1fr; gap:.55rem .6rem; }
+.dash-legend-item {
+    display:flex; align-items:center; gap:.55rem;
+    font-size:.83rem; color:var(--dash-ink); font-weight:600;
+    padding:.45rem .65rem; border-radius:.7rem;
+    transition:transform .15s ease;
+}
+.dash-legend-item:hover { transform:translateY(-1px); }
+.dash-legend-item .dot { width:.6rem; height:.6rem; border-radius:50%; flex:none; }
+.dash-legend-item .lbl { flex:1; }
+.dash-legend-item .n { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; color:var(--dash-ink); }
+
+/* ══════════════════════════════════════════════════════════════
+   BAR CHART TREND 7 HARI
+   ══════════════════════════════════════════════════════════════ */
+.dash-chart { padding:.5rem 0 .3rem; }
+.dash-chart-svg { width:100%; max-width:560px; height:auto; aspect-ratio:100 / 72; display:block; margin:0 auto; }
+.dash-bar {
+    transition:filter .2s ease;
+    transform-box:fill-box; transform-origin:50% 100%;
+    animation:barGrow .65s cubic-bezier(.2,.8,.3,1) both;
+    animation-delay:calc(var(--i, 0) * 70ms);
+}
+.dash-bar:hover { filter:brightness(1.12); cursor:pointer; }
+@keyframes barGrow { from { transform:scaleY(0); opacity:.35; } to { transform:scaleY(1); opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .dash-bar { animation:none; } }
+.dash-chart-foot {
+    display:flex; gap:1.5rem; justify-content:center;
+    margin-top:.8rem; font-size:.78rem; color:var(--dash-muted); font-weight:600;
+}
+.dash-chart-foot .dot { display:inline-block; width:.65rem; height:.65rem; border-radius:.25rem; margin-right:.4rem; vertical-align:middle; }
+
+/* ══════════════════════════════════════════════════════════════
+   FASILITAS AKTIF (progress bars)
+   ══════════════════════════════════════════════════════════════ */
+.dash-meter { display:flex; align-items:center; gap:.9rem; padding:.55rem 0; }
+.dash-meter + .dash-meter { border-top:1px solid var(--dash-line-soft); padding-top:.9rem; }
+.dash-meter-ic {
+    width:2.4rem; height:2.4rem; border-radius:.7rem;
+    display:grid; place-items:center; font-size:1rem; flex:none;
+}
+.dash-meter-body { flex:1; min-width:0; }
+.dash-meter-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.4rem; }
+.dash-meter-name { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; color:var(--dash-ink); font-size:.9rem; }
+.dash-meter-count { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.05rem; }
+.dash-meter-count small { font-size:.65rem; color:var(--dash-muted); font-weight:500; margin-left:.15rem; }
+.dash-meter-track { height:.5rem; border-radius:1rem; background:var(--dash-line-soft); overflow:hidden; }
+.dash-meter-fill { height:100%; border-radius:1rem; transition:width .6s cubic-bezier(.2,.7,.3,1); }
+
+/* ══════════════════════════════════════════════════════════════
+   RESERVASI TERBARU — activity feed
+   ══════════════════════════════════════════════════════════════ */
+.dash-feed { display:flex; flex-direction:column; }
+.dash-feed-row {
+    display:flex; align-items:center; gap:.9rem;
+    padding:.95rem 1.3rem;
+    text-decoration:none; color:inherit;
+    border-bottom:1px solid var(--dash-line-soft);
+    transition:background .15s ease;
+}
+.dash-feed-row:last-child { border-bottom:0; }
+.dash-feed-row:hover { background:var(--dash-primary-soft); }
+.dash-feed-avatar {
+    display:grid; place-items:center;
+    width:2.4rem; height:2.4rem; border-radius:.7rem;
+    background:var(--dash-primary); color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:.9rem;
+    flex:none;
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);
+}
+.dash-feed-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:.15rem; }
+.dash-feed-main { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:.92rem; color:var(--dash-ink); }
+.dash-feed-sub { font-size:.78rem; color:var(--dash-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dash-feed-sub .sep { margin:0 .35rem; color:var(--dash-soft); }
+.dash-feed-badge {
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-size:.75rem; font-weight:700;
+    padding:.35rem .75rem; border-radius:2rem;
+    white-space:nowrap; flex:none;
+}
+.dash-feed-badge .dot { width:.5rem; height:.5rem; border-radius:50%; }
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 1199.98px) {
+    .dash-tiles { grid-template-columns:repeat(4, 1fr); }
+}
+@media (max-width: 991.98px) {
+    .dash-grid-2, .dash-grid-2b { grid-template-columns:1fr; }
+    .dash-tiles { grid-template-columns:repeat(2, 1fr); }
+    .dash-hero { padding:1.8rem 1.6rem; }
+    .dash-hero-title { font-size:1.5rem; }
+}
+@media (max-width: 575.98px) {
+    .dash-tiles { grid-template-columns:1fr; }
+    .dash-card-head { font-size:.88rem; padding:.9rem 1.1rem; }
+    .dash-card-body { padding:1.1rem; }
+    .dash-feed-badge { display:none; }
+}
 </style>
+<script>
+    // Cincin donut digambar dari 0 lalu ditransisikan ke panjang aslinya (data-dash)
+    // supaya terlihat "tumbuh" saat halaman dimuat, alih-alih langsung penuh.
+    requestAnimationFrame(() => {
+        document.querySelectorAll('.donut-seg').forEach(seg => {
+            seg.style.strokeDasharray = seg.dataset.dash;
+        });
+    });
+</script>
 @endsection

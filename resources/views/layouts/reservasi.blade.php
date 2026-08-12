@@ -120,13 +120,12 @@
                         <ul class="dropdown-menu shadow border-0" style="border-radius:1rem">
                             @php
                                 $navLantai = \App\Models\Lantai::with(['fasilitas' => fn ($q) => $q->limit(1)])->orderBy('id_lantai')->get();
-                                $navWarna = ['1' => '#2f7fd1', '2' => '#24aa9a', '3A' => '#7c5cd6', '3B' => '#e8833a', '5' => '#d6527c'];
                             @endphp
                             @foreach ($navLantai as $nl)
                                 @if ($nl->fasilitas->isNotEmpty())
                                     <li>
                                         <a class="dropdown-item fw-semibold" href="{{ route('reservasi.denah', ['kategori' => $nl->fasilitas->first()->kategori_fasilitas, 'lantai' => $nl->id_lantai]) }}">
-                                            <span class="d-inline-block rounded-circle me-2" style="width:.6rem;height:.6rem;background:{{ $navWarna[$nl->nomor_lantai] ?? '#176b87' }}"></span>
+                                            <span class="d-inline-block rounded-circle me-2" style="width:.6rem;height:.6rem;background:var(--primary)"></span>
                                             Lantai {{ $nl->nomor_lantai }} · {{ $nl->fasilitas->first()->kategori_fasilitas }}
                                         </a>
                                     </li>
@@ -179,18 +178,16 @@
 
     <footer class="site-footer">
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <span class="d-flex align-items-center gap-2"><span class="brand-mark" style="width:1.7rem;height:1.7rem;border-radius:.55rem;font-size:.85rem"><i class="bi bi-building"></i></span><span class="fw-bold">WADUH</span> — Wadah Akses Digital Unit Hunian BITC</span>
+            <span class="d-flex align-items-center gap-2"><span class="brand-mark" style="width:1.7rem;height:1.7rem;border-radius:.55rem;font-size:.85rem"><i class="bi bi-building"></i></span><span class="fw-bold">WADUH</span> · Wadah Akses Digital Unit Hunian BITC</span>
             <span>&copy; {{ now()->year }} WADUH · BITC Cimahi</span>
         </div>
     </footer>
     <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
     <script>
-        // Pop-up flash: sukses → toast manis, error → modal jelas
-        const toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3400, timerProgressBar: true,
-            didOpen: t => { t.onmouseenter = Swal.stopTimer; t.onmouseleave = Swal.resumeTimer; } });
+        // Pop-up flash message — semua pakai modal penuh (bukan toast kecil di pojok).
         @if (session('success'))
-            toast.fire({ icon: 'success', title: @json(session('success')), iconColor: '#24aa9a' });
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: @json(session('success')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
         @endif
         @if (session('error'))
             Swal.fire({ icon: 'error', title: 'Maaf, ada kendala', text: @json(session('error')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke, mengerti' });
@@ -198,12 +195,28 @@
         @if (session('checkout'))
             Swal.fire({
                 icon: 'success',
-                title: 'Reservasi Terkirim! 🎉',
-                html: 'Kode reservasi Anda:<br><strong style="font-size:1.6rem;color:#176b87;letter-spacing:.08em">{{ session('checkout')['kode_transaksi'] ?? '' }}</strong><br><small class="text-muted">Simpan kode ini untuk mengecek status reservasi.</small>',
+                title: 'Reservasi Terkirim',
+                html: 'Kode reservasi Anda:<br>'
+                    + '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">'
+                    + '<strong style="font-size:1.6rem;color:#176b87;letter-spacing:.08em">{{ session('checkout')['kode_transaksi'] ?? '' }}</strong>'
+                    + '<button type="button" class="btn btn-sm btn-brand-outline" data-salin="{{ session('checkout')['kode_transaksi'] ?? '' }}"><i class="bi bi-clipboard me-1"></i>Salin</button>'
+                    + '</div>'
+                    + '<small class="text-muted">Simpan kode ini untuk mengecek status reservasi.</small>',
                 confirmButtonColor: '#176b87',
                 confirmButtonText: 'Siap, sudah kusimpan',
             });
         @endif
+
+        // Tombol salin kode reservasi — umpan balik langsung di tombol, tanpa ketergantungan pustaka.
+        document.addEventListener('click', e => {
+            const btn = e.target.closest('[data-salin]');
+            if (!btn) return;
+            navigator.clipboard.writeText(btn.dataset.salin).catch(() => {});
+            const asli = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersalin!';
+            btn.disabled = true;
+            setTimeout(() => { btn.innerHTML = asli; btn.disabled = false; }, 1800);
+        });
 
         // ===== Validasi klien yang ramah (mengganti bubble bawaan browser) =====
         const labelDari = el => {
@@ -214,9 +227,9 @@
         const pesanSalah = el => {
             const v = el.validity;
             if (v.valueMissing) {
-                if (el.type === 'file') return 'Lampirkan dulu dokumennya ya.';
+                if (el.type === 'file') return 'Dokumen belum dilampirkan.';
                 if (el.tagName === 'SELECT') return labelDari(el) + ' belum dipilih.';
-                return labelDari(el) + ' masih kosong — isi dulu ya.';
+                return labelDari(el) + ' belum diisi.';
             }
             if (v.typeMismatch && el.type === 'email') return 'Format email belum benar (contoh: nama@email.com).';
             if (v.rangeUnderflow) return labelDari(el) + ' minimal ' + el.min + '.';
@@ -256,32 +269,49 @@
                 const pertama = wakilTerlihat(salah[0]);
                 pertama.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => pertama.focus({ preventScroll: true }), 350);
-                toast.fire({ icon: 'warning', title: 'Ups! ' + salah.length + ' isian belum lengkap 👇', iconColor: '#e5b94e' });
+                Swal.fire({ icon: 'warning', title: 'Periksa kembali', text: salah.length + ' isian belum lengkap.', confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
             }, true);
             f.addEventListener('input', e => bersihkan(e.target), true);
             f.addEventListener('change', e => bersihkan(e.target), true);
         });
         @if ($errors->any())
-            toast.fire({ icon: 'warning', title: 'Ups! {{ $errors->count() }} hal perlu diperbaiki 👇', iconColor: '#e5b94e' });
+            Swal.fire({ icon: 'warning', title: 'Periksa kembali', text: '{{ $errors->count() }} isian belum benar.', confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
         @endif
 
-        // Dialog konfirmasi untuk form ber-atribut data-confirm
-        document.querySelectorAll('form[data-confirm]').forEach(f => {
-            f.addEventListener('submit', e => {
-                if (f.dataset.confirmed) return;
-                e.preventDefault();
-                Swal.fire({
-                    title: f.dataset.confirmTitle || 'Yakin?',
-                    text: f.dataset.confirm,
-                    icon: f.dataset.icon || 'question',
-                    showCancelButton: true,
-                    confirmButtonText: f.dataset.confirmText || 'Ya, lanjutkan',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: f.dataset.confirmColor || '#176b87',
-                    cancelButtonColor: '#8a97a5',
-                    reverseButtons: true,
-                }).then(r => { if (r.isConfirmed) { f.dataset.confirmed = 1; f.submit(); } });
-            });
+        // Dialog konfirmasi untuk form/tautan ber-atribut data-confirm — didelegasikan ke document
+        // supaya otomatis berlaku juga untuk konten yang disisipkan belakangan lewat AJAX.
+        document.addEventListener('submit', e => {
+            const f = e.target.closest('form[data-confirm]');
+            if (!f || f.dataset.confirmed) return;
+            e.preventDefault();
+            Swal.fire({
+                title: f.dataset.confirmTitle || 'Yakin?',
+                text: f.dataset.confirm,
+                icon: f.dataset.icon || 'question',
+                showCancelButton: true,
+                confirmButtonText: f.dataset.confirmText || 'Ya, lanjutkan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: f.dataset.confirmColor || '#176b87',
+                cancelButtonColor: '#8a97a5',
+                reverseButtons: true,
+            }).then(r => { if (r.isConfirmed) { f.dataset.confirmed = 1; f.submit(); } });
+        });
+
+        document.addEventListener('click', e => {
+            const a = e.target.closest('a[data-confirm]');
+            if (!a) return;
+            e.preventDefault();
+            Swal.fire({
+                title: a.dataset.confirmTitle || 'Yakin?',
+                text: a.dataset.confirm,
+                icon: a.dataset.icon || 'question',
+                showCancelButton: true,
+                confirmButtonText: a.dataset.confirmText || 'Ya, lanjutkan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: a.dataset.confirmColor || '#176b87',
+                cancelButtonColor: '#8a97a5',
+                reverseButtons: true,
+            }).then(r => { if (r.isConfirmed) window.location.href = a.href; });
         });
     </script>
 </body>

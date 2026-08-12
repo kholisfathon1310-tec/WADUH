@@ -9,7 +9,7 @@
     $ikon = ['Jam' => 'bi-clock', 'Hari' => 'bi-calendar-day', 'Bulan' => 'bi-calendar-month'];
     $desk = [
         'Jam'   => 'Cocok untuk rapat & sesi singkat. Bayar per jam pemakaian.',
-        'Hari'  => 'Untuk acara atau kegiatan satu hari atau lebih — 1 hari dihitung 8 jam pemakaian.',
+        'Hari'  => 'Untuk acara atau kegiatan satu hari atau lebih, dengan 1 hari dihitung 8 jam pemakaian.',
         'Bulan' => 'Sewa jangka panjang untuk kantor / usaha (min. 3 bulan, perlu dokumen).',
     ];
 @endphp

@@ -1,18 +1,17 @@
 {{--
-    <x-denah.schedule-filter> — ScheduleFilter: form GET Tanggal/Jam/Cek Ketersediaan.
+    <x-denah.schedule-filter> — ScheduleFilter: form GET Tanggal/Cek Ketersediaan.
     Sama persis secara fungsional dengan form lama (method, name field, action default
     ke URL saat ini) — hanya tampilan & susunan yang dirapikan.
     Props:
       - jenisId    : id_jenis_sewa terpilih (dikirim balik sebagai hidden input)
-      - isJam      : true = tampilkan Jam mulai/selesai
-      - sehariSaja : true = Convention Hall, cukup satu tanggal (otomatis 8 jam)
+      - sehariSaja : true = Convention Hall / Per Jam, cukup satu tanggal (otomatis 8 jam)
       - jadwal     : ['tanggal_mulai' => ..., 'tanggal_selesai' => ..., 'jam_mulai' => ..., 'jam_selesai' => ...]
                      (dinamai "jadwal", BUKAN "slot" — "slot" adalah nama variabel bawaan Blade
                      untuk konten slot komponen, jadi tidak bisa dipakai sebagai nama prop)
 --}}
-@props(['jenisId' => null, 'isJam' => false, 'sehariSaja' => false, 'jadwal'])
+@props(['jenisId' => null, 'sehariSaja' => false, 'jadwal'])
 
-<form method="GET" class="dn-filter">
+<form method="GET" class="dn-filter" data-filter-form>
     <input type="hidden" name="jenis" value="{{ $jenisId }}">
     <div class="dn-filter-grid">
         <div class="dn-filter-field">
@@ -20,16 +19,7 @@
             <input type="date" name="tanggal_mulai" class="form-control dn-filter-input" value="{{ $jadwal['tanggal_mulai'] }}">
         </div>
 
-        @if ($isJam)
-            <div class="dn-filter-field dn-filter-field--sm">
-                <label class="dn-filter-label">Jam mulai</label>
-                @include('reservasi.partials.pilih-jam', ['name' => 'jam_mulai', 'value' => $jadwal['jam_mulai'], 'required' => false, 'kecil' => true])
-            </div>
-            <div class="dn-filter-field dn-filter-field--sm">
-                <label class="dn-filter-label">Jam selesai</label>
-                @include('reservasi.partials.pilih-jam', ['name' => 'jam_selesai', 'value' => $jadwal['jam_selesai'], 'required' => false, 'kecil' => true])
-            </div>
-        @elseif ($sehariSaja)
+        @if ($sehariSaja)
             <div class="dn-filter-field dn-filter-note">
                 <i class="bi bi-clock-history"></i><span>1 hari = otomatis 8 jam pemakaian</span>
             </div>

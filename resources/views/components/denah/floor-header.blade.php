@@ -16,7 +16,7 @@
     <div class="dn-head-main">
         <p class="dn-head-eyebrow">Langkah 4 dari 5 &middot; {{ $kategori }}@if($satuan) &middot; Per {{ $satuan }}@endif</p>
         <h1 class="dn-head-title"><i class="bi bi-map"></i>Denah Lantai {{ $nomorLantai }}</h1>
-        <p class="dn-head-sub">Klik ruangan <strong>hijau</strong> untuk memesan &mdash; warna mengikuti jadwal yang Anda pilih.</p>
+        <p class="dn-head-sub">Klik ruangan <strong>hijau</strong> untuk memesan. Warna mengikuti jadwal yang Anda pilih.</p>
     </div>
     <div class="dn-head-stats">
         <div class="dn-stat">

@@ -91,8 +91,9 @@ class FakturController extends Controller
         $adaKolomWaktu = $items->contains(fn ($r) => $r->tarifSewa->jenisSewa->satuan->value === 'Jam');
 
         $tglId = fn ($d) => $d->locale('id')->translatedFormat('d F Y');
-        $waktu = fn ($r) => str_replace(':', '.', substr($r->jam_mulai, 0, 5))
-            .' - '.str_replace(':', '.', substr($r->jam_selesai, 0, 5)).' WIB';
+        $waktu = fn ($r) => $r->jam_mulai
+            ? str_replace(':', '.', substr($r->jam_mulai, 0, 5)).' - '.str_replace(':', '.', substr($r->jam_selesai, 0, 5)).' WIB'
+            : null;
 
         $barisItems = $items->values()->map(function ($r, $i) use ($tglId, $waktu) {
             $fas = $r->tarifSewa->fasilitas;

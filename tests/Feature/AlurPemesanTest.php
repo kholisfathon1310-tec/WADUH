@@ -229,6 +229,6 @@ class AlurPemesanTest extends TestCase
                 'pekerjaan'    => 'Direktur',
                 'alamat'       => 'Jl. Korporat 9',
             ])
-            ->assertSessionHasErrors('dokumen.0');
+            ->assertSessionHasErrors('dokumen');
     }
 }

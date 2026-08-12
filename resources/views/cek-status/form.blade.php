@@ -212,7 +212,7 @@
     <div class="row g-3" data-reveal>
         @foreach ([
             ['bi-hourglass-split', 'dot-menunggu', 'Diverifikasi', 'Reservasi sedang diperiksa admin. Anda masih dapat membatalkannya pada tahap ini.'],
-            ['bi-check-circle',    'dot-setujui',  'Disetujui',    'Reservasi diterima — fasilitas siap digunakan sesuai jadwal yang dipesan.'],
+            ['bi-check-circle',    'dot-setujui',  'Disetujui',    'Reservasi diterima. Fasilitas siap digunakan sesuai jadwal yang dipesan.'],
             ['bi-x-circle',        'dot-tolak',    'Ditolak',      'Reservasi tidak dapat diproses. Alasan penolakan tercantum di halaman hasil.'],
             ['bi-slash-circle',    'dot-batal',    'Dibatalkan',   'Reservasi dibatalkan oleh pemesan sebelum diproses admin.'],
         ] as [$ikon, $kelasWarna, $judul, $desk])

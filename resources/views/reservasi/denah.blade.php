@@ -6,15 +6,9 @@
 @endsection
 
 @php
-    $isJam = $jenis && $jenis->satuan->value === 'Jam';
-    // Convention Hall: sewa harian hanya 1 hari (8 jam) — filter cukup satu tanggal.
-    $sehariSaja = $kategori === 'Convention Hall';
-    $warnaLantai = ['1' => '#2f7fd1', '2' => '#24aa9a', '3A' => '#7c5cd6', '3B' => '#e8833a', '5' => '#d6527c'];
-    $w = $warnaLantai[$lantai->nomor_lantai] ?? '#176b87';
-
-    // Rekap status untuk FloorHeader — dihitung dari data yang sudah dikirim controller, tanpa query baru.
-    $jumlahKosong = $status->filter(fn ($s) => $s === 'hijau')->count();
-    $jumlahTerisi = $status->filter(fn ($s) => $s !== 'hijau')->count();
+    // Per Jam & Convention Hall: pemakaian selalu 1 hari (otomatis 8 jam) — filter cukup satu tanggal,
+    // tidak perlu pilih jam mulai/selesai secara manual.
+    $sehariSaja = $kategori === 'Convention Hall' || ($jenis && $jenis->satuan->value === 'Jam');
 @endphp
 
 @section('content')
@@ -26,32 +20,53 @@
     </ol></nav>
 
     <div data-reveal>
-        <x-denah.floor-header
-            :nomor-lantai="$lantai->nomor_lantai"
-            :kategori="$kategori"
-            :satuan="$jenis?->satuan->value"
-            :warna="$w"
-            :total="$fasilitas->count()"
-            :kosong="$jumlahKosong"
-            :terisi="$jumlahTerisi"
-        />
-    </div>
-
-    <div data-reveal>
         <x-denah.schedule-filter
             :jenis-id="$jenis?->id_jenis_sewa"
-            :is-jam="$isJam"
             :sehari-saja="$sehariSaja"
             :jadwal="$slot"
         />
     </div>
 
-    {{-- Denah interaktif SVG — koordinat presisi dari config/denah.php --}}
-    @php
-        $statusByKode = $fasilitas->mapWithKeys(fn ($f) => [$f->kode_fasilitas => $status[$f->id_fasilitas] ?? 'hijau'])->all();
-        $tplDetail = route('reservasi.fasilitas.show', array_merge(['fasilitas' => '__ID__', 'jenis' => $jenis?->id_jenis_sewa], $slot));
-    @endphp
-    <x-denah :lantai="$lantai->nomor_lantai" :status-per-fasilitas="$statusByKode" :clickable="true" :link-template="$tplDetail" :jenis="$jenis?->id_jenis_sewa"/>
+    <div id="hasil-denah" data-filter-hasil>
+        @include('reservasi.partials.denah-hasil')
+    </div>
 
-    <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i>Klik ruangan <strong class="text-success">hijau/kuning</strong> untuk memilih (bisa lebih dari satu), lalu tekan <strong>Isi Jadwal</strong>. Ruangan <strong>merah</strong> penuh atau sedang tidak disewakan.</p>
+    <script>
+        (function () {
+            const form = document.querySelector('[data-filter-form]');
+            const hasil = document.getElementById('hasil-denah');
+            if (!form || !hasil) return;
+
+            let controller = null;
+
+            const terapkan = () => {
+                controller?.abort();
+                controller = new AbortController();
+
+                const params = new URLSearchParams(new FormData(form));
+                [...params.keys()].forEach((k) => { if (!params.get(k)) params.delete(k); });
+                const url = form.getAttribute('action') || window.location.pathname;
+                const urlLengkap = url + (params.toString() ? '?' + params.toString() : '');
+
+                hasil.classList.add('opacity-50');
+                fetch(urlLengkap, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: controller.signal })
+                    .then((r) => r.text())
+                    .then((html) => {
+                        hasil.innerHTML = html;
+                        hasil.classList.remove('opacity-50');
+                        window.initDenah?.(hasil);
+                        window.history.replaceState(null, '', urlLengkap);
+                    })
+                    .catch((err) => {
+                        if (err.name !== 'AbortError') hasil.classList.remove('opacity-50');
+                    });
+            };
+
+            form.querySelectorAll('input[type="date"]').forEach((el) => {
+                el.addEventListener('change', terapkan);
+            });
+
+            form.addEventListener('submit', (e) => { e.preventDefault(); terapkan(); });
+        })();
+    </script>
 @endsection

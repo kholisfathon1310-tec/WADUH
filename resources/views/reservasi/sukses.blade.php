@@ -13,12 +13,17 @@
         <div class="sukses-ic mx-auto mb-3" style="width:5.2rem;height:5.2rem;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#e2f7ef,#d4f2e5);color:#0d8a5f;font-size:2.5rem;">
             <i class="bi bi-check-lg"></i>
         </div>
-        <h1 class="h4 mb-2">Reservasi Berhasil Diajukan 🎉</h1>
+        <h1 class="h4 mb-2">Reservasi Berhasil Diajukan</h1>
         <p class="text-muted">Status awal <span class="badge text-bg-warning">Menunggu</span> persetujuan admin. Simpan kode berikut untuk mengecek status kapan saja.</p>
 
         <div class="sukses-kode p-4 rounded-4 my-3" style="background:var(--surface); border:1.5px dashed #b8cad5;">
             <span class="text-muted small d-block mb-1">Kode Reservasi Anda</span>
-            <div class="display-6 fw-bold mb-1" style="color:var(--primary); letter-spacing:.08em;">{{ $checkout['kode_transaksi'] }}</div>
+            <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mb-1">
+                <div class="display-6 fw-bold mb-0" style="color:var(--primary); letter-spacing:.08em;">{{ $checkout['kode_transaksi'] }}</div>
+                <button type="button" class="btn btn-sm btn-brand-outline" data-salin="{{ $checkout['kode_transaksi'] }}">
+                    <i class="bi bi-clipboard me-1"></i>Salin
+                </button>
+            </div>
             @if (count($checkout['kode_reservasi']) > 1)
                 <span class="text-muted small">Satu kode untuk {{ count($checkout['kode_reservasi']) }} ruangan yang Anda pesan.</span>
             @endif

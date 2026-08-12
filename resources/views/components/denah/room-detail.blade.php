@@ -18,8 +18,8 @@
         <p class="dn-detail-nama" data-dd-nama></p>
 
         <dl class="dn-detail-specs">
-            <div><dt><i class="bi bi-aspect-ratio"></i>Luas</dt><dd data-dd-luas>&mdash;</dd></div>
-            <div><dt><i class="bi bi-people"></i>Kapasitas</dt><dd data-dd-kapasitas>&mdash;</dd></div>
+            <div><dt><i class="bi bi-aspect-ratio"></i>Luas</dt><dd data-dd-luas>-</dd></div>
+            <div><dt><i class="bi bi-people"></i>Kapasitas</dt><dd data-dd-kapasitas>-</dd></div>
         </dl>
 
         <div class="dn-detail-harga" data-dd-harga-wrap hidden>

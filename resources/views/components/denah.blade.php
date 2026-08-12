@@ -187,10 +187,13 @@
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // window.initDenah — bisa dipanggil ulang setelah konten denah diganti via AJAX
+        // (filter interaktif), bukan cuma sekali saat DOMContentLoaded.
+        window.initDenah = function (root) {
             const fmtRupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
 
-            document.querySelectorAll('[data-denah]').forEach(wrap => {
+            (root || document).querySelectorAll('[data-denah]:not([data-denah-siap])').forEach(wrap => {
+                wrap.setAttribute('data-denah-siap', '1');
                 const clickable = wrap.dataset.clickable === '1';
                 const link = wrap.dataset.link || null;
                 const dipilih = new Map(); // id -> {label, kode}
@@ -244,8 +247,8 @@
                     detail.querySelector('[data-dd-status]').className = 'dn-detail-status ' + st;
                     detail.querySelector('[data-dd-kode]').textContent = room.dataset.kode;
                     detail.querySelector('[data-dd-nama]').textContent = room.dataset.nama || '';
-                    detail.querySelector('[data-dd-luas]').textContent = room.dataset.luas ? (room.dataset.luas.replace('.', ',') + ' m²') : '—';
-                    detail.querySelector('[data-dd-kapasitas]').textContent = room.dataset.kapasitas ? (room.dataset.kapasitas + ' orang') : '—';
+                    detail.querySelector('[data-dd-luas]').textContent = room.dataset.luas ? (room.dataset.luas.replace('.', ',') + ' m²') : '-';
+                    detail.querySelector('[data-dd-kapasitas]').textContent = room.dataset.kapasitas ? (room.dataset.kapasitas + ' orang') : '-';
 
                     const hargaWrap = detail.querySelector('[data-dd-harga-wrap]');
                     if (room.dataset.harga) {
@@ -304,8 +307,8 @@
                     const ttStatus = tooltip.querySelector('[data-tt-status]');
                     ttStatus.textContent = room.dataset.statusLabel || '';
                     ttStatus.className = 'dn-tt-status ' + st;
-                    tooltip.querySelector('[data-tt-luas]').textContent = room.dataset.luas ? (room.dataset.luas.replace('.', ',') + ' m²') : '—';
-                    tooltip.querySelector('[data-tt-kap]').textContent = (room.dataset.kapasitas || '—') + ' orang';
+                    tooltip.querySelector('[data-tt-luas]').textContent = room.dataset.luas ? (room.dataset.luas.replace('.', ',') + ' m²') : '-';
+                    tooltip.querySelector('[data-tt-kap]').textContent = (room.dataset.kapasitas || '-') + ' orang';
 
                     const hargaRow = tooltip.querySelector('[data-tt-harga-row]');
                     if (room.dataset.harga) {
@@ -319,6 +322,9 @@
                     if (clickable && st !== 'merah') {
                         hint.hidden = false;
                         hint.textContent = 'Klik untuk memilih';
+                    } else if (!clickable && link) {
+                        hint.hidden = false;
+                        hint.textContent = 'Klik untuk lihat detail';
                     } else {
                         hint.hidden = true;
                     }
@@ -334,7 +340,10 @@
                     room.addEventListener('mousemove', evt => positionTooltip(evt));
                     room.addEventListener('mouseleave', hideTooltip);
 
-                    if (room.dataset.st === 'merah') return; // merah tidak merespons klik (aturan lama, tidak berubah)
+                    // Merah tidak bisa dipilih pemesan (mode clickable), tapi admin (mode read-only)
+                    // tetap boleh membuka detail ruangan merah untuk lihat siapa pemesannya.
+                    if (room.dataset.st === 'merah' && clickable) return;
+                    if (room.dataset.st === 'merah' && !link) return;
 
                     room.classList.add('klik');
                     room.addEventListener('click', () => {
@@ -355,7 +364,8 @@
                     });
                 });
             });
-        });
+        };
+        document.addEventListener('DOMContentLoaded', () => window.initDenah());
     </script>
     @endonce
 @endif

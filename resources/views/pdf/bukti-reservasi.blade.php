@@ -73,7 +73,7 @@
             <td style="width:44px;"><div class="brand-mark">W</div></td>
             <td>
                 <div class="brand-name">WADUH<span class="t">.</span></div>
-                <div class="brand-sub">BITC Cimahi Techno Park &mdash; Baros Information Technology Creative Centre</div>
+                <div class="brand-sub">BITC Cimahi Techno Park (Baros Information Technology Creative Centre)</div>
             </td>
             <td class="hdr-right">
                 Wadah Akses Digital Unit Hunian<br>

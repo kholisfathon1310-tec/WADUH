@@ -79,7 +79,7 @@
         <div class="xcard p-5 text-center mx-auto" style="max-width:560px;">
             <div class="icon-tile mx-auto mb-3" style="background:#fff4d6; color:#9a6b00;"><i class="bi bi-search"></i></div>
             <h1 class="h5 mb-2">Kode <span style="color:var(--primary)">{{ $kode }}</span> tidak ditemukan</h1>
-            <p class="text-muted small mb-4">Pastikan kode diketik lengkap beserta awalannya — <strong>TRX-</strong> untuk satu pemesanan utuh atau <strong>RSV-</strong> untuk satu ruangan. Huruf besar/kecil tidak berpengaruh, namun tanda hubung harus ikut ditulis.</p>
+            <p class="text-muted small mb-4">Pastikan kode diketik lengkap beserta awalannya, yaitu <strong>TRX-</strong> untuk satu pemesanan utuh atau <strong>RSV-</strong> untuk satu ruangan. Huruf besar dan huruf kecil tidak berpengaruh, namun tanda hubung harus ikut ditulis.</p>
             <div class="d-flex justify-content-center gap-2 flex-wrap">
                 <a href="{{ route('cek-status.form') }}" class="btn btn-brand px-4"><i class="bi bi-arrow-counterclockwise me-1"></i>Coba Lagi</a>
                 <a href="{{ route('reservasi.index') }}" class="btn btn-brand-outline px-4">Buat Reservasi Baru</a>
@@ -197,10 +197,10 @@
                             @elseif ($status === 'Dibatalkan')
                                 <div class="rs-alasan batal mt-2">
                                     <i class="bi bi-slash-circle flex-shrink-0 mt-1"></i>
-                                    <div>Reservasi ini telah dibatalkan{{ $alasan ? ' — ' . $alasan : ' oleh pemesan.' }}</div>
+                                    <div>Reservasi ini telah dibatalkan{{ $alasan ? '. '.$alasan : ' oleh pemesan.' }}</div>
                                 </div>
                             @elseif ($status === 'Disetujui' && $r->tanggal_diproses)
-                                <div class="small mt-2" style="color:#0d8a5f"><i class="bi bi-patch-check-fill me-1"></i>Disetujui pada {{ $r->tanggal_diproses->translatedFormat('d M Y H:i') }} — tunjukkan kode reservasi Anda saat datang.</div>
+                                <div class="small mt-2" style="color:#0d8a5f"><i class="bi bi-patch-check-fill me-1"></i>Disetujui pada {{ $r->tanggal_diproses->translatedFormat('d M Y H:i') }}. Tunjukkan kode reservasi Anda saat datang.</div>
                             @endif
 
                             {{-- Jadwal --}}
@@ -220,7 +220,7 @@
                                             $vClass = ['Menunggu' => 'menunggu', 'Valid' => 'valid', 'Tidak Valid' => 'tidak-valid'][$vs] ?? 'menunggu';
                                             $vIkon = ['Menunggu' => 'bi-hourglass-split', 'Valid' => 'bi-check-circle-fill', 'Tidak Valid' => 'bi-x-circle-fill'][$vs] ?? 'bi-hourglass-split';
                                         @endphp
-                                        <span class="dok-chip {{ $vClass }}" title="{{ $dok->nama_file }} — {{ $vs }}">
+                                        <span class="dok-chip {{ $vClass }}" title="{{ $dok->nama_file }} ({{ $vs }})">
                                             <i class="bi {{ $vIkon }}"></i>{{ $dok->jenis_dokumen }}
                                         </span>
                                     @endforeach
@@ -284,17 +284,4 @@
             <a href="{{ route('cek-status.form') }}" class="btn btn-brand-outline btn-sm px-4"><i class="bi bi-search me-1"></i>Cek Kode Lain</a>
         </div>
     @endif
-
-    <script>
-        // Tombol salin kode — umpan balik langsung di tombol, tanpa ketergantungan pustaka.
-        document.querySelectorAll('[data-salin]').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                try { await navigator.clipboard.writeText(btn.dataset.salin); }
-                catch { /* clipboard tidak tersedia (mis. non-HTTPS) */ }
-                const asli = btn.innerHTML;
-                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Tersalin!';
-                setTimeout(() => { btn.innerHTML = asli; }, 1800);
-            });
-        });
-    </script>
 @endsection

@@ -25,7 +25,7 @@
         </div>
         <div class="col-lg-7" data-reveal>
             <div class="xcard h-100">
-                <div class="xhead"><span><i class="bi bi-calendar-week me-1"></i>Reservasi aktif — {{ $slot['tanggal_mulai'] }}@if($slot['tanggal_selesai'] !== $slot['tanggal_mulai']) → {{ $slot['tanggal_selesai'] }}@endif</span></div>
+                <div class="xhead"><span><i class="bi bi-calendar-week me-1"></i>Reservasi Aktif Tanggal {{ $slot['tanggal_mulai'] }}@if($slot['tanggal_selesai'] !== $slot['tanggal_mulai']) sampai {{ $slot['tanggal_selesai'] }}@endif</span></div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0 align-middle">
                         <thead><tr><th>Kode</th><th>Pemesan</th><th>Periode</th><th>Status</th></tr></thead>

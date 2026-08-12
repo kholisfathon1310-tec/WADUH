@@ -12,7 +12,7 @@
 <div class="jampicker {{ $kecil ? 'jam-kecil' : '' }}" data-jampicker>
     <input type="hidden" name="{{ $name }}" value="{{ $value }}" @if($required) required @endif>
     <button type="button" class="form-control {{ $kecil ? 'form-control-sm' : '' }} jam-btn {{ $labelTerpilih ? '' : 'jam-kosong' }}">
-        <i class="bi bi-clock me-1"></i><span class="jam-label">{{ $labelTerpilih ?? '— pilih jam —' }}</span>
+        <i class="bi bi-clock me-1"></i><span class="jam-label">{{ $labelTerpilih ?? 'Pilih jam' }}</span>
         <i class="bi bi-chevron-down jam-caret"></i>
     </button>
     <div class="jam-panel">

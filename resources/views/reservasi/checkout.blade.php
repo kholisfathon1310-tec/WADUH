@@ -18,14 +18,14 @@
     </div>
 
     <div class="row g-4">
-        {{-- Ringkasan keranjang --}}
+        {{-- Ringkasan keranjang — sticky supaya tetap terlihat saat form di kanan digulir --}}
         <div class="col-lg-5" data-reveal>
-            <div class="xcard overflow-hidden">
+            <div class="xcard overflow-hidden" style="position:sticky; top:5.5rem;">
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background:var(--surface)">
                     <span class="fw-bold"><i class="bi bi-cart3 me-1"></i>Keranjang ({{ count($items) }})</span>
                     <a href="{{ route('reservasi.index') }}" class="btn btn-brand-outline btn-sm"><i class="bi bi-plus-lg"></i> Tambah fasilitas</a>
                 </div>
-                <ul class="list-group list-group-flush">
+                <ul class="list-group list-group-flush" style="max-height:26rem; overflow-y:auto;">
                     @foreach ($items as $index => $item)
                         <li class="list-group-item p-3">
                             <div class="d-flex justify-content-between gap-2">
@@ -61,7 +61,9 @@
         <div class="col-lg-7" data-reveal>
             <div class="xcard p-4">
                 <h2 class="h5 mb-3"><i class="bi bi-person-vcard me-1"></i>Data Diri Pemesan</h2>
-                <form method="POST" action="{{ route('reservasi.checkout') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('reservasi.checkout') }}" enctype="multipart/form-data"
+                      data-confirm="Reservasi akan dikirim untuk diverifikasi admin. Pastikan data & jadwal sudah benar."
+                      data-confirm-title="Kirim reservasi ini?" data-icon="question" data-confirm-text="Ya, kirim">
                     @csrf
                     <div class="row">
                         <div class="col-md-7 mb-3"><label class="form-label">Nama lengkap</label><input name="nama_lengkap" class="form-control" placeholder="Nama sesuai identitas" value="{{ old('nama_lengkap') }}" required></div>
@@ -75,24 +77,20 @@
                     <div class="mb-3"><label class="form-label">Alamat</label><textarea name="alamat" class="form-control" rows="2" required>{{ old('alamat') }}</textarea></div>
 
                     @if ($hasBulan)
+                        @php $ruangBulan = collect($items)->where('satuan', 'Bulan')->pluck('nama_fasilitas'); @endphp
                         <div class="p-3 rounded-4 mb-3" style="background:#fff8e6; border:1px solid #f1e3b8;">
-                            <p class="fw-bold small mb-1"><i class="bi bi-paperclip me-1"></i>Dokumen Persyaratan — wajib untuk sewa Bulanan</p>
-                            <p class="text-muted small mb-2">Company Profile / legalitas perusahaan / fotokopi KTP penanggung jawab (PDF, JPG, PNG, maks 5 MB per file).</p>
-                            @foreach ($items as $index => $item)
-                                @if ($item['satuan'] === 'Bulan')
-                                    <div class="mb-2" data-dok-group="{{ $index }}">
-                                        <label class="form-label small mb-1">Dokumen untuk: <strong>{{ $item['nama_fasilitas'] }}</strong></label>
-                                        <input type="file" name="dokumen[{{ $index }}][]" class="form-control form-control-sm mb-1" accept=".pdf,.jpg,.jpeg,.png" multiple required>
-                                        <button type="button" class="btn btn-sm btn-brand-outline" onclick="tambahFile({{ $index }})"><i class="bi bi-plus-lg me-1"></i>Tambah file lain</button>
-                                    </div>
-                                @endif
-                            @endforeach
+                            <p class="fw-bold small mb-1"><i class="bi bi-paperclip me-1"></i>Dokumen Persyaratan (Wajib untuk Sewa Bulanan)</p>
+                            <p class="text-muted small mb-2">Company Profile, legalitas perusahaan, atau fotokopi KTP penanggung jawab (PDF, JPG, PNG, maksimal 5 MB per file). Dokumen ini berlaku untuk {{ $ruangBulan->count() > 1 ? 'semua ruangan bulanan (' . $ruangBulan->implode(', ') . ')' : $ruangBulan->first() }} pada pemesanan ini, cukup diunggah sekali.</p>
+                            <div class="mb-2" data-dok-group>
+                                <input type="file" name="dokumen[]" class="form-control form-control-sm mb-1" accept=".pdf,.jpg,.jpeg,.png" multiple required>
+                                <button type="button" class="btn btn-sm btn-brand-outline" onclick="tambahFile()"><i class="bi bi-plus-lg me-1"></i>Tambah file lain</button>
+                            </div>
                             <script>
                                 // Tambah input file baru agar pemesan mudah melampirkan beberapa dokumen.
-                                function tambahFile(index) {
-                                    const group = document.querySelector('[data-dok-group="' + index + '"]');
+                                function tambahFile() {
+                                    const group = document.querySelector('[data-dok-group]');
                                     const input = document.createElement('input');
-                                    input.type = 'file'; input.name = 'dokumen[' + index + '][]';
+                                    input.type = 'file'; input.name = 'dokumen[]';
                                     input.className = 'form-control form-control-sm mb-1';
                                     input.accept = '.pdf,.jpg,.jpeg,.png'; input.multiple = true;
                                     group.insertBefore(input, group.lastElementChild);

@@ -37,6 +37,11 @@ class MonitoringController extends Controller
                 : 'merah', // Tidak Aktif selalu merah (tidak bisa dipesan).
         ]);
 
+        // Filter interaktif: request AJAX cukup dibalas fragmen denah, tanpa layout.
+        if ($request->ajax()) {
+            return view('admin.monitoring.partials.hasil', compact('lantai', 'fasilitas', 'status', 'slot'));
+        }
+
         return view('admin.monitoring.index', compact('daftarLantai', 'lantai', 'fasilitas', 'status', 'slot'));
     }
 

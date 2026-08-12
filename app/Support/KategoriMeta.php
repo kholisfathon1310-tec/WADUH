@@ -11,7 +11,7 @@ class KategoriMeta
     private const META = [
         'Working Space' => [
             'ikon'   => 'bi-briefcase',
-            'warna'  => '#2f7fd1',
+            'warna'  => '#176b87',
             'desk'   => 'Ruang kerja privat untuk instansi & perusahaan.',
             'lokasi' => 'Lantai 1 & 2',
             'gambar' => 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1000&q=80',
@@ -19,7 +19,7 @@ class KategoriMeta
         ],
         'Co-Working Space' => [
             'ikon'   => 'bi-people',
-            'warna'  => '#7c5cd6',
+            'warna'  => '#176b87',
             'desk'   => 'Kubikal & ruang bersama yang fleksibel untuk startup.',
             'lokasi' => 'Lantai 3A & 3B',
             'gambar' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80',
@@ -27,7 +27,7 @@ class KategoriMeta
         ],
         'Convention Hall' => [
             'ikon'   => 'bi-bank',
-            'warna'  => '#d6527c',
+            'warna'  => '#176b87',
             'desk'   => 'Aula besar untuk event, seminar, dan konvensi.',
             'lokasi' => 'Lantai 5',
             'gambar' => 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1000&q=80',

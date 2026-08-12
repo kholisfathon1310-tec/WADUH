@@ -25,12 +25,15 @@ class AuthController extends Controller
         if (! Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
             return back()
                 ->withInput($request->only('email'))
-                ->with('error', 'Email atau password salah.');
+                ->with('error', 'Email atau kata sandi salah.');
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard'));
+        $nama = Auth::guard('admin')->user()?->nama_admin;
+
+        return redirect()->intended(route('admin.dashboard'))
+            ->with('success', "Selamat datang, {$nama}!");
     }
 
     public function logout(Request $request): RedirectResponse
@@ -39,6 +42,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login')->with('success', 'Anda telah keluar.');
+        return redirect()->route('admin.login');
     }
 }

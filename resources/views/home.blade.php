@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="WADUH — Wadah Akses Digital Unit Hunian BITC. Reservasi Working Space, Co-Working Space, dan Convention Hall Gedung BITC Cimahi secara online.">
+    <meta name="description" content="WADUH, Wadah Akses Digital Unit Hunian BITC. Reservasi Working Space, Co-Working Space, dan Convention Hall Gedung BITC Cimahi secara online.">
     <title>WADUH | Wadah Akses Digital Unit Hunian BITC</title>
     <link href="{{ asset('vendor/fonts/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
@@ -413,7 +413,7 @@
 <nav id="mainNav" class="navbar navbar-expand-lg fixed-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="#beranda">
-            <img src="{{ asset('images/logo_bitc.png') }}" alt="BITC — Baros Information Technology Creative Center" class="brand-logo">
+            <img src="{{ asset('images/logo_bitc.png') }}" alt="BITC (Baros Information Technology Creative Center)" class="brand-logo">
         </a>
         <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"><i class="bi bi-list fs-2"></i></button>
         <div id="navbarMenu" class="collapse navbar-collapse">
@@ -454,7 +454,7 @@
                 <div class="col-lg-7" data-reveal>
                     <span class="badge-hero mb-4"><i class="bi bi-stars"></i>Wadah Akses Digital Unit Hunian BITC</span>
                     <h1>Reservasi ruang di <span class="grad">Gedung BITC</span>, semudah beberapa klik.</h1>
-                    <p class="lead-copy">WADUH adalah layanan resmi reservasi fasilitas <strong>Baros Information Technology Creative Center (BITC)</strong> — mulai dari kubikal co-working, ruang kerja privat, sampai convention hall. Pilih ruang, atur jadwal, pantau status. Tanpa antrian.</p>
+                    <p class="lead-copy">WADUH adalah layanan resmi reservasi fasilitas <strong>Baros Information Technology Creative Center (BITC)</strong>, mulai dari kubikal co-working, ruang kerja privat, hingga convention hall. Pemesanan dilakukan secara online tanpa perlu antre di lokasi.</p>
                     <div class="d-flex flex-wrap gap-3 mt-4">
                         <a href="{{ route('reservasi.index') }}" class="btn-hero solid">Reservasi Sekarang <i class="bi bi-arrow-up-right"></i></a>
                         <a href="{{ route('cek-status.form') }}" class="btn-hero ghost"><i class="bi bi-search"></i> Cek Status Reservasi</a>
@@ -701,7 +701,7 @@
      ══════════════════════════════════════════════════════════════ --}}
 <footer class="site-footer">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <span><strong style="color:var(--ink)">WADUH</strong> — Wadah Akses Digital Unit Hunian BITC · UPTD Cimahi Techno Park</span>
+        <span><strong style="color:var(--ink)">WADUH</strong> · Wadah Akses Digital Unit Hunian BITC · UPTD Cimahi Techno Park</span>
         <div class="d-flex gap-3">
             <a href="#tentang">Tentang</a>
             <a href="#fasilitas">Fasilitas</a>

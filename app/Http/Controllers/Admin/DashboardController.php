@@ -7,6 +7,7 @@ use App\Enums\StatusReservasi;
 use App\Http\Controllers\Controller;
 use App\Models\Fasilitas;
 use App\Models\Reservasi;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -39,6 +40,27 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('admin.dashboard', compact('statistik', 'fasilitasPerKategori', 'terbaru'));
+        // Tren reservasi 7 hari terakhir (termasuk hari ini) — untuk bar chart di dashboard.
+        // Diagregasi per DATE(created_at) lalu di-pad ke tanggal yang hilang supaya bar
+        // selalu berjumlah tujuh, meskipun hari itu tidak ada reservasi.
+        $mulai = now()->startOfDay()->subDays(6);
+        $countPerHari = Reservasi::query()
+            ->where('created_at', '>=', $mulai)
+            ->selectRaw('DATE(created_at) as tgl, COUNT(*) as jumlah')
+            ->groupBy('tgl')
+            ->pluck('jumlah', 'tgl');
+
+        $trend7Hari = collect(range(0, 6))->map(function ($i) use ($mulai, $countPerHari) {
+            $tgl = $mulai->copy()->addDays($i);
+            $key = $tgl->toDateString();
+
+            return [
+                'tanggal' => $tgl,
+                'label'   => $tgl->translatedFormat('D'),   // Sen, Sel, ...
+                'jumlah'  => (int) ($countPerHari[$key] ?? 0),
+            ];
+        })->all();
+
+        return view('admin.dashboard', compact('statistik', 'fasilitasPerKategori', 'terbaru', 'trend7Hari'));
     }
 }

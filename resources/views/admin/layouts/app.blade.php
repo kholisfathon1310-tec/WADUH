@@ -23,47 +23,92 @@
         [data-reveal] { animation:riseIn .5s cubic-bezier(.2,.7,.3,1) both; }
         @media (prefers-reduced-motion: reduce) { [data-reveal] { animation:none; } }
 
-        /* Frame */
+        /* Frame — konsep BARU: sidebar terang, topbar flush (bukan pill mengambang) */
         .frame { display:flex; min-height:100vh; }
-        .sidebar { width:272px; flex:none; background:linear-gradient(190deg,var(--side),var(--side2) 70%); color:#cbd5e1; display:flex; flex-direction:column;
-            position:sticky; top:0; height:100vh; overflow-y:auto; box-shadow:6px 0 28px -18px rgba(8,15,25,.5); }
-        .sidebar::-webkit-scrollbar { width:6px; } .sidebar::-webkit-scrollbar-thumb { background:#26405c; border-radius:3px; }
+        .sidebar { width:268px; flex:none; background:#fff; border-right:1px solid var(--line); color:var(--ink); display:flex; flex-direction:column;
+            position:sticky; top:0; height:100vh; overflow-y:auto; z-index:1046; transition:width .22s ease; }
+        .sidebar::-webkit-scrollbar { width:6px; } .sidebar::-webkit-scrollbar-thumb { background:#dbe4ec; border-radius:3px; }
         .content { flex:1; min-width:0; display:flex; flex-direction:column; }
-        @media (max-width: 991.98px) { .sidebar { position:fixed; z-index:1045; left:-280px; transition:left .25s; height:100vh; } .sidebar.open { left:0; box-shadow:0 0 0 100vmax rgba(8,15,25,.55); } }
+        .backdrop { display:none; }
+        @media (max-width: 991.98px) {
+            .sidebar { position:fixed; left:-280px; transition:left .25s ease; height:100vh; box-shadow:14px 0 40px -20px rgba(15,23,42,.25); }
+            .sidebar.open { left:0; }
+            .backdrop { display:none; position:fixed; inset:0; background:rgba(8,15,25,.5); backdrop-filter:blur(2px); z-index:1044; opacity:0; transition:opacity .25s ease; }
+            .backdrop.show { display:block; opacity:1; }
+        }
+
+        /* Sidebar diciutkan (desktop) — hanya ikon, teks & submenu disembunyikan. */
+        @media (min-width: 992px) {
+            body.sidebar-collapsed .sidebar { width:84px; }
+            body.sidebar-collapsed .side-brand { padding:1.5rem .5rem 1.2rem; justify-content:center; }
+            body.sidebar-collapsed .side-brand .brand-font { display:none; }
+            body.sidebar-collapsed .side-section { display:none; }
+            body.sidebar-collapsed .side-link { justify-content:center; padding:.62rem; }
+            body.sidebar-collapsed .side-link .lbl,
+            body.sidebar-collapsed .side-link .caret,
+            body.sidebar-collapsed .side-link .badge { display:none; }
+            body.sidebar-collapsed .side-sub { display:none !important; }
+            body.sidebar-collapsed .side-foot { display:none; }
+        }
+        .collapse-toggle-btn { border:none; background:var(--surface); border-radius:.7rem; padding:.35rem .6rem; transition:background .15s, color .15s; flex:none; color:#4b5a6e; }
+        .collapse-toggle-btn:hover { background:#e9eff4; color:var(--primary-dark); }
+        .collapse-toggle-btn i { transition:transform .22s ease; }
+        body.sidebar-collapsed .collapse-toggle-btn i { transform:rotate(180deg); }
 
         /* Sidebar */
-        .side-brand { display:flex; align-items:center; gap:.65rem; padding:1.4rem 1.4rem; color:#fff; text-decoration:none; font-weight:800; font-size:1.1rem; }
-        .side-brand .brand-mark { display:inline-grid; width:2.4rem; height:2.4rem; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.85rem; box-shadow:0 8px 18px rgba(23,107,135,.4); }
-        .side-brand small { display:block; font-size:.6rem; font-weight:600; color:#7f93ab; letter-spacing:.1em; text-transform:uppercase; }
-        .side-section { padding:1.2rem 1.4rem .5rem; font-size:.64rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#546b84; }
-        .side-nav { list-style:none; margin:0; padding:0 .9rem; }
-        .side-link { display:flex; align-items:center; gap:.7rem; padding:.68rem .8rem; margin:.2rem 0; color:#c3cfdc; text-decoration:none; border-radius:.9rem; font-weight:600; font-size:.9rem; transition:background .18s ease, color .18s ease, transform .18s ease; }
-        .side-link .mic { display:grid; place-items:center; width:2.1rem; height:2.1rem; border-radius:.7rem; font-size:.95rem; flex:none; color:#8fb7c9; background:rgba(255,255,255,.06); transition:all .18s ease; }
-        .side-link:hover { color:#fff; background:rgba(255,255,255,.08); transform:translateX(3px); }
-        .side-link.active { color:#fff; background:linear-gradient(90deg,rgba(23,107,135,.5),rgba(36,170,154,.18)); box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
-        .side-link.active .mic { color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); box-shadow:0 6px 16px rgba(10,40,55,.4); }
-        .side-link .caret { margin-left:auto; transition:transform .2s; font-size:.72rem; opacity:.7; }
+        .side-brand { display:flex; align-items:center; gap:.7rem; padding:1.5rem 1.4rem 1.2rem; color:var(--ink); text-decoration:none; font-weight:800; font-size:1.05rem; border-bottom:1px solid var(--line); margin-bottom:.6rem; }
+        .side-brand .brand-mark { display:inline-grid; width:2.35rem; height:2.35rem; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.85rem; box-shadow:0 8px 18px rgba(23,107,135,.3); flex:none; }
+        .side-brand small { display:block; font-size:.58rem; font-weight:600; color:var(--muted); letter-spacing:.09em; text-transform:uppercase; }
+        .side-section { padding:1rem 1.4rem .5rem; font-size:.62rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#94a3b8; }
+        .side-nav { list-style:none; margin:0; padding:0 .85rem; display:flex; flex-direction:column; gap:.2rem; }
+        .side-link { position:relative; display:flex; align-items:center; gap:.7rem; padding:.62rem .8rem; color:#4b5a6e; text-decoration:none; border-radius:.85rem; font-weight:600; font-size:.88rem; transition:background .18s ease, color .18s ease; }
+        .side-link::before { content:''; position:absolute; left:-.85rem; top:50%; translate:0 -50%; width:3px; height:0; background:linear-gradient(180deg,var(--primary),var(--teal)); border-radius:0 3px 3px 0; transition:height .18s ease; }
+        .side-link .mic { display:grid; place-items:center; width:2rem; height:2rem; border-radius:.65rem; font-size:.92rem; flex:none; color:#7c8ba1; background:var(--surface); transition:all .18s ease; }
+        .side-link:hover { color:var(--primary-dark); background:var(--surface); }
+        .side-link.active { color:var(--primary-dark); background:linear-gradient(90deg,rgba(23,107,135,.1),rgba(36,170,154,.05)); }
+        .side-link.active::before { height:1.35rem; }
+        .side-link.active .mic { color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); box-shadow:0 6px 14px -4px rgba(23,107,135,.45); }
+        .side-link .caret { margin-left:auto; transition:transform .2s; font-size:.68rem; opacity:.6; }
         .side-link[aria-expanded="true"] .caret { transform:rotate(90deg); }
-        .side-sub { list-style:none; margin:.2rem 0 .5rem; padding:0 0 0 2.4rem; }
-        .side-sub a { display:flex; align-items:center; gap:.55rem; padding:.46rem .8rem; margin:.1rem 0; color:#93a5ba; text-decoration:none; border-left:2px solid rgba(255,255,255,.1); border-radius:0 .7rem .7rem 0; font-size:.85rem; font-weight:500; transition:all .18s ease; }
-        .side-sub a:hover { color:#fff; background:rgba(255,255,255,.05); }
-        .side-sub a.active { color:#fff; border-left-color:var(--teal); background:rgba(255,255,255,.07); font-weight:700; }
+        .side-sub { list-style:none; margin:.15rem 0 .4rem; padding:0 0 0 2.35rem; }
+        .side-sub a { display:flex; align-items:center; gap:.55rem; padding:.42rem .75rem; margin:.05rem 0; color:#8290a3; text-decoration:none; border-left:2px solid var(--line); border-radius:0 .65rem .65rem 0; font-size:.82rem; font-weight:500; transition:all .18s ease; }
+        .side-sub a:hover { color:var(--primary-dark); background:var(--surface); }
+        .side-sub a.active { color:var(--primary-dark); border-left-color:var(--teal); background:var(--primary-soft, #e6f2f4); font-weight:700; }
         .side-sub .badge { margin-left:auto; }
-        .side-foot { margin-top:auto; padding:1rem 1.1rem 1.25rem; }
-        .admin-card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:1.2rem; padding:1.05rem; }
-        .admin-chip { display:flex; align-items:center; gap:.65rem; margin-bottom:.85rem; }
-        .admin-chip .avatar { display:grid; place-items:center; width:2.4rem; height:2.4rem; border-radius:.8rem; background:linear-gradient(135deg,var(--primary),var(--teal)); color:#fff; font-weight:800; }
-        .admin-chip small { color:#7f93ab; font-size:.72rem; }
+        .side-foot { margin-top:auto; padding:.9rem 1.1rem 1.1rem; font-size:.68rem; color:var(--muted); text-align:center; letter-spacing:.03em; border-top:1px solid var(--line); }
 
-        /* Topbar */
-        .topbar { background:rgba(255,255,255,.9); backdrop-filter:blur(14px); border:1px solid var(--line); box-shadow:0 10px 26px -18px rgba(21,36,59,.2);
-            border-radius:1.25rem; margin:1rem 1.5rem 0; padding:.9rem 1.3rem; display:flex; align-items:center; gap:1rem; position:sticky; top:1rem; z-index:1020; }
-        .topbar h1 { font-size:1.15rem; font-weight:800; margin:0; }
-        .topbar .crumb { font-size:.72rem; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
-        .burger { border:1px solid var(--line); background:#fff; border-radius:.7rem; padding:.35rem .6rem; transition:background .15s, border-color .15s; }
-        .burger:hover { background:var(--surface); border-color:#c8d6e0; }
+        /* Topbar — flush, tanpa margin/rounded, menyatu dengan tepi konten */
+        .topbar { background:rgba(255,255,255,.92); backdrop-filter:blur(14px); border-bottom:1px solid var(--line);
+            padding:1rem 1.6rem; display:flex; align-items:center; gap:.9rem; position:sticky; top:0; z-index:1020; }
+        .topbar h1 { font-size:1.1rem; font-weight:800; margin:0; }
+        .topbar .crumb { font-size:.7rem; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+        .burger { border:none; background:var(--surface); border-radius:.7rem; padding:.35rem .6rem; transition:background .15s, color .15s; flex:none; color:#4b5a6e; }
+        .burger:hover { background:#e9eff4; color:var(--primary-dark); }
 
-        main.inner { padding:1.25rem 1.5rem 1.5rem; }
+        /* Bel notifikasi */
+        .bell-btn { position:relative; border:none; background:var(--surface); border-radius:.75rem; width:2.5rem; height:2.5rem; display:grid; place-items:center; color:#4b5a6e; transition:background .15s, color .15s; flex:none; }
+        .bell-btn:hover { background:#e9eff4; color:var(--primary); }
+        .bell-btn .dot { position:absolute; top:-.3rem; right:-.3rem; min-width:1.15rem; height:1.15rem; padding:0 .3rem; border-radius:2rem; background:#e5b94e; color:#3a2c00; font-size:.62rem; font-weight:800; display:grid; place-items:center; border:2px solid #fff; }
+
+        .day-chip { align-items:center; background:var(--surface); color:#4b5a6e; font-size:.78rem; font-weight:700; padding:.45rem .85rem; border-radius:.75rem; }
+
+        /* Profil admin (dropdown) */
+        .profile-btn { display:flex; align-items:center; gap:.6rem; border:none; background:var(--surface); border-radius:.9rem; padding:.35rem .7rem .35rem .35rem; transition:background .15s; }
+        .profile-btn:hover { background:#e9eff4; }
+        .profile-btn .avatar { display:grid; place-items:center; width:2.15rem; height:2.15rem; border-radius:.7rem; background:linear-gradient(135deg,var(--primary),var(--teal)); color:#fff; font-weight:800; font-size:.85rem; flex:none; }
+        .profile-btn .who { text-align:left; line-height:1.2; }
+        .profile-btn .who .nm { font-size:.82rem; font-weight:700; color:var(--ink); max-width:9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .profile-btn .who .rl { font-size:.68rem; color:var(--muted); }
+        .profile-menu { border:1px solid var(--line); border-radius:1rem; box-shadow:0 18px 40px -14px rgba(21,36,59,.25); padding:.5rem; min-width:230px; }
+        .profile-menu .pm-head { display:flex; align-items:center; gap:.65rem; padding:.55rem .6rem .75rem; border-bottom:1px solid var(--line); margin-bottom:.4rem; }
+        .profile-menu .pm-head .avatar { display:grid; place-items:center; width:2.4rem; height:2.4rem; border-radius:.8rem; background:linear-gradient(135deg,var(--primary),var(--teal)); color:#fff; font-weight:800; flex:none; }
+        .profile-menu .pm-head .nm { font-weight:700; font-size:.85rem; color:var(--ink); }
+        .profile-menu .pm-head .em { font-size:.72rem; color:var(--muted); word-break:break-all; }
+        .profile-menu .dropdown-item { border-radius:.65rem; padding:.5rem .6rem; font-size:.85rem; font-weight:600; color:#3c4a5f; }
+        .profile-menu .dropdown-item:hover { background:var(--surface); color:var(--primary-dark); }
+        .profile-menu .dropdown-item.text-danger:hover { background:#fdf1f1; color:#c02929 !important; }
+
+        main.inner { padding:1.5rem 1.6rem 1.75rem; }
 
         /* Components */
         .xcard { background:#fff; border:1px solid var(--line); border-radius:1.35rem; box-shadow:0 4px 18px -4px rgba(21,60,73,.07); transition:box-shadow .2s ease, transform .2s ease; }
@@ -113,6 +158,10 @@
     </style>
 </head>
 <body>
+<script>
+    // Terapkan status ciut/lebar sidebar sebelum konten dirender, biar tidak "kedip" saat load.
+    if (localStorage.getItem('adminSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed');
+</script>
 @php
     $me = Auth::guard('admin')->user();
     $sideLantai = \App\Models\Lantai::orderBy('id_lantai')->get(['id_lantai', 'nomor_lantai']);
@@ -132,16 +181,16 @@
         <div class="side-section">Menu Utama</div>
         <ul class="side-nav">
             <li>
-                <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                    <span class="mic"><i class="bi bi-speedometer2"></i></span> Dashboard
+                <a class="side-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}" title="Dashboard">
+                    <span class="mic"><i class="bi bi-speedometer2"></i></span> <span class="lbl">Dashboard</span>
                 </a>
             </li>
 
             <li>
                 <a class="side-link {{ request()->routeIs('admin.monitoring*') ? 'active' : '' }}" data-bs-toggle="collapse" href="#subMonitoring"
-                   aria-expanded="{{ request()->routeIs('admin.monitoring*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.monitoring*') ? 'true' : 'false' }}" title="Monitoring">
                     <span class="mic"><i class="bi bi-grid-3x3-gap"></i></span>
-                    Monitoring <i class="bi bi-chevron-right caret"></i>
+                    <span class="lbl">Monitoring</span> <i class="bi bi-chevron-right caret"></i>
                 </a>
                 <ul class="side-sub collapse {{ request()->routeIs('admin.monitoring*') ? 'show' : '' }}" id="subMonitoring">
                     @foreach ($sideLantai as $l)
@@ -152,37 +201,29 @@
             </li>
 
             <li>
-                <a class="side-link {{ request()->routeIs('admin.reservasi*') ? 'active' : '' }}" href="{{ route('admin.reservasi.index') }}">
+                <a class="side-link {{ request()->routeIs('admin.reservasi*') ? 'active' : '' }}" href="{{ route('admin.reservasi.index') }}" title="Data Reservasi">
                     <span class="mic"><i class="bi bi-journal-check"></i></span>
-                    Data Reservasi
+                    <span class="lbl">Data Reservasi</span>
                     @if ($menungguN > 0)<span class="badge rounded-pill text-bg-warning ms-auto">{{ $menungguN }}</span>@endif
                 </a>
             </li>
 
             <li>
-                <a class="side-link {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}" href="{{ route('admin.laporan') }}">
+                <a class="side-link {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}" href="{{ route('admin.laporan') }}" title="Laporan">
                     <span class="mic"><i class="bi bi-file-earmark-bar-graph"></i></span>
-                    Laporan
+                    <span class="lbl">Laporan</span>
                 </a>
             </li>
         </ul>
 
-        <div class="side-foot">
-            <div class="admin-card">
-                <div class="admin-chip">
-                    <span class="avatar">{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}</span>
-                    <div><div class="fw-bold text-white small">{{ $me?->nama_admin }}</div><small>{{ $me?->email }}</small></div>
-                </div>
-                <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
-                    <button class="btn btn-sm btn-outline-light w-100"><i class="bi bi-box-arrow-right me-1"></i>Keluar</button>
-                </form>
-            </div>
-        </div>
+        <div class="side-foot">WADUH Admin &copy; {{ now()->year }}</div>
     </aside>
+    <div class="backdrop" id="backdrop"></div>
 
     <div class="content">
         <div class="topbar">
-            <button class="burger d-lg-none" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="bi bi-list"></i></button>
+            <button class="burger d-lg-none" id="burgerBtn"><i class="bi bi-list"></i></button>
+            <button class="collapse-toggle-btn d-none d-lg-inline-flex" id="collapseBtn" title="Ciutkan/lebarkan sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
             <button class="burger" onclick="history.back()" title="Kembali ke halaman sebelumnya"><i class="bi bi-arrow-left"></i></button>
             <div>
                 <div class="crumb">WADUH Admin</div>
@@ -190,7 +231,32 @@
             </div>
             <div class="ms-auto d-flex align-items-center gap-2">
                 @yield('actions')
-                <span class="badge text-bg-light border py-2 d-none d-md-inline"><i class="bi bi-calendar3 me-1"></i>{{ now()->translatedFormat('d M Y') }}</span>
+                <span class="day-chip d-none d-md-inline-flex"><i class="bi bi-calendar3 me-1"></i>{{ now()->translatedFormat('d M Y') }}</span>
+
+                <a href="{{ route('admin.reservasi.index', ['status' => 'Menunggu']) }}" class="bell-btn" title="Reservasi menunggu persetujuan">
+                    <i class="bi bi-bell"></i>
+                    @if ($menungguN > 0)<span class="dot">{{ $menungguN > 99 ? '99+' : $menungguN }}</span>@endif
+                </a>
+
+                <div class="dropdown">
+                    <button class="profile-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar">{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}</span>
+                        <span class="who d-none d-md-block">
+                            <div class="nm">{{ $me?->nama_admin }}</div>
+                            <div class="rl">Administrator</div>
+                        </span>
+                        <i class="bi bi-chevron-down small d-none d-md-inline" style="color:var(--muted)"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end profile-menu">
+                        <div class="pm-head">
+                            <span class="avatar">{{ strtoupper(substr($me?->nama_admin ?? 'A', 0, 1)) }}</span>
+                            <div><div class="nm">{{ $me?->nama_admin }}</div><div class="em">{{ $me?->email }}</div></div>
+                        </div>
+                        <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
+                            <button type="submit" class="dropdown-item text-danger w-100 text-start"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -199,7 +265,7 @@
                 <div class="d-flex gap-3 align-items-start p-3 mb-3 rounded-4" style="background:linear-gradient(120deg,#fdf1f1,#fff7f4); border:1px solid #f0c9c9; border-left:4px solid #d95757;">
                     <span style="display:grid;place-items:center;flex:none;width:2.5rem;height:2.5rem;border-radius:.8rem;background:#fbdddd;color:#c02929;font-size:1.2rem"><i class="bi bi-exclamation-triangle"></i></span>
                     <div>
-                        <div class="fw-bold" style="color:#a12c2c">Periksa kembali — {{ $errors->count() }} isian belum benar</div>
+                        <div class="fw-bold" style="color:#a12c2c">Periksa kembali, terdapat {{ $errors->count() }} isian belum benar</div>
                         <ul class="mb-0 mt-1 small" style="color:#7c3a3a; list-style:none; padding:0">
                             @foreach ($errors->all() as $e)<li><i class="bi bi-arrow-right-short" style="color:#d95757"></i>{{ $e }}</li>@endforeach
                         </ul>
@@ -214,14 +280,42 @@
 <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script>
-    // Toast pop-up untuk flash message
-    const toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3200, timerProgressBar: true,
-        didOpen: t => { t.onmouseenter = Swal.stopTimer; t.onmouseleave = Swal.resumeTimer; } });
+    // Sidebar mobile: buka/tutup lewat tombol burger atau tap di luar (backdrop).
+    (() => {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('backdrop');
+        const burger = document.getElementById('burgerBtn');
+        const buka = () => { sidebar.classList.add('open'); backdrop.classList.add('show'); };
+        const tutup = () => { sidebar.classList.remove('open'); backdrop.classList.remove('show'); };
+        burger.addEventListener('click', () => sidebar.classList.contains('open') ? tutup() : buka());
+        backdrop.addEventListener('click', tutup);
+        sidebar.querySelectorAll('a:not([data-bs-toggle])').forEach(a => a.addEventListener('click', tutup));
+    })();
+
+    // Sidebar desktop: ciutkan/lebarkan, status disimpan supaya tetap sama di halaman berikutnya.
+    (() => {
+        const collapseBtn = document.getElementById('collapseBtn');
+        const setCollapsed = (on) => {
+            document.body.classList.toggle('sidebar-collapsed', on);
+            localStorage.setItem('adminSidebarCollapsed', on ? '1' : '0');
+        };
+        collapseBtn.addEventListener('click', () => setCollapsed(! document.body.classList.contains('sidebar-collapsed')));
+
+        // Kalau sidebar sedang ciut, klik menu yang punya submenu (mis. Monitoring) akan
+        // melebarkan sidebar dulu supaya submenu-nya kelihatan, bukan cuma toggle tak terlihat.
+        document.querySelectorAll('#sidebar [data-bs-toggle="collapse"]').forEach(a => {
+            a.addEventListener('click', () => {
+                if (document.body.classList.contains('sidebar-collapsed')) setCollapsed(false);
+            });
+        });
+    })();
+
+    // Pop-up flash message — semua pakai modal penuh (bukan toast kecil di pojok).
     @if (session('success'))
-        toast.fire({ icon: 'success', title: @json(session('success')), iconColor: '#24aa9a' });
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: @json(session('success')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
     @endif
     @if (session('error'))
-        Swal.fire({ icon: 'error', title: 'Ups!', text: @json(session('error')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke, mengerti' });
+        Swal.fire({ icon: 'error', title: 'Gagal!', text: @json(session('error')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke, mengerti' });
     @endif
 
     // ===== Validasi klien ramah (mengganti bubble bawaan browser) =====
@@ -232,7 +326,7 @@
     };
     const pesanSalah = el => {
         const v = el.validity;
-        if (v.valueMissing) return labelDari(el) + ' masih kosong — isi dulu ya.';
+        if (v.valueMissing) return labelDari(el) + ' belum diisi.';
         if (v.typeMismatch && el.type === 'email') return 'Format email belum benar.';
         if (v.rangeUnderflow) return labelDari(el) + ' minimal ' + el.min + '.';
         if (v.rangeOverflow) return labelDari(el) + ' maksimal ' + el.max + '.';
@@ -261,32 +355,50 @@
             salah.forEach(tandai);
             salah[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => salah[0].focus({ preventScroll: true }), 350);
-            toast.fire({ icon: 'warning', title: 'Ups! ' + salah.length + ' isian belum lengkap 👇', iconColor: '#e5b94e' });
+            Swal.fire({ icon: 'warning', title: 'Periksa kembali', text: salah.length + ' isian belum lengkap.', confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
         }, true);
         f.addEventListener('input', e => bersihkan(e.target), true);
         f.addEventListener('change', e => bersihkan(e.target), true);
     });
     @if ($errors->any())
-        toast.fire({ icon: 'warning', title: 'Ups! {{ $errors->count() }} hal perlu diperbaiki 👇', iconColor: '#e5b94e' });
+        Swal.fire({ icon: 'warning', title: 'Periksa kembali', text: '{{ $errors->count() }} isian belum benar.', confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
     @endif
 
-    // Dialog konfirmasi kreatif untuk form ber-atribut data-confirm
-    document.querySelectorAll('form[data-confirm]').forEach(f => {
-        f.addEventListener('submit', e => {
-            if (f.dataset.confirmed) return;
-            e.preventDefault();
-            Swal.fire({
-                title: f.dataset.confirmTitle || 'Yakin?',
-                text: f.dataset.confirm,
-                icon: f.dataset.icon || 'question',
-                showCancelButton: true,
-                confirmButtonText: f.dataset.confirmText || 'Ya, lanjutkan',
-                cancelButtonText: 'Batal',
-                confirmButtonColor: f.dataset.confirmColor || '#176b87',
-                cancelButtonColor: '#8a97a5',
-                reverseButtons: true,
-            }).then(r => { if (r.isConfirmed) { f.dataset.confirmed = 1; f.submit(); } });
-        });
+    // Dialog konfirmasi untuk form/tautan ber-atribut data-confirm — didelegasikan ke document
+    // (bukan dipasang per elemen) supaya otomatis berlaku juga untuk konten yang disisipkan
+    // belakangan lewat AJAX (mis. hasil filter interaktif), tanpa perlu pasang ulang listener.
+    document.addEventListener('submit', e => {
+        const f = e.target.closest('form[data-confirm]');
+        if (!f || f.dataset.confirmed) return;
+        e.preventDefault();
+        Swal.fire({
+            title: f.dataset.confirmTitle || 'Yakin?',
+            text: f.dataset.confirm,
+            icon: f.dataset.icon || 'question',
+            showCancelButton: true,
+            confirmButtonText: f.dataset.confirmText || 'Ya, lanjutkan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: f.dataset.confirmColor || '#176b87',
+            cancelButtonColor: '#8a97a5',
+            reverseButtons: true,
+        }).then(r => { if (r.isConfirmed) { f.dataset.confirmed = 1; f.submit(); } });
+    });
+
+    document.addEventListener('click', e => {
+        const a = e.target.closest('a[data-confirm]');
+        if (!a) return;
+        e.preventDefault();
+        Swal.fire({
+            title: a.dataset.confirmTitle || 'Yakin?',
+            text: a.dataset.confirm,
+            icon: a.dataset.icon || 'question',
+            showCancelButton: true,
+            confirmButtonText: a.dataset.confirmText || 'Ya, lanjutkan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: a.dataset.confirmColor || '#176b87',
+            cancelButtonColor: '#8a97a5',
+            reverseButtons: true,
+        }).then(r => { if (r.isConfirmed) window.location.href = a.href; });
     });
 </script>
 </body>

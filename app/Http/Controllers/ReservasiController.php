@@ -100,6 +100,11 @@ class ReservasiController extends Controller
             $f->id_fasilitas => $this->availability->statusFasilitas($f, $slot, $sessionId),
         ]);
 
+        // Filter interaktif: request AJAX cukup dibalas fragmen hasil, tanpa layout.
+        if ($request->ajax()) {
+            return view('reservasi.partials.denah-hasil', compact('kategori', 'jenis', 'lantai', 'fasilitas', 'status', 'slot'));
+        }
+
         return view('reservasi.denah', compact('kategori', 'jenis', 'lantai', 'fasilitas', 'status', 'slot'));
     }
 
@@ -150,7 +155,7 @@ class ReservasiController extends Controller
 
             if (! $t) {
                 return back()->withInput()->withErrors([
-                    'antrian' => 'Salah satu ruangan pilihanmu sudah tidak tersedia untuk jenis sewa ini — silakan pilih ulang di denah.',
+                    'antrian' => 'Salah satu ruangan yang dipilih sudah tidak tersedia untuk jenis sewa ini. Silakan pilih ulang di denah.',
                 ]);
             }
             $daftarTarif->push($t);
@@ -171,7 +176,7 @@ class ReservasiController extends Controller
             if ((int) $data['jumlah_pengguna'] > $t->fasilitas->kapasitas) {
                 $galat[] = "{$t->fasilitas->nama_fasilitas}: kapasitas maksimal {$t->fasilitas->kapasitas} orang.";
             } elseif (! $this->availability->slotAvailable($item['id_fasilitas'], $slot, $sessionId)) {
-                $galat[] = "{$t->fasilitas->nama_fasilitas}: jadwal tersebut baru saja terisi — pilih jadwal lain.";
+                $galat[] = "{$t->fasilitas->nama_fasilitas}: jadwal tersebut baru saja terisi, pilih jadwal lain.";
             } else {
                 $items[] = $item;
             }
@@ -273,8 +278,10 @@ class ReservasiController extends Controller
                 ]);
 
                 // 3. Item Bulan wajib punya dokumen persyaratan (sudah divalidasi CheckoutRequest).
+                //    Satu lampiran (dokumen[]) berlaku untuk SEMUA ruangan Bulan pada transaksi ini,
+                //    jadi disalin ke tiap baris Reservasi Bulan (skema id_reservasi tetap per-baris).
                 if ($item['satuan'] === SatuanSewa::Bulan->value) {
-                    $this->simpanDokumen($request, $index, $reservasi);
+                    $this->simpanDokumen($request, $reservasi);
                 }
 
                 $kodeReservasi[] = $reservasi->kode_reservasi;
@@ -401,9 +408,9 @@ class ReservasiController extends Controller
         return $kode;
     }
 
-    private function simpanDokumen(Request $request, int $index, Reservasi $reservasi): void
+    private function simpanDokumen(Request $request, Reservasi $reservasi): void
     {
-        $files = $request->file("dokumen.$index", []);
+        $files = $request->file('dokumen', []);
         $files = is_array($files) ? $files : [$files];
 
         foreach (array_filter($files) as $file) {
