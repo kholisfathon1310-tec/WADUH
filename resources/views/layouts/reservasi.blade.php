@@ -53,16 +53,39 @@
         .btn-cart .badge { position:absolute; top:-7px; right:-7px; background:#f59e0b; }
 
         /* Stepper — pill progress yang lebih hidup */
-        .stepper { display:flex; gap:.3rem; overflow-x:auto; padding:.3rem 0 .6rem; }
-        .step { display:flex; align-items:center; gap:.5rem; flex:1 1 0; min-width:120px; }
-        .step .dot { display:grid; place-items:center; width:2.1rem; height:2.1rem; border-radius:50%; font-weight:700; font-size:.85rem; background:#e6edf3; color:var(--muted); flex:none; transition:background .2s ease, box-shadow .2s ease, transform .2s ease; }
-        .step .step-label { font-size:.78rem; font-weight:700; color:var(--muted); white-space:nowrap; }
-        .step .bar { height:4px; border-radius:2px; background:#e2e9f0; flex:1; }
-        .step.done .dot { background:var(--teal); color:#fff; }
-        .step.done .bar { background:linear-gradient(90deg,var(--teal),var(--primary)); }
-        .step.done .step-label { color:var(--teal); }
-        .step.now .dot { background:var(--primary); color:#fff; box-shadow:0 0 0 5px rgba(23,107,135,.16); transform:scale(1.08); }
+        /* ══════════════════════════════════════════════════════════════
+           STEPPER — centered container dengan max-width, kompak & rapi.
+           Berlaku di seluruh halaman yang menggunakan @section('stepper').
+           ══════════════════════════════════════════════════════════════ */
+        .stepper-wrap { max-width: 780px; margin: 0 auto; }
+        .stepper { display:flex; align-items:center; gap:.4rem; overflow-x:auto; padding:.4rem .2rem .8rem; }
+        .step { display:flex; align-items:center; gap:.55rem; flex:1 1 0; min-width:110px; }
+        .step .dot {
+            display:grid; place-items:center; width:2rem; height:2rem;
+            border-radius:50%; font-weight:700; font-size:.82rem;
+            background:#eef2f6; color:var(--muted); flex:none;
+            border:1.5px solid #e2e9f0;
+            transition:background .2s ease, box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+        }
+        .step .step-label {
+            font-size:.76rem; font-weight:700; color:var(--muted);
+            white-space:nowrap; letter-spacing:.01em;
+        }
+        .step .bar {
+            height:2.5px; border-radius:2px; background:#e2e9f0; flex:1; min-width:14px;
+        }
+        .step.done .dot { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .step.done .bar { background:var(--primary); }
+        .step.done .step-label { color:var(--primary); }
+        .step.now .dot {
+            background:var(--primary); color:#fff; border-color:var(--primary);
+            box-shadow:0 0 0 4px rgba(14,107,125,.14);
+        }
         .step.now .step-label { color:var(--primary); }
+        @media (max-width: 575.98px) {
+            .step .step-label { display:none; }
+            .step { min-width:0; }
+        }
 
         /* Cards & buttons — lebih rounded & hangat */
         .xcard { background:#fff; border:1px solid var(--line); border-radius:1.35rem; box-shadow:0 4px 18px -4px rgba(21,60,73,.07); transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
@@ -150,7 +173,7 @@
         <button onclick="history.back()" class="btn btn-sm btn-brand-outline mb-3"><i class="bi bi-arrow-left me-1"></i>Kembali</button>
 
         @hasSection('stepper')
-            <div class="mb-3">@yield('stepper')</div>
+            <div class="stepper-wrap mb-4">@yield('stepper')</div>
         @endif
 
         @if ($errors->any())

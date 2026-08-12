@@ -19,6 +19,6 @@
     $statusByKode = $fasilitas->mapWithKeys(fn ($f) => [$f->kode_fasilitas => $status[$f->id_fasilitas] ?? 'hijau'])->all();
     $tplDetail = route('reservasi.fasilitas.show', array_merge(['fasilitas' => '__ID__', 'jenis' => $jenis?->id_jenis_sewa], $slot));
 @endphp
-<x-denah :lantai="$lantai->nomor_lantai" :status-per-fasilitas="$statusByKode" :clickable="true" :link-template="$tplDetail" :jenis="$jenis?->id_jenis_sewa"/>
+<x-denah :lantai="$lantai->nomor_lantai" :status-per-fasilitas="$statusByKode" :clickable="true" :link-template="$tplDetail" :jenis="$jenis?->id_jenis_sewa" :kategori="$kategori"/>
 
 <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i>Klik ruangan <strong class="text-success">hijau/kuning</strong> untuk memilih (bisa lebih dari satu), lalu tekan <strong>Isi Jadwal</strong>. Ruangan <strong>merah</strong> penuh atau sedang tidak disewakan.</p>

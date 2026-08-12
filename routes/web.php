@@ -53,6 +53,9 @@ Route::get('/cek-status', [CekStatusController::class, 'form'])->name('cek-statu
 Route::post('/cek-status', [CekStatusController::class, 'hasil'])->name('cek-status.hasil');
 Route::get('/cek-status/{kodeReservasi}/bukti-reservasi', [BuktiReservasiController::class, 'unduh'])->name('cek-status.bukti-reservasi');
 
+// Preview denah gedung BITC (visualisasi 5 lantai). Tidak melakukan reservasi.
+Route::view('/denah-preview', 'denah-preview')->name('denah-preview');
+
 /*
 | Alur Admin — Stage 3. Guard `admin` (tabel admin terpisah dari users).
 */
