@@ -454,8 +454,14 @@
                 <div class="fp-form">
                     <div class="fp-form-head">
                         <h2>Jadwal Pemakaian</h2>
+                    </div>
+
                     @if ($isMulti)
                         <div class="fp-hint">
+                            <i class="bi bi-info-circle"></i>
+                            <div>
+                                <b>{{ $jumlahRuangan }} ruangan · satu isian.</b>
+                                Jadwal berikut berlaku untuk semua ruangan terpilih.
                             </div>
                         </div>
                     @endif

@@ -45,41 +45,33 @@
 
         html { scroll-behavior:smooth; scroll-padding-top:92px; }
         body { font-family:'DM Sans',sans-serif; color:var(--ink); background:var(--card); line-height:1.65; -webkit-font-smoothing:antialiased; }
-        h1,h2,h3,h4,h5,.navbar-brand { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:-.028em; color:var(--ink); }
+        h1,h2,h3,h4,h5 { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:-.028em; color:var(--ink); }
         ::selection { background:var(--primary-soft); color:var(--primary-dark); }
         a { color:var(--primary); }
         a:focus-visible, button:focus-visible, .nav-link:focus-visible { outline:2px solid var(--primary); outline-offset:3px; border-radius:.4rem; }
         img { max-width:100%; display:block; }
 
         /* ══════════════════════════════════════════════════════════════
-           NAVBAR — transparan di atas hero, glassy pas discroll.
+           NAVBAR — tanpa logo, cuma pill menu, mengambang di tengah,
+           transparan di atas hero, glassy pas discroll.
            ══════════════════════════════════════════════════════════════ */
         .navbar { padding:1rem 0; transition:padding .3s ease; }
-        .navbar .container {
+        .navbar .container { display:flex; align-items:center; justify-content:center; }
+        .nav-pill {
+            display:flex; align-items:center;
             background:transparent;
             border:1px solid transparent;
             border-radius:1.5rem;
-            padding:.4rem .5rem .4rem 1.1rem;
+            padding:.4rem .5rem;
             transition:background .3s ease, border-color .3s ease, box-shadow .3s ease, backdrop-filter .3s ease;
         }
         .navbar.scrolled { padding:.55rem 0; }
-        .navbar.scrolled .container {
+        .navbar.scrolled .nav-pill {
             background:rgba(255,255,255,.88);
             border-color:var(--line);
             box-shadow:var(--shadow-md);
             backdrop-filter:saturate(140%) blur(18px);
             -webkit-backdrop-filter:saturate(140%) blur(18px);
-        }
-        .brand-logo {
-            height:3.5rem; width:auto; object-fit:contain; display:block;
-            margin:-.55rem 0;
-            filter:drop-shadow(0 4px 10px rgba(15,23,42,.15));
-            transition:height .3s ease, filter .3s ease;
-        }
-        .navbar.scrolled .brand-logo { height:3rem; filter:drop-shadow(0 2px 6px rgba(15,23,42,.1)); }
-        @media (max-width: 575px) {
-            .brand-logo { height:2.6rem; margin:-.25rem 0; }
-            .navbar.scrolled .brand-logo { height:2.4rem; }
         }
 
         .nav-link {
@@ -412,12 +404,10 @@
      ══════════════════════════════════════════════════════════════ --}}
 <nav id="mainNav" class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#beranda">
-            <img src="{{ asset('images/logo_bitc.png') }}" alt="BITC (Baros Information Technology Creative Center)" class="brand-logo">
-        </a>
+        <div class="nav-pill">
         <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"><i class="bi bi-list fs-2"></i></button>
         <div id="navbarMenu" class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+            <ul class="navbar-nav align-items-lg-center gap-lg-1">
                 <li class="nav-item"><a class="nav-link active" href="#beranda">Beranda</a></li>
                 <li class="nav-item"><a class="nav-link" href="#tentang">Tentang BITC</a></li>
                 <li class="nav-item dropdown">
@@ -439,6 +429,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('cek-status.form') }}">Cek Status</a></li>
                 <li class="nav-item ms-lg-2"><a class="btn btn-nav" href="{{ route('admin.login') }}"><i class="bi bi-box-arrow-in-right me-1"></i> Login</a></li>
             </ul>
+        </div>
         </div>
     </div>
 </nav>

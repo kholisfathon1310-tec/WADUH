@@ -38,7 +38,7 @@
             @endforelse
             @if ($rows->isNotEmpty())
                 <tr class="fw-bold">
-                    <td colspan="6" class="text-end">TOTAL</td>
+                    <td colspan="7" class="text-end">TOTAL</td>
                     <td class="text-end">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
                     <td></td>
                 </tr>

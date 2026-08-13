@@ -32,16 +32,21 @@
     body { font-family: DejaVu Sans, Arial, sans-serif; color:#000; margin:0; padding:24px 28px; font-size:12px; }
     table { border-collapse: collapse; width:100%; }
 
-    /* Header — identik dengan admin/pdf/faktur.blade.php */
+    /* Header — SAMA PERSIS dengan admin/pdf/faktur.blade.php: logo kop surat resmi
+       (logofaktur.png, BUKAN logo BITC) rata kiri, di-crop-zoom karena ada banyak
+       ruang kosong di sekeliling lambangnya, + kolom spacer di kanan. */
     .hdr-table { border:none; }
     .hdr-table td { vertical-align: top; border:none; padding:0; }
-    .logo-cell { width:190px; text-align:center; }
-    .logo-box { width:170px; height:113px; border:1px dashed #999; text-align:center; line-height:113px; font-size:10px; color:#999; margin:0 auto; }
-    .inst { text-align:center; }
-    .inst .l1, .inst .l2 { font-weight:bold; font-size:16px; line-height:1.25; }
-    .inst .l3 { font-weight:bold; font-size:16px; line-height:1.25; margin-bottom:4px; }
-    .inst .addr { font-size:12px; line-height:1.5; }
-    .inst .addr .alamat-1baris { white-space:nowrap; font-size:11px; }
+    .logo-cell { width:180px; text-align:left; }
+    .logo-frame { width:165px; height:165px; overflow:hidden; position:relative; }
+    .logo-frame img { position:absolute; top:-27px; left:-80px; width:325px; height:auto; }
+    .logo-box { width:165px; height:165px; border:1px dashed #999; text-align:center; line-height:165px; font-size:11px; color:#999; }
+    .spacer-cell { width:90px; }
+    .inst { text-align:center; padding-top:8px; }
+    .inst .l1, .inst .l2 { font-weight:bold; font-size:14px; line-height:1.35; }
+    .inst .l3 { font-weight:bold; font-size:14px; line-height:1.35; margin-bottom:5px; }
+    .inst .addr { font-size:10.5px; line-height:1.55; }
+    .inst .addr .alamat-1baris { white-space:nowrap; font-size:10px; }
     .rule { border:none; border-top:3px solid #000; margin:10px 0 4px; }
     .judul { text-align:center; font-size:22px; font-weight:bold; letter-spacing:1px; margin:14px 0 12px; }
 
@@ -84,7 +89,7 @@
         <tr>
             <td class="logo-cell">
                 @if(!empty($inst['logo_path']) && file_exists(public_path($inst['logo_path'])))
-                    <img src="{{ public_path($inst['logo_path']) }}" style="width:170px;height:auto;">
+                    <div class="logo-frame"><img src="{{ public_path($inst['logo_path']) }}"></div>
                 @else
                     <div class="logo-box">LOGO</div>
                 @endif
@@ -100,7 +105,7 @@
                     Surel {{ $inst['email'] }}
                 </div>
             </td>
-            <td style="width:50px;"></td>
+            <td class="spacer-cell"></td>
         </tr>
     </table>
     <hr class="rule">

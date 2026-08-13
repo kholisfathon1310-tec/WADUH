@@ -57,7 +57,7 @@ class AlurAdminTest extends TestCase
 
     public function test_login_page_dapat_diakses(): void
     {
-        $this->get('/admin/login')->assertOk()->assertSee('WADUH Admin');
+        $this->get('/admin/login')->assertOk()->assertSee('Panel Admin');
     }
 
     public function test_area_admin_redirect_ke_login_jika_belum_auth(): void
@@ -71,6 +71,16 @@ class AlurAdminTest extends TestCase
         $this->post('/admin/login', ['email' => 'admin@waduh.test', 'password' => 'password'])
             ->assertRedirect(route('admin.dashboard'));
         $this->assertTrue(auth()->guard('admin')->check());
+    }
+
+    /** Checkbox "Ingat saya" mengirim remember=1 → sebelum kolom remember_token ditambahkan
+     *  ke tabel admin, ini gagal dengan SQL error "Column not found". */
+    public function test_login_dengan_ingat_saya_tidak_error(): void
+    {
+        $this->post('/admin/login', ['email' => 'admin@waduh.test', 'password' => 'password', 'remember' => '1'])
+            ->assertRedirect(route('admin.dashboard'));
+        $this->assertTrue(auth()->guard('admin')->check());
+        $this->assertNotNull($this->admin()->fresh()->remember_token);
     }
 
     public function test_login_salah_ditolak(): void

@@ -370,10 +370,26 @@
             text-align: center; border-radius: 10px; color: #8a9099; font-weight: 600;
         }
 
+        /* Layar kecil: JANGAN dipepetkan sampai kartu ruangan jadi terlalu kecil/susah
+           dibaca — kartu tetap punya lebar minimum yang layak, dan denah jadi bisa
+           digulir ke samping (bukan ditumpuk/wrap) supaya semua ruangan tetap terlihat
+           utuh dengan ukuran yang sama seperti tampilan desktop. */
         @media (max-width: 640px) {
-            .d-room { min-height: 78px; flex: 1 1 45%; }
-            .d-room.is-rroom { min-height: 110px; }
+            .dl-building { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 18px 16px; }
+            .dl-row { flex-wrap: nowrap; }
+            .d-room { min-height: 78px; flex: 0 0 92px; width: 92px; }
+            .d-room.is-rroom { min-height: 110px; flex-basis: 132px; width: 132px; }
+            .d-room.is-kroom { flex-basis: 68px; width: 68px; }
+            .d-room.koridor { flex: 0 0 auto; width: auto; min-width: 320px; }
+            .dl-grid { grid-template-columns: none !important; grid-auto-flow: column; grid-auto-columns: 92px; overflow: visible; }
             .dl-table { width: 66px; height: 66px; }
+        }
+        .dl-scroll-hint { display: none; }
+        @media (max-width: 640px) {
+            .dl-scroll-hint {
+                display: block; text-align: center; margin-top: 10px;
+                font-size: .68rem; font-weight: 600; color: var(--dl-sub); letter-spacing: .02em;
+            }
         }
 
         /* ===== Tambahan: umpan balik ruangan terpilih + bar ringkasan (mode pemesan) =====
@@ -540,6 +556,7 @@
         {{-- Kompas --}}
         <div class="dl-compass">N ↑</div>
     </div>
+    <p class="dl-scroll-hint"><i class="bi bi-arrow-left-right"></i> Geser untuk melihat semua ruangan</p>
 
     {{-- Legenda --}}
     <div class="dl-legend">

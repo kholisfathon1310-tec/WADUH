@@ -58,7 +58,7 @@
                 <td class="c">{{ $row['kode_reservasi'] }}</td>
                 <td class="l">{{ $row['nama'] ?: '-' }}</td>
                 <td class="l">{{ $row['uraian'] }}</td>
-                <td class="c">{{ number_format($row['volume'], 2, ',', '.') }}</td>
+                <td class="c">{{ $row['volume']}}</td>
                 <td class="c">{{ $row['periode'] }}</td>
                 <td class="c">{{ $row['keterangan'] }}</td>
                 <td class="r">Rp {{ number_format($row['total_harga'], 0, ',', '.') }}</td>
@@ -69,9 +69,8 @@
 
         @if ($rows->isNotEmpty())
             <tr class="total">
-                <td colspan="6" class="r">TOTAL</td>
+                <td colspan="7" class="r">TOTAL</td>
                 <td class="r">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
-                <td></td>
             </tr>
         @endif
         </tbody>

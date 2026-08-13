@@ -24,28 +24,22 @@
                 var(--surface);
             background-attachment:fixed;
         }
-        h1,h2,h3,h4,h5,.navbar-brand,.step-label { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; }
+        h1,h2,h3,h4,h5,.step-label { font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; }
         ::selection { background:#bfe3ea; color:var(--primary-dark); }
 
         @keyframes riseIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
         [data-reveal] { animation:riseIn .55s cubic-bezier(.2,.7,.3,1) both; }
         @media (prefers-reduced-motion: reduce) { [data-reveal] { animation:none; } }
 
-        /* Navbar — floating pill, gaya SaaS modern */
+        /* Navbar — tanpa logo, cuma pill menu, mengambang & sticky. */
         .nav-shell { position:sticky; top:.85rem; z-index:1030; padding:0 1rem; }
         .topnav {
+            max-width:1200px; margin:0 auto;
             background:rgba(255,255,255,.85); backdrop-filter:blur(16px); border:1px solid rgba(228,235,242,.9);
             border-radius:1.5rem; box-shadow:0 14px 34px -18px rgba(21,36,59,.28); padding:.4rem .5rem;
-            max-width:1200px; margin:0 auto; transition:box-shadow .2s ease;
+            transition:box-shadow .2s ease;
         }
-        .navbar-brand { padding:0; margin:0; }
-        .navbar-brand .brand-logo {
-            height:2.75rem; width:auto; object-fit:contain; display:block;
-            margin:-.25rem 0;
-            filter:drop-shadow(0 3px 8px rgba(15,23,42,.14));
-        }
-        @media (max-width: 575px) { .navbar-brand .brand-logo { height:2.35rem; } }
-        .brand-mark { display:inline-grid; width:1.7rem; height:1.7rem; place-items:center; color:#fff; background:var(--primary); border-radius:.55rem; font-size:.85rem; box-shadow:0 4px 10px rgba(14,107,125,.28); }
+        .topnav .container-fluid { justify-content:center; }
         .topnav .nav-link { color:#4e5c70; font-weight:600; font-size:.9rem; border-radius:.8rem; padding:.55rem 1rem; transition:background .15s ease, color .15s ease; }
         .topnav .nav-link:hover, .topnav .nav-link.active { color:var(--primary); background:#eef6f9; }
         .btn-cart { position:relative; color:#fff; border:none; border-radius:.85rem; font-weight:700; background:var(--primary); box-shadow:0 10px 22px -8px rgba(14,107,125,.5); transition:all .15s ease; }
@@ -126,11 +120,8 @@
 </head>
 <body>
     <div class="nav-shell">
-    <nav class="navbar navbar-expand-lg topnav">
+        <nav class="navbar navbar-expand-lg topnav">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-                <img src="{{ asset('images/logo_bitc.png') }}" alt="BITC" class="brand-logo">
-            </a>
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
                 <i class="bi bi-list fs-3"></i>
             </button>
@@ -201,7 +192,7 @@
 
     <footer class="site-footer">
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <span class="d-flex align-items-center gap-2"><span class="brand-mark" style="width:1.7rem;height:1.7rem;border-radius:.55rem;font-size:.85rem"><i class="bi bi-building"></i></span><span class="fw-bold">WADUH</span> · Wadah Akses Digital Unit Hunian BITC</span>
+            <span class="d-flex align-items-center gap-2"><img src="{{ asset('images/logo_bitc_crop.png') }}" alt="Logo BITC" style="height:1.6rem;width:auto;"><span class="fw-bold">WADUH</span> · Wadah Akses Digital Unit Hunian BITC</span>
             <span>&copy; {{ now()->year }} WADUH · BITC Cimahi</span>
         </div>
     </footer>
