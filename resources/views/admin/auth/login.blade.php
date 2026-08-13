@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk | WADUH Admin</title>
+    <title>Masuk | WADUH</title>
     <link href="{{ asset('vendor/fonts/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
@@ -21,25 +21,23 @@
 
         /* Panel kiri — identitas & sorotan singkat, tersembunyi di layar kecil */
         .login-visual { flex:1 1 46%; position:relative; overflow:hidden; padding:2.75rem 2.5rem; color:#fff;
-            background:linear-gradient(150deg,#0a1a29 0%,#0e2b3d 55%,#124553 100%);
-            display:flex; flex-direction:column; justify-content:space-between; }
-        .login-visual::before, .login-visual::after { content:''; position:absolute; border-radius:50%; filter:blur(6px); opacity:.28; pointer-events:none; }
-        .login-visual::before { width:22rem; height:22rem; background:#24aa9a; top:-9rem; left:-8rem; }
-        .login-visual::after { width:18rem; height:18rem; background:#176b87; bottom:-7rem; right:-6rem; }
-        .lv-grid { position:absolute; inset:0; opacity:.06;
+            background:url('{{ asset('images/gedung_bitc.png') }}') center/cover no-repeat;
+            display:flex; flex-direction:column; justify-content:center; gap:2.25rem; }
+        /* Gradasi sekarang hanya menggelapkan bagian bawah (tempat teks) supaya foto gedung terlihat jelas di bagian atas */
+        .login-visual::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+            background:linear-gradient(180deg, rgba(9,23,36,.12) 0%, rgba(9,23,36,.28) 38%, rgba(9,23,36,.62) 72%, rgba(9,23,36,.82) 100%); }
+        .login-visual::after { content:''; position:absolute; z-index:0; pointer-events:none; border-radius:50%; filter:blur(6px); opacity:.22;
+            width:16rem; height:16rem; background:#24aa9a; bottom:-6rem; right:-5rem; }
+        .lv-grid { position:absolute; inset:0; z-index:0; opacity:.05;
             background-image:linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
             background-size:32px 32px; mask-image:radial-gradient(60% 60% at 30% 30%, #000, transparent); }
-        .login-visual > * { position:relative; }
-        .lv-brand { display:flex; align-items:center; gap:.75rem; }
-        .lv-brand .mark { display:inline-grid; width:2.9rem; height:2.9rem; place-items:center; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.9rem; font-size:1.25rem; box-shadow:0 10px 22px rgba(23,107,135,.4); flex:none; }
-        .lv-brand .name { font-weight:800; font-size:1.15rem; }
-        .lv-brand .name small { display:block; font-size:.65rem; font-weight:600; color:#9db6c4; letter-spacing:.08em; text-transform:uppercase; }
-        .lv-headline { font-weight:800; font-size:1.55rem; line-height:1.3; margin:2.5rem 0 .75rem; max-width:20rem; }
-        .lv-sub { color:#b9d2db; font-size:.9rem; line-height:1.6; max-width:22rem; margin:0; }
+        .login-visual > * { position:relative; z-index:1; }
+        .lv-headline { font-weight:800; font-size:1.55rem; line-height:1.3; margin:0 0 .75rem; max-width:20rem; text-shadow:0 3px 14px rgba(0,0,0,.4); }
+        .lv-sub { color:#d7e7ec; font-size:.9rem; line-height:1.6; max-width:22rem; margin:0; text-shadow:0 2px 10px rgba(0,0,0,.35); }
         .lv-points { list-style:none; margin:2.25rem 0 0; padding:0; display:flex; flex-direction:column; gap:.85rem; }
-        .lv-points li { display:flex; align-items:center; gap:.65rem; font-size:.85rem; color:#dcecef; }
-        .lv-points .ic { display:grid; place-items:center; width:1.9rem; height:1.9rem; border-radius:.6rem; background:rgba(255,255,255,.12); flex:none; font-size:.85rem; }
-        .lv-foot { font-size:.72rem; color:#7f9aa5; }
+        .lv-points li { display:flex; align-items:center; gap:.65rem; font-size:.85rem; color:#eef6f7; text-shadow:0 2px 8px rgba(0,0,0,.4); }
+        .lv-points .ic { display:grid; place-items:center; width:1.9rem; height:1.9rem; border-radius:.6rem; background:rgba(255,255,255,.16); backdrop-filter:blur(2px); flex:none; font-size:.85rem; }
+        .lv-foot { font-size:.72rem; color:#c9dade; text-shadow:0 2px 8px rgba(0,0,0,.4); }
 
         /* Panel kanan — form */
         .login-form-panel { flex:1 1 54%; padding:3rem 3rem 2.25rem; display:flex; flex-direction:column; justify-content:center; }
@@ -69,20 +67,15 @@
     <div class="login-shell">
         <div class="login-visual">
             <div class="lv-grid"></div>
-            <div class="lv-brand">
-                <span class="mark"><i class="bi bi-building"></i></span>
-                <span class="name">WADUH<small>Panel Admin</small></span>
-            </div>
             <div>
                 <h1 class="lv-headline">Kelola reservasi fasilitas BITC dalam satu sistem</h1>
                 <p class="lv-sub">Pantau pengajuan, verifikasi dokumen, sampai buat laporan reservasi.</p>
                 <ul class="lv-points">
                     <li><span class="ic"><i class="bi bi-journal-check"></i></span>Verifikasi dan persetujuan reservasi</li>
-                    <li><span class="ic"><i class="bi bi-grid-3x3-gap"></i></span>Monitoring okupansi tiap lantai</li>
+                    <li><span class="ic"><i class="bi bi-grid-3x3-gap"></i></span>Monitoring tiap lantai</li>
                     <li><span class="ic"><i class="bi bi-file-earmark-bar-graph"></i></span>Laporan data reservasi bulanan</li>
                 </ul>
             </div>
-            <div class="lv-foot">Wadah Akses Digital Unit Hunian, Cimahi Techno Park</div>
         </div>
 
         <div class="login-form-panel">
@@ -101,7 +94,7 @@
                     <label class="form-label">Email</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input type="email" name="email" class="form-control" placeholder="admin@waduh.test" value="{{ old('email') }}" required autofocus>
+                        <input type="email" name="email" class="form-control" placeholder="nama@waduh.test" value="{{ old('email') }}" required autofocus>
                     </div>
                 </div>
                 <div class="mb-3">

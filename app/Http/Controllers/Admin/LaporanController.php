@@ -52,7 +52,7 @@ class LaporanController extends Controller
         ]);
 
         return Pdf::loadView('admin.pdf.laporan', $data)
-            ->setPaper('a4', 'landscape')
+            ->setPaper('a4', 'portrait')
             ->download('laporan-reservasi-'.now()->format('Ymd-His').'.pdf');
     }
 
@@ -71,15 +71,23 @@ class LaporanController extends Controller
             ->whereIn('status_reservasi', [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value])
             ->whereYear('tanggal_mulai', $tahun)
             ->whereMonth('tanggal_mulai', $bulan)
-            ->with(['pemesan', 'tarifSewa.fasilitas.lantai'])
+            ->with(['pemesan', 'tarifSewa.fasilitas.lantai', 'tarifSewa.jenisSewa'])
             ->orderBy('tanggal_mulai')
             ->orderBy('kode_reservasi')
             ->get()
             ->map(function (Reservasi $r, int $i) {
                 $fasilitas = $r->tarifSewa->fasilitas;
-                $periode = $r->tanggal_mulai->translatedFormat('d M Y').' – '.$r->tanggal_selesai->translatedFormat('d M Y');
-                if ($r->jam_mulai) {
-                    $periode .= ' ('.substr($r->jam_mulai, 0, 5).'–'.substr($r->jam_selesai, 0, 5).' WIB)';
+
+                // Sewa per Jam: tanggal_mulai selalu sama dengan tanggal_selesai, jadi rentang
+                // tanggal tidak informatif — cukup satu tanggal plus jam mulai/selesai. Sewa
+                // Harian/Bulanan sebaliknya tidak punya jam, jadi tampilkan rentang tanggalnya.
+                if ($r->tarifSewa->jenisSewa->satuan->value === 'Jam') {
+                    $periode = $r->tanggal_mulai->translatedFormat('d M Y');
+                    if ($r->jam_mulai) {
+                        $periode .= ', '.substr($r->jam_mulai, 0, 5).'–'.substr($r->jam_selesai, 0, 5).' WIB';
+                    }
+                } else {
+                    $periode = $r->tanggal_mulai->translatedFormat('d M Y').' – '.$r->tanggal_selesai->translatedFormat('d M Y');
                 }
 
                 return [
@@ -90,6 +98,7 @@ class LaporanController extends Controller
                     'periode'         => $periode,
                     'total_harga'     => (float) $r->total_biaya,
                     'keterangan'      => 'Isi',
+                    'volume'          => (float) $fasilitas->luas,
                 ];
             });
 

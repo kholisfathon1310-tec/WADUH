@@ -23,18 +23,25 @@
   * { box-sizing: border-box; }
   body { font-family: DejaVu Sans, Arial, sans-serif; color:#000; margin:0; padding:24px 28px; font-size:12px; }
   table { border-collapse: collapse; }
+
+  /* ===== HEADER — logo di kiri, identitas instansi benar-benar center di lebar halaman ===== */
   .hdr-table { width:100%; border:none; }
   .hdr-table td { vertical-align: top; border:none; padding:0; }
-  .logo-cell { width:190px; text-align:center; }
+  .logo-cell { width:180px; text-align:left; }
+  /* File logo punya banyak ruang kosong di sekelilingnya — dipotong (crop-zoom) di sini
+     supaya lambangnya sendiri yang tampil besar, bukan ruang kosongnya. */
+  .logo-frame { width:165px; height:165px; overflow:hidden; position:relative; }
+  .logo-frame img { position:absolute; top:-27px; left:-80px; width:325px; height:auto; }
   /* dompdf tidak mendukung flex — pakai line-height agar teks LOGO benar-benar di tengah kotak */
-  .logo-box { width:170px; height:113px; border:1px dashed #999; text-align:center; line-height:113px; font-size:10px; color:#999; margin:0 auto; }
-  .inst { text-align:center; }
-  .inst .l1 { font-weight:bold; font-size:16px; line-height:1.25; }
-  .inst .l2 { font-weight:bold; font-size:16px; line-height:1.25; }
-  .inst .l3 { font-weight:bold; font-size:16px; line-height:1.25; margin-bottom:4px; }
-  .inst .addr { font-size:12px; line-height:1.5; }
+  .logo-box { width:165px; height:165px; border:1px dashed #999; text-align:center; line-height:165px; font-size:11px; color:#999; }
+  .spacer-cell { width:90px; }
+  .inst { text-align:center; padding-top:8px; }
+  .inst .l1 { font-weight:bold; font-size:14px; line-height:1.35; }
+  .inst .l2 { font-weight:bold; font-size:14px; line-height:1.35; }
+  .inst .l3 { font-weight:bold; font-size:14px; line-height:1.35; margin-bottom:5px; }
+  .inst .addr { font-size:10.5px; line-height:1.55; }
   /* Alamat wajib SATU baris — jangan patah ke bawah */
-  .inst .addr .alamat-1baris { white-space:nowrap; font-size:11px; }
+  .inst .addr .alamat-1baris { white-space:nowrap; font-size:10px; }
   .rule { border:none; border-top:3px solid #000; margin:10px 0 4px; }
   .judul { text-align:center; font-size:26px; font-weight:bold; letter-spacing:1px; margin:6px 0 14px; }
 
@@ -55,17 +62,17 @@
   .items td.uraian { text-align:left; }
   .items .total-label { text-align:center; font-weight:bold; }
   .items .total-val { text-align:right; font-weight:bold; }
-  .items .terbilang-label { font-weight:bold; }
-  .items .terbilang-val { text-align:left; }
 
-  .items .terbilang-full { text-align:left; }
+  /* Terbilang — di LUAR tabel item, tanpa kotak, tepat di bawah TOTAL (sesuai posisi pada invoice acuan) */
   .terbilang-luar { margin-top:8px; font-size:12px; }
+
   .foot-table { width:100%; border:none; margin-top:20px; }
   .foot-table > tbody > tr > td { border:none; vertical-align:top; padding:0; }
-  /* Informasi Pembayaran — TANPA bold sama sekali */
+  /* Informasi Pembayaran — judul, sub-judul, dan tabel rekening dibingkai satu kotak, sama seperti invoice acuan */
+  .pay-frame { border:1px solid #000; padding:8px; width:96%; }
   .pay-title { font-weight:normal; font-size:13px; margin-bottom:2px; }
   .pay-sub { font-weight:normal; font-size:11px; margin-bottom:6px; }
-  .pay-box { border-collapse:collapse; width:96%; }
+  .pay-box { border-collapse:collapse; width:100%; }
   .pay-box td { border:1px solid #000; padding:6px 8px; font-size:12px; font-weight:normal; }
   .pay-box .k { width:130px; }
   .pay-box .colon { width:10px; text-align:center; }
@@ -87,7 +94,7 @@
     <tr>
       <td class="logo-cell">
         @if(!empty($inst['logo_path']) && file_exists(public_path($inst['logo_path'])))
-          <img src="{{ public_path($inst['logo_path']) }}" style="width:170px;height:auto;">
+          <div class="logo-frame"><img src="{{ public_path($inst['logo_path']) }}"></div>
         @else
           <div class="logo-box">LOGO</div>
         @endif
@@ -103,7 +110,7 @@
           Surel {{ $inst['email'] }}
         </div>
       </td>
-      <td style="width:50px;"></td>
+      <td class="spacer-cell"></td>
     </tr>
   </table>
 
@@ -160,23 +167,23 @@
         <td class="total-label" colspan="{{ $colspanTotal }}">TOTAL</td>
         <td class="total-val" colspan="2">Rp {{ rp($total) }}</td>
       </tr>
-      <tr>
-        <td class="terbilang-full" colspan="{{ $adaKolomWaktu ? 7 : 6 }}"><strong>Terbilang</strong> : {{ $terbilang }}</td>
-      </tr>
     </tbody>
   </table>
+  <div class="terbilang-luar"><strong>Terbilang</strong> : {{ $terbilang }}</div>
 
   {{-- ===== FOOTER: PEMBAYARAN + TTD ===== --}}
   <table class="foot-table">
     <tr>
       <td style="width:58%;">
-        <div class="pay-title"><b>Informasi Pembayaran</b></div>
-        <div class="pay-sub">Pembayaran dapat dilakukan melalui rekening berikut:</div>
-        <table class="pay-box">
-          <tr><td class="k">Nama Bank</td><td class="colon">:</td><td class="v">{{ $inst['bank_nama'] }}</td></tr>
-          <tr><td class="k">Nomor Rekening</td><td class="colon">:</td><td class="v">{{ $inst['bank_no_rekening'] }}</td></tr>
-          <tr><td class="k">Atas Nama</td><td class="colon">:</td><td class="v">{{ $inst['bank_atas_nama'] }}</td></tr>
-        </table>
+        <div class="pay-frame">
+          <div class="pay-title"><b>Informasi Pembayaran</b></div>
+          <div class="pay-sub">Pembayaran dapat dilakukan melalui rekening berikut:</div>
+          <table class="pay-box">
+            <tr><td class="k">Nama Bank</td><td class="colon">:</td><td class="v">{{ $inst['bank_nama'] }}</td></tr>
+            <tr><td class="k">Nomor Rekening</td><td class="colon">:</td><td class="v">{{ $inst['bank_no_rekening'] }}</td></tr>
+            <tr><td class="k">Atas Nama</td><td class="colon">:</td><td class="v">{{ $inst['bank_atas_nama'] }}</td></tr>
+          </table>
+        </div>
         <div class="other"><b>Metode Pembayaran Lain:</b></div>
         <div class="other-sub">Pembayaran tunai dapat dilakukan langsung ke kasir di BITC.</div>
       </td>

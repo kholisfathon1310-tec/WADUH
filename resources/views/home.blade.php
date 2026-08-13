@@ -454,7 +454,7 @@
                 <div class="col-lg-7" data-reveal>
                     <span class="badge-hero mb-4"><i class="bi bi-stars"></i>Wadah Akses Digital Unit Hunian BITC</span>
                     <h1>Reservasi ruang di <span class="grad">Gedung BITC</span>, semudah beberapa klik.</h1>
-                    <p class="lead-copy">WADUH adalah layanan resmi reservasi fasilitas <strong>Baros Information Technology Creative Center (BITC)</strong>, mulai dari kubikal co-working, ruang kerja privat, hingga convention hall. Pemesanan dilakukan secara online tanpa perlu antre di lokasi.</p>
+                    <p class="lead-copy">WADUH adalah layanan resmi reservasi fasilitas <strong>Baros Information Technology Creative Center (BITC)</strong>, mulai dari kubikal co-working, ruang kerja privat, ruang rapat, hingga convention hall. Pemesanan dilakukan secara online tanpa perlu antre di lokasi.</p>
                     <div class="d-flex flex-wrap gap-3 mt-4">
                         <a href="{{ route('reservasi.index') }}" class="btn-hero solid">Reservasi Sekarang <i class="bi bi-arrow-up-right"></i></a>
                         <a href="{{ route('cek-status.form') }}" class="btn-hero ghost"><i class="bi bi-search"></i> Cek Status Reservasi</a>
@@ -499,9 +499,9 @@
                 <div class="col-lg-6" data-reveal>
                     <div class="section-head">
                         <p class="eyebrow">Tentang BITC</p>
-                        <h2>Baros Information Technology Creative Center &mdash; rumah ekosistem digital Cimahi.</h2>
-                        <p class="lead">Gedung <strong>BITC</strong> di Jalan Raya Baros No. 78 dikelola oleh <strong>UPTD Cimahi Techno Park</strong> sebagai pusat pengembangan industri teknologi informasi dan ekonomi kreatif Kota Cimahi. Di dalamnya tersedia unit hunian usaha yang dapat disewa: ruang kerja privat, kubikal co-working, hingga convention hall untuk acara berskala besar.</p>
-                        <p class="text-muted mt-3" style="line-height:1.85"><strong>WADUH (Wadah Akses Digital Unit Hunian)</strong> hadir agar seluruh proses &mdash; mulai dari melihat ketersediaan per lantai, mengajukan reservasi, sampai cek status reservasi &mdash; bisa dilakukan dari mana saja.</p>
+                        <h2>Baros Information Technology Creative Centre.</h2>
+                        <p class="lead">Gedung <strong>BITC</strong> di  Jl. HMS Mintareja Sarjana Hukum, Baros, Kec. Cimahi Tengah, Kota Cimahi, Jawa Barat dikelola oleh <strong>UPTD Cimahi Techno Park</strong> sebagai pusat pengembangan industri teknologi informasi dan ekonomi kreatif Kota Cimahi. Di dalamnya tersedia unit hunian usaha yang dapat disewa: ruang kerja privat, ruang rapat, kubikal co-working, hingga convention hall untuk acara berskala besar.</p>
+                        <p class="text-muted mt-3" style="line-height:1.85"><strong>WADUH (Wadah Akses Digital Unit Hunian)</strong> hadir agar seluruh proses mulai dari melihat ketersediaan per lantai, mengajukan reservasi, sampai cek status reservasi, bisa dilakukan dari mana saja.</p>
                     </div>
                 </div>
                 <div class="col-lg-6" data-reveal>
@@ -521,7 +521,7 @@
                     <div class="feature-card">
                         <span class="ic"><i class="bi bi-geo-alt-fill"></i></span>
                         <h3>Lokasi Strategis</h3>
-                        <p>Jl. Raya Baros No. 78, Cimahi Selatan &mdash; akses mudah dari tol Baros.</p>
+                        <p> Jl. HMS Mintareja Sarjana Hukum, Baros, Kec. Cimahi Tengah, Kota Cimahi, Jawa Barat. Akses mudah dari tol Baros.</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3" data-reveal>
@@ -542,7 +542,7 @@
                     <div class="feature-card">
                         <span class="ic"><i class="bi bi-lightning-charge-fill"></i></span>
                         <h3>Proses Digital</h3>
-                        <p>Lihat ruangan sampai checkout &mdash; semuanya lewat WADUH.</p>
+                        <p>Lihat ruangan sampai checkout, semuanya lewat WADUH.</p>
                     </div>
                 </div>
             </div>
@@ -624,7 +624,7 @@
                     <div class="step-card">
                         <span class="n">2</span>
                         <h3>Atur Jadwal</h3>
-                        <p>Sewa per jam, harian, atau bulanan &mdash; bisa beberapa ruang sekaligus.</p>
+                        <p>Sewa per jam, harian, atau bulanan, bisa beberapa ruang sekaligus.</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3" data-reveal>

@@ -167,7 +167,7 @@
     </table>
 
     <div class="footer-note">
-        Dokumen ini adalah bukti bahwa reservasi di atas sudah tercatat di sistem WADUH — bukan bukti pembayaran.
+        Dokumen ini adalah bukti bahwa reservasi di atas sudah tercatat di sistem WADUH, bukan bukti pembayaran.
         Bawa dokumen ini beserta kode reservasi saat verifikasi di lokasi BITC.
     </div>
 

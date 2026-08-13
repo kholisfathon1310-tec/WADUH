@@ -57,7 +57,8 @@
 
         /* Sidebar */
         .side-brand { display:flex; align-items:center; gap:.7rem; padding:1.5rem 1.4rem 1.2rem; color:var(--ink); text-decoration:none; font-weight:800; font-size:1.05rem; border-bottom:1px solid var(--line); margin-bottom:.6rem; }
-        .side-brand .brand-mark { display:inline-grid; width:2.35rem; height:2.35rem; place-items:center; color:#fff; background:linear-gradient(135deg,var(--primary),var(--teal)); border-radius:.85rem; box-shadow:0 8px 18px rgba(23,107,135,.3); flex:none; }
+        .side-brand .brand-mark { display:inline-grid; width:2.35rem; height:2.35rem; place-items:center; background:#fff; border:1px solid var(--line); border-radius:.85rem; box-shadow:0 8px 18px rgba(23,107,135,.15); flex:none; padding:.25rem; }
+        .side-brand .brand-mark img { width:100%; height:100%; object-fit:contain; }
         .side-brand small { display:block; font-size:.58rem; font-weight:600; color:var(--muted); letter-spacing:.09em; text-transform:uppercase; }
         .side-section { padding:1rem 1.4rem .5rem; font-size:.62rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#94a3b8; }
         .side-nav { list-style:none; margin:0; padding:0 .85rem; display:flex; flex-direction:column; gap:.2rem; }
@@ -75,7 +76,8 @@
         .side-sub a:hover { color:var(--primary-dark); background:var(--surface); }
         .side-sub a.active { color:var(--primary-dark); border-left-color:var(--teal); background:var(--primary-soft, #e6f2f4); font-weight:700; }
         .side-sub .badge { margin-left:auto; }
-        .side-foot { margin-top:auto; padding:.9rem 1.1rem 1.1rem; font-size:.68rem; color:var(--muted); text-align:center; letter-spacing:.03em; border-top:1px solid var(--line); }
+        .side-bottom { margin-top:auto; }
+        .side-foot { padding:.9rem 1.1rem .6rem; font-size:.68rem; color:var(--muted); text-align:center; letter-spacing:.03em; }
 
         /* Topbar — flush, tanpa margin/rounded, menyatu dengan tepi konten */
         .topbar { background:rgba(255,255,255,.92); backdrop-filter:blur(14px); border-bottom:1px solid var(--line);
@@ -174,7 +176,7 @@
 <div class="frame">
     <aside class="sidebar" id="sidebar">
         <a href="{{ route('admin.dashboard') }}" class="side-brand">
-            <span class="brand-mark"><i class="bi bi-building"></i></span>
+            <span class="brand-mark"><img src="{{ asset('images/logo_bitc.png') }}" alt="Logo BITC"></span>
             <span class="brand-font">WADUH<span style="color:var(--teal)">.</span><small>Wadah Akses Digital Unit Hunian</small></span>
         </a>
 
@@ -223,16 +225,17 @@
             </li>
         </ul>
 
-        <div class="side-nav" style="padding-top:.3rem;margin-top:.3rem;border-top:1px solid var(--line)">
-            <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
-                <button type="submit" class="side-link w-100 text-start border-0 bg-transparent" style="color:#c02929" title="Keluar">
-                    <span class="mic" style="color:#c02929"><i class="bi bi-box-arrow-right"></i></span>
-                    <span class="lbl">Keluar</span>
-                </button>
-            </form>
+        <div class="side-bottom">
+            <div class="side-foot">WADUH Admin &copy; {{ now()->year }}</div>
+            <div class="side-nav" style="padding-top:.3rem;margin-top:.3rem;border-top:1px solid var(--line)">
+                <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
+                    <button type="submit" class="side-link w-100 text-start border-0 bg-transparent" style="color:#c02929" title="Keluar">
+                        <span class="mic" style="color:#c02929"><i class="bi bi-box-arrow-right"></i></span>
+                        <span class="lbl">Keluar</span>
+                    </button>
+                </form>
+            </div>
         </div>
-
-        <div class="side-foot">WADUH Admin &copy; {{ now()->year }}</div>
     </aside>
     <div class="backdrop" id="backdrop"></div>
 

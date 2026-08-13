@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <style>
         * { font-family: DejaVu Sans, sans-serif; }
-        @page { margin: 24px 22px 36px; }
-        body { font-size: 9px; color: #000; background: #fff; }
+        @page { margin: 22px 18px 36px; }
+        body { font-size: 8px; color: #000; background: #fff; }
 
-        h1 { font-size: 14px; font-weight: bold; margin: 0 0 12px; }
+        h1 { font-size: 13px; font-weight: bold; margin: 0 0 10px; }
 
         table { border-collapse: collapse; width: 100%; background: #fff; table-layout: fixed; }
-        th, td { border: 0.75px solid #333333; padding: 3px 5px; background: #fff; overflow-wrap: break-word; }
+        th, td { border: 0.75px solid #333333; padding: 3px 4px; background: #fff; overflow-wrap: break-word; }
         thead th { background: #e5e5e5; color: #000; font-weight: bold; text-align: center; }
         thead { display: table-header-group; } /* judul kolom terulang tiap halaman baru */
         tr { page-break-inside: avoid; }
@@ -30,23 +30,25 @@
 
     <table>
         <colgroup>
-            <col style="width:26px;">
-            <col style="width:85px;">
-            <col style="width:95px;">
-            <col>
-            <col style="width:120px;">
-            <col style="width:75px;">
-            <col style="width:38px;">
+            <col style="width:5%;">
+            <col style="width:12%;">
+            <col style="width:15%;">
+            <col style="width:19%;">
+            <col style="width:17%;">
+            <col style="width:10%;">
+            <col style="width:13%;">
+            <col style="width:9%;">
         </colgroup>
         <thead>
             <tr>
                 <th>Nomor</th>
                 <th>Kode Reservasi</th>
-                <th class="l">Nama</th>
+                <th class="l">Nama Pemesan</th>
                 <th class="l">Uraian</th>
+                <th>Volume (m²)</th>
                 <th>Periode Sewa</th>
-                <th>Total Harga (Rp)</th>
                 <th>Keterangan</th>
+                <th>Total Harga (Rp)</th>
             </tr>
         </thead>
         <tbody>
@@ -56,17 +58,18 @@
                 <td class="c">{{ $row['kode_reservasi'] }}</td>
                 <td class="l">{{ $row['nama'] ?: '-' }}</td>
                 <td class="l">{{ $row['uraian'] }}</td>
+                <td class="c">{{ number_format($row['volume'], 2, ',', '.') }}</td>
                 <td class="c">{{ $row['periode'] }}</td>
-                <td class="r">Rp {{ number_format($row['total_harga'], 0, ',', '.') }}</td>
                 <td class="c">{{ $row['keterangan'] }}</td>
+                <td class="r">Rp {{ number_format($row['total_harga'], 0, ',', '.') }}</td>
             </tr>
         @empty
-            <tr><td colspan="7" class="c">Belum ada reservasi disetujui pada {{ $judulBulan }}.</td></tr>
+            <tr><td colspan="8" class="c">Belum ada reservasi disetujui pada {{ $judulBulan }}.</td></tr>
         @endforelse
 
         @if ($rows->isNotEmpty())
             <tr class="total">
-                <td colspan="5" class="r">TOTAL</td>
+                <td colspan="6" class="r">TOTAL</td>
                 <td class="r">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
                 <td></td>
             </tr>

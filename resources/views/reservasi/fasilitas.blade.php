@@ -454,15 +454,8 @@
                 <div class="fp-form">
                     <div class="fp-form-head">
                         <h2>Jadwal Pemakaian</h2>
-                        <span class="satuan"><i class="bi bi-clock-history"></i>Per {{ $satuan }}</span>
-                    </div>
-
                     @if ($isMulti)
                         <div class="fp-hint">
-                            <i class="bi bi-info-circle"></i>
-                            <div>
-                                <b>{{ $jumlahRuangan }} ruangan · satu isian.</b>
-                                Jadwal berikut berlaku untuk semua ruangan terpilih.
                             </div>
                         </div>
                     @endif
@@ -493,7 +486,6 @@
                                 <div class="col-md-6 mb-3 d-flex align-items-end">
                                     <div class="fp-info-slot">
                                         <i class="bi bi-clock-history"></i>
-                                        <span>Durasi <strong>1 hari · 8 jam otomatis</strong></span>
                                     </div>
                                 </div>
                             @else
@@ -532,7 +524,7 @@
                         @elseif ($satuan === 'Bulan')
                             <div class="fp-note">
                                 <i class="bi bi-file-earmark-text"></i>
-                                <span>Sewa bulanan wajib melengkapi dokumen legalitas (Company Profile / KTP) saat checkout.</span>
+                                <span>Sewa bulanan wajib melengkapi dokumen (Legalitas / Company Profile / KTP) saat checkout.</span>
                             </div>
                         @endif
 

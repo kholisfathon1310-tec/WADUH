@@ -10,7 +10,7 @@
     $desk = [
         'Jam'   => 'Cocok untuk rapat & sesi singkat. Bayar per jam pemakaian.',
         'Hari'  => 'Untuk acara atau kegiatan satu hari atau lebih, dengan 1 hari dihitung 8 jam pemakaian.',
-        'Bulan' => 'Sewa jangka panjang untuk kantor / usaha (min. 3 bulan, perlu dokumen).',
+        'Bulan' => 'Sewa jangka panjang untuk kantor / usaha (min. 3 bulan).',
     ];
 @endphp
 

@@ -198,10 +198,6 @@
                     </button>
                 </div>
             </form>
-
-            <p class="cs-hint">
-                <i class="bi bi-info-circle"></i>
-                Kode diawali <code>TRX-</code> untuk semua ruangan sekaligus, atau <code>RSV-</code> untuk satu ruangan saja.
             </p>
         </div>
     </div>

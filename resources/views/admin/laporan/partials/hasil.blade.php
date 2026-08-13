@@ -16,9 +16,9 @@
         <table class="table table-bordered table-hover mb-0 align-middle">
             <thead class="text-center">
                 <tr>
-                    <th>Nomor</th><th>Kode Reservasi</th><th class="text-start">Nama</th>
-                    <th class="text-start">Uraian</th><th>Periode Sewa</th>
-                    <th>Total Harga (Rp)</th><th>Keterangan</th>
+                    <th>Nomor</th><th>Kode Reservasi</th><th class="text-start">Nama Pemesan</th>
+                    <th class="text-start">Uraian</th><th>Volume (m²)</th><th>Periode Sewa</th>
+                    <th>Keterangan</th><th>Total Harga (Rp)</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,16 +28,17 @@
                     <td class="text-center">{{ $row['kode_reservasi'] }}</td>
                     <td>{{ $row['nama'] ?: '-' }}</td>
                     <td>{{ $row['uraian'] }}</td>
+                    <td class="text-center">{{ number_format($row['volume'], 2, ',', '.') }}</td>
                     <td class="text-center">{{ $row['periode'] }}</td>
-                    <td class="text-end">Rp {{ number_format($row['total_harga'], 0, ',', '.') }}</td>
                     <td class="text-center"><span class="avail merah">{{ $row['keterangan'] }}</span></td>
+                    <td class="text-end">Rp {{ number_format($row['total_harga'], 0, ',', '.') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="7" class="text-center text-muted p-4">Belum ada reservasi disetujui pada {{ $judulBulan }}.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted p-4">Belum ada reservasi disetujui pada {{ $judulBulan }}.</td></tr>
             @endforelse
             @if ($rows->isNotEmpty())
                 <tr class="fw-bold">
-                    <td colspan="5" class="text-end">TOTAL</td>
+                    <td colspan="6" class="text-end">TOTAL</td>
                     <td class="text-end">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
                     <td></td>
                 </tr>

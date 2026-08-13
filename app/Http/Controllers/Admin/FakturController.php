@@ -113,7 +113,7 @@ class FakturController extends Controller
         })->all();
 
         $data = [
-            'inst'    => array_merge(config('institusi'), ['logo_path' => 'images/logo-cimahi.png']),
+            'inst'    => config('institusi'),
             'faktur'  => [
                 'no'      => $faktur->nomor_faktur,
                 'tanggal' => $tglId($faktur->tanggal_faktur),
