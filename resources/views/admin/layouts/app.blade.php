@@ -57,12 +57,17 @@
         /* Sidebar */
         /* Logo (lockup memanjang) di baris sendiri di atas, nama+tagline di bawahnya —
            dipisah jadi dua baris supaya logo tidak berebut ruang sempit dengan teks. */
-        .side-brand { display:flex; flex-direction:column; align-items:flex-start; gap:.6rem; padding:1.4rem 1.4rem 1.15rem; color:var(--ink); text-decoration:none; font-weight:800; font-size:1.05rem; border-bottom:1px solid var(--line); margin-bottom:.6rem; }
+        .side-brand-row { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; padding:1.4rem 1.4rem 1.15rem; border-bottom:1px solid var(--line); margin-bottom:.6rem; }
+        .side-brand { display:flex; flex-direction:column; align-items:flex-start; gap:.6rem; min-width:0; color:var(--ink); text-decoration:none; font-weight:800; font-size:1.05rem; }
         .side-brand .brand-mark { display:block; max-width:100%; }
         .side-brand .brand-mark img { height:auto; width:100%; max-width:7rem; display:block; }
         .side-brand .brand-font { line-height:1.3; }
         .side-brand small { display:block; font-size:.6rem; font-weight:600; color:var(--muted); letter-spacing:.09em; text-transform:uppercase; margin-top:.1rem; }
-        /* Sidebar ciut — hanya logo yang tersisa, dipusatkan dan dibatasi lebarnya. */
+        .side-brand-row .collapse-toggle-btn { flex:none; }
+        /* Sidebar ciut — hanya logo yang tersisa, dipusatkan dan dibatasi lebarnya; tombol
+           ciutkan/lebarkan ikut turun ke bawah logo supaya tetap kelihatan & bisa dipencet
+           lagi untuk melebarkan (satu-satunya cara membuka lagi saat sudah ciut di desktop). */
+        body.sidebar-collapsed .side-brand-row { flex-direction:column; align-items:center; padding:1.5rem .5rem 1.2rem; }
         body.sidebar-collapsed .side-brand { align-items:center; }
         body.sidebar-collapsed .side-brand .brand-mark img { max-width:3.2rem; }
         .side-section { padding:1rem 1.4rem .5rem; font-size:.62rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#94a3b8; }
@@ -179,10 +184,13 @@
 @endphp
 <div class="frame">
     <aside class="sidebar" id="sidebar">
-        <a href="{{ route('admin.dashboard') }}" class="side-brand">
-            <span class="brand-mark"><img src="{{ asset('images/logo_bitc_crop.png') }}" alt="Logo BITC"></span>
-            <span class="brand-font">BITC<span style="color:var(--teal)">.</span><small>Panel Admin</small></span>
-        </a>
+        <div class="side-brand-row">
+            <a href="{{ route('admin.dashboard') }}" class="side-brand">
+                <span class="brand-mark"><img src="{{ asset('images/logo_bitc_crop.png') }}" alt="Logo BITC"></span>
+                <span class="brand-font">BITC<span style="color:var(--teal)">.</span><small>Panel Admin</small></span>
+            </a>
+            <button class="collapse-toggle-btn d-none d-lg-inline-flex" id="collapseBtn" title="Ciutkan/lebarkan sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
+        </div>
 
         <div class="side-section">Menu Utama</div>
         <ul class="side-nav">
@@ -231,7 +239,7 @@
 
         <div class="side-bottom">
             <div class="side-nav" style="padding-top:.3rem;margin-top:.3rem;border-top:1px solid var(--line)">
-                <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="question">@csrf
+                <form method="POST" action="{{ route('admin.logout') }}" data-confirm="Keluar dari panel admin?" data-icon="warning">@csrf
                     <button type="submit" class="side-link w-100 text-start border-0 bg-transparent" style="color:#c02929" title="Keluar">
                         <span class="mic" style="color:#c02929"><i class="bi bi-box-arrow-right"></i></span>
                         <span class="lbl">Keluar</span>
@@ -245,7 +253,6 @@
     <div class="content">
         <div class="topbar">
             <button class="burger d-lg-none" id="burgerBtn"><i class="bi bi-list"></i></button>
-            <button class="collapse-toggle-btn d-none d-lg-inline-flex" id="collapseBtn" title="Ciutkan/lebarkan sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
             <button class="burger" onclick="history.back()" title="Kembali ke halaman sebelumnya"><i class="bi bi-arrow-left"></i></button>
             <div>
                 <div class="crumb">WADUH Admin</div>
@@ -307,6 +314,16 @@
 <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 <script>
+    // Kalau halaman ini dipulihkan dari bfcache (mis. admin pencet "Kembali" setelah
+    // setujui/tolak pemesanan), muat ulang dari server. Header Cache-Control: no-store
+    // (lihat routes/web.php) saja TIDAK selalu cukup — Chrome versi baru tetap boleh
+    // menyimpan halaman ber-no-store ke bfcache — jadi pengecekan pageshow ini tetap
+    // dibutuhkan supaya data & tombol aksi yang tampil selalu yang terbaru, bukan
+    // salinan lama (yang bisa saja masih menampilkan modal konfirmasi yang belum tertutup).
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) window.location.reload();
+    });
+
     // Sidebar mobile: buka/tutup lewat tombol burger atau tap di luar (backdrop).
     (() => {
         const sidebar = document.getElementById('sidebar');
@@ -401,7 +418,7 @@
         Swal.fire({
             title: f.dataset.confirmTitle || 'Yakin?',
             text: f.dataset.confirm,
-            icon: f.dataset.icon || 'question',
+            icon: f.dataset.icon || 'warning',
             showCancelButton: true,
             confirmButtonText: f.dataset.confirmText || 'Ya, lanjutkan',
             cancelButtonText: 'Batal',
@@ -418,7 +435,7 @@
         Swal.fire({
             title: a.dataset.confirmTitle || 'Yakin?',
             text: a.dataset.confirm,
-            icon: a.dataset.icon || 'question',
+            icon: a.dataset.icon || 'warning',
             showCancelButton: true,
             confirmButtonText: a.dataset.confirmText || 'Ya, lanjutkan',
             cancelButtonText: 'Batal',

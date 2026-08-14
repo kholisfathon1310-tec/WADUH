@@ -152,7 +152,7 @@
                 <div class="pf-panel-title"><span class="ic"><i class="bi bi-person-lines-fill"></i></span>Edit Profil</div>
                 <form method="POST" action="{{ route('admin.profil.update') }}"
                       data-confirm="Nama dan email akun akan diperbarui." data-confirm-title="Simpan perubahan profil?"
-                      data-icon="question" data-confirm-text="Ya, simpan">
+                      data-icon="warning" data-confirm-text="Ya, simpan">
                     @csrf
                     @method('PUT')
 

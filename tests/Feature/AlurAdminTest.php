@@ -164,6 +164,54 @@ class AlurAdminTest extends TestCase
         $this->assertSame('Valid', $dok->fresh()->status_verifikasi->value);
     }
 
+    /** Sekali diputuskan (Valid/Tidak Valid), keputusan dokumen tidak boleh diubah lagi. */
+    public function test_verifikasi_dokumen_terkunci_setelah_diputuskan(): void
+    {
+        $this->actingAs($this->admin(), 'admin');
+        $r = $this->reservasiMenunggu('Bulan', 241);
+        $dok = DokumenPersyaratan::create([
+            'id_reservasi'      => $r->id_reservasi,
+            'jenis_dokumen'     => 'Company Profile',
+            'nama_file'         => 'cp-terkunci.pdf',
+            'lokasi_file'       => 'dokumen/cp-terkunci.pdf',
+            'tanggal_upload'    => now(),
+            'status_verifikasi' => 'Valid',
+        ]);
+
+        $this->post(route('admin.reservasi.dokumen.verifikasi', $dok->id_dokumen), ['status_verifikasi' => 'Tidak Valid'])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertSame('Valid', $dok->fresh()->status_verifikasi->value, 'Status tidak boleh berubah setelah diputuskan.');
+    }
+
+    /**
+     * Reproduksi keluhan "tombol Kembali habis setujui/tolak muncul pop-up lagi": setelah
+     * setujui, GET ulang halaman detail (simulasi klik Kembali / reload) TIDAK boleh
+     * menampilkan flash sukses lagi (sudah dikonsumsi sekali), dan halaman admin harus
+     * mengirim header Cache-Control: no-store supaya browser tidak menyimpan halaman lama
+     * di back-forward cache.
+     */
+    public function test_halaman_detail_tidak_menampilkan_flash_sukses_dua_kali_setelah_setujui(): void
+    {
+        $this->actingAs($this->admin(), 'admin');
+        $r = $this->reservasiMenunggu('Hari', 270);
+
+        // setujui() memakai back() → redirect ke halaman detail (referer). Ikuti redirect-nya
+        // supaya "request pertama" di bawah adalah render halaman detail dengan flash sukses.
+        $pertama = $this->followingRedirects()->from(route('admin.reservasi.show', $r->kode_reservasi))
+            ->post(route('admin.reservasi.setujui', $r->kode_reservasi));
+        $pertama->assertOk()->assertSee('disetujui', false);
+        $ccPertama = $pertama->headers->get('Cache-Control');
+        $this->assertStringContainsString('no-store', (string) $ccPertama, "Header aktual: {$ccPertama}");
+
+        // Request kedua (simulasi Kembali/reload): flash sudah dikonsumsi, tidak boleh muncul lagi.
+        $kedua = $this->get(route('admin.reservasi.show', $r->kode_reservasi));
+        $kedua->assertOk();
+        $kedua->assertSessionMissing('success');
+        $ccKedua = $kedua->headers->get('Cache-Control');
+        $this->assertStringContainsString('no-store', (string) $ccKedua, "Header aktual: {$ccKedua}");
+    }
+
     public function test_halaman_detail_monitoring_laporan_render(): void
     {
         $this->actingAs($this->admin(), 'admin');

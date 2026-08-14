@@ -88,18 +88,33 @@
                             <p class="fw-bold small mb-1"><i class="bi bi-paperclip me-1"></i>Dokumen Persyaratan (Wajib untuk Sewa Bulanan)</p>
                             <p class="text-muted small mb-2">Company Profile, legalitas perusahaan, atau fotokopi KTP penanggung jawab (PDF, JPG, PNG, maksimal 5 MB per file). Dokumen ini berlaku untuk {{ $ruangBulan->count() > 1 ? 'semua ruangan bulanan (' . $ruangBulan->implode(', ') . ')' : $ruangBulan->first() }} pada pemesanan ini, cukup diunggah sekali.</p>
                             <div class="mb-2" data-dok-group>
-                                <input type="file" name="dokumen[]" class="form-control form-control-sm mb-1" accept=".pdf,.jpg,.jpeg,.png" multiple required>
+                                <div class="d-flex gap-1 align-items-center mb-1">
+                                    <input type="file" name="dokumen[]" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" multiple required>
+                                </div>
                                 <button type="button" class="btn btn-sm btn-brand-outline" onclick="tambahFile()"><i class="bi bi-plus-lg me-1"></i>Tambah file lain</button>
                             </div>
                             <script>
-                                // Tambah input file baru agar pemesan mudah melampirkan beberapa dokumen.
+                                // Tambah baris input file baru, lengkap dengan tombol hapus (X) supaya
+                                // pemesan bisa membatalkan baris ini kalau ternyata tidak jadi dipakai.
                                 function tambahFile() {
                                     const group = document.querySelector('[data-dok-group]');
+                                    const baris = document.createElement('div');
+                                    baris.className = 'd-flex gap-1 align-items-center mb-1';
+
                                     const input = document.createElement('input');
                                     input.type = 'file'; input.name = 'dokumen[]';
-                                    input.className = 'form-control form-control-sm mb-1';
+                                    input.className = 'form-control form-control-sm';
                                     input.accept = '.pdf,.jpg,.jpeg,.png'; input.multiple = true;
-                                    group.insertBefore(input, group.lastElementChild);
+
+                                    const hapus = document.createElement('button');
+                                    hapus.type = 'button';
+                                    hapus.className = 'btn btn-sm btn-outline-danger flex-shrink-0';
+                                    hapus.title = 'Batalkan file ini';
+                                    hapus.innerHTML = '<i class="bi bi-x-lg"></i>';
+                                    hapus.onclick = () => baris.remove();
+
+                                    baris.append(input, hapus);
+                                    group.insertBefore(baris, group.lastElementChild);
                                 }
                             </script>
                         </div>

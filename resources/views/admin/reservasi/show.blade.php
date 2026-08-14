@@ -55,7 +55,7 @@
                     {{-- Idempotent: klik pertama menerbitkan, berikutnya mengunduh PDF yang sama (1 faktur utk semua ruangan). --}}
                     <form method="POST" action="{{ route('admin.reservasi.faktur.cetak', $r->kode_reservasi) }}"
                           data-confirm="Faktur PDF untuk pemesanan {{ $r->kode_transaksi }} akan diterbitkan/diunduh."
-                          data-confirm-title="Cetak faktur ini?" data-icon="question" data-confirm-text="Ya, cetak">@csrf
+                          data-confirm-title="Cetak faktur ini?" data-icon="warning" data-confirm-text="Ya, cetak">@csrf
                         <button class="btn btn-brand"><i class="bi bi-receipt me-1"></i>Cetak Faktur</button>
                     </form>
                 @endif
@@ -139,15 +139,24 @@
                                 <a href="{{ \Illuminate\Support\Facades\Storage::url($dok->lokasi_file) }}" target="_blank" class="cell-sub text-decoration-none">{{ $dok->nama_file }} <i class="bi bi-box-arrow-up-right"></i></a>
                                 <span class="badge text-bg-{{ ['Menunggu'=>'warning','Valid'=>'success','Tidak Valid'=>'danger'][$dok->status_verifikasi->value] }} ms-1">{{ $dok->status_verifikasi->value }}</span>
                             </div>
-                            @if ($dok->status_verifikasi->value !== 'Valid')
-                                {{-- Satu tombol ceklis; setelah Valid tombol hilang. --}}
-                                <form method="POST" action="{{ route('admin.reservasi.dokumen.verifikasi', $dok->id_dokumen) }}"
-                                      data-confirm="Dokumen {{ $dok->nama_file }} akan ditandai VALID."
-                                      data-confirm-title="Validasi dokumen ini?" data-icon="question"
-                                      data-confirm-text="Ya, valid" data-confirm-color="#25b47e">@csrf
-                                    <input type="hidden" name="status_verifikasi" value="Valid">
-                                    <button class="btn btn-sm btn-outline-success" title="Tandai Valid"><i class="bi bi-check-lg"></i> Validasi</button>
-                                </form>
+                            @if ($dok->status_verifikasi->value === 'Menunggu')
+                                {{-- Keputusan final: begitu Valid/Tidak Valid dipilih, tombol hilang dan tidak bisa diubah lagi. --}}
+                                <div class="d-flex gap-1">
+                                    <form method="POST" action="{{ route('admin.reservasi.dokumen.verifikasi', $dok->id_dokumen) }}"
+                                          data-confirm="Dokumen {{ $dok->nama_file }} akan ditandai VALID. Keputusan ini tidak bisa diubah lagi."
+                                          data-confirm-title="Validasi dokumen ini?" data-icon="warning"
+                                          data-confirm-text="Ya, valid" data-confirm-color="#25b47e">@csrf
+                                        <input type="hidden" name="status_verifikasi" value="Valid">
+                                        <button class="btn btn-sm btn-outline-success" title="Tandai Valid"><i class="bi bi-check-lg"></i> Validasi</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.reservasi.dokumen.verifikasi', $dok->id_dokumen) }}"
+                                          data-confirm="Dokumen {{ $dok->nama_file }} akan ditandai TIDAK VALID. Keputusan ini tidak bisa diubah lagi."
+                                          data-confirm-title="Tolak dokumen ini?" data-icon="warning"
+                                          data-confirm-text="Ya, tolak" data-confirm-color="#d95757">@csrf
+                                        <input type="hidden" name="status_verifikasi" value="Tidak Valid">
+                                        <button class="btn btn-sm btn-outline-danger" title="Tandai Tidak Valid"><i class="bi bi-x-lg"></i> Tolak</button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     @empty
@@ -166,7 +175,7 @@
                         <p class="small text-muted mb-2">Keputusan berlaku untuk <strong>seluruh ruangan Menunggu</strong> pada pemesanan ini. Checklist tiap ruangan ada di kartu ruangan.</p>
                         <form method="POST" action="{{ route('admin.reservasi.setujui', $r->kode_reservasi) }}" class="d-grid mb-2"
                               data-confirm="Seluruh ruangan Menunggu pada {{ $r->kode_transaksi }} akan disetujui."
-                              data-confirm-title="Setujui pemesanan ini?" data-icon="question"
+                              data-confirm-title="Setujui pemesanan ini?" data-icon="warning"
                               data-confirm-text="Ya, setujui" data-confirm-color="#25b47e">@csrf
                             <button class="btn btn-success" @disabled(! $bolehSetujui)><i class="bi bi-check2-circle me-1"></i>Setujui Semua</button>
                         </form>

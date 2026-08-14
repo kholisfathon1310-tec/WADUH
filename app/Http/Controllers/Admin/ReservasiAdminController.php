@@ -200,6 +200,11 @@ class ReservasiAdminController extends Controller
             'status_verifikasi' => ['required', 'string', 'in:'.implode(',', array_map(fn ($c) => $c->value, StatusVerifikasi::cases()))],
         ]);
 
+        // Keputusan Valid/Tidak Valid final — begitu sudah diputuskan, tidak boleh diubah lagi.
+        if ($dokumen->status_verifikasi !== StatusVerifikasi::Menunggu) {
+            return back()->with('error', 'Dokumen ini sudah diputuskan sebelumnya dan tidak bisa diubah lagi.');
+        }
+
         $kodeTransaksi = $dokumen->reservasi->kode_transaksi;
 
         DokumenPersyaratan::whereHas('reservasi', fn ($q) => $q->where('kode_transaksi', $kodeTransaksi))

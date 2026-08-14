@@ -67,8 +67,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/login', [AdminAuthController::class, 'login'])->name('login.attempt');
     });
 
-    // Area terproteksi.
-    Route::middleware('auth:admin')->group(function () {
+    // Area terproteksi. cache.headers:no_store mencegah browser menyimpan halaman ini di
+    // cache/bfcache, supaya tombol "Kembali" selalu memuat ulang dari server (data terbaru,
+    // bukan snapshot lama yang bisa masih menampilkan modal konfirmasi yang belum tertutup).
+    Route::middleware(['auth:admin', 'cache.headers:no_store'])->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
