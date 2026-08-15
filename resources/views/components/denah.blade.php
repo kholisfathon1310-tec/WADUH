@@ -32,6 +32,9 @@
     'kategori' => null,
     'title' => null,
     'info' => null,
+    // Sembunyikan header judul+info internal komponen ini — dipakai saat halaman pemanggil
+    // sudah punya kartu header sendiri (mis. monitoring admin), supaya tidak duplikat.
+    'hideHeader' => false,
 ])
 
 @php
@@ -449,15 +452,17 @@
      RENDER DENAH
      ═════════════════════════════════════════════════════════════ --}}
 <div class="denah-layout" data-denah data-clickable="{{ $clickable ? 1 : 0 }}">
-    <div class="dl-header">
-        <h2 class="dl-title">
-            {{ $displayTitle }}
-            @if ($displaySubtitle)<small>{{ $displaySubtitle }}</small>@endif
-        </h2>
-        @if ($displayInfo)
-            <div class="dl-info">{{ $displayInfo }}</div>
-        @endif
-    </div>
+    @unless ($hideHeader)
+        <div class="dl-header">
+            <h2 class="dl-title">
+                {{ $displayTitle }}
+                @if ($displaySubtitle)<small>{{ $displaySubtitle }}</small>@endif
+            </h2>
+            @if ($displayInfo)
+                <div class="dl-info">{{ $displayInfo }}</div>
+            @endif
+        </div>
+    @endunless
 
     <div class="dl-building">
         @if (isset($data['hall']))

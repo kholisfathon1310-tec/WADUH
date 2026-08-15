@@ -61,9 +61,16 @@ class MonitoringController extends Controller
             ->pluck('reservasi')
             ->flatten();
 
+        // Tarif aktif — ditampilkan di kartu info supaya admin tahu harga sewa tanpa buka menu lain.
+        $tarifAktif = $fasilitas->tarifSewa()
+            ->where('status_aktif', StatusAktif::Aktif->value)
+            ->with('jenisSewa')
+            ->get();
+
         return view('admin.monitoring.detail', [
             'fasilitas'      => $fasilitas->load('lantai'),
             'reservasiAktif' => $reservasiAktif,
+            'tarifAktif'     => $tarifAktif,
             'slot'           => $slot,
         ]);
     }
