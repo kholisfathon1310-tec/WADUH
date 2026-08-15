@@ -411,13 +411,13 @@
                 <li class="nav-item"><a class="nav-link active" href="#beranda">Beranda</a></li>
                 <li class="nav-item"><a class="nav-link" href="#tentang">Tentang BITC</a></li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#fasilitas" role="button" data-bs-toggle="dropdown">Fasilitas</a>
+                    <a class="nav-link dropdown-toggle" href="{{ route('fasilitas.index') }}" role="button" data-bs-toggle="dropdown">Fasilitas</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#fasilitas"><i class="bi bi-grid-3x3-gap me-2"></i>Semua Lantai</a></li>
+                        <li><a class="dropdown-item" href="{{ route('fasilitas.index') }}"><i class="bi bi-grid-3x3-gap me-2"></i>Semua Lantai</a></li>
                         <li><hr class="dropdown-divider"></li>
                         @foreach ($daftarLantai as $l)
                             <li>
-                                <a class="dropdown-item" href="{{ route('reservasi.denah', ['kategori' => $l['kategori'], 'lantai' => $l['id']]) }}">
+                                <a class="dropdown-item" href="{{ route('fasilitas.denah', ['kategori' => $l['kategori'], 'lantai' => $l['id']]) }}">
                                     <span class="dot"></span>
                                     Lantai {{ $l['nomor'] }} · {{ $l['kategori'] }}
                                 </a>
@@ -548,7 +548,7 @@
             <div class="section-head center mb-5" data-reveal>
                 <p class="eyebrow">Fasilitas per Lantai</p>
                 <h2>Lima lantai, tiga jenis ruang.</h2>
-                <p class="lead">Pilih lantai untuk langsung melihat denah &amp; ketersediaannya hari ini.</p>
+                <p class="lead">Pilih lantai untuk langsung melihat denah &amp; detail tiap ruangannya.</p>
             </div>
             <div class="row g-4">
                 @foreach ($daftarLantai as $l)
@@ -582,7 +582,7 @@
                                         {{ $l['tersedia'] }} tersedia
                                     </span>
                                 </div>
-                                <a href="{{ route('reservasi.denah', ['kategori' => $l['kategori'], 'lantai' => $l['id']]) }}" class="btn-lantai">
+                                <a href="{{ route('fasilitas.denah', ['kategori' => $l['kategori'], 'lantai' => $l['id']]) }}" class="btn-lantai">
                                     <span>Lihat Denah Lantai {{ $l['nomor'] }}</span>
                                     <i class="bi bi-arrow-right"></i>
                                 </a>

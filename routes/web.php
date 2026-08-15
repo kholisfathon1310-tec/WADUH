@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\FakturController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MonitoringController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Admin\ProfilController;
 use App\Http\Controllers\Admin\ReservasiAdminController;
 use App\Http\Controllers\BuktiReservasiController;
 use App\Http\Controllers\CekStatusController;
+use App\Http\Controllers\FasilitasController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReservasiController;
 use Illuminate\Support\Facades\Route;
@@ -50,8 +52,22 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
     Route::get('/{kategori}/denah/{lantai}', [ReservasiController::class, 'denah'])->name('denah');
 });
 
+/*
+| Jelajah Fasilitas (publik, tanpa auth) — TERPISAH dari alur reservasi di atas.
+| Murni informasi (denah + detail), tidak ada jalan ke keranjang/checkout.
+*/
+Route::prefix('fasilitas')->name('fasilitas.')->group(function () {
+    Route::get('/', [FasilitasController::class, 'index'])->name('index');
+    Route::get('/detail/{fasilitas}', [FasilitasController::class, 'detail'])->name('detail');
+    Route::get('/{kategori}/lantai', [FasilitasController::class, 'lantai'])->name('lantai');
+    Route::get('/{kategori}/denah/{lantai}', [FasilitasController::class, 'denah'])->name('denah');
+});
+
 Route::get('/cek-status', [CekStatusController::class, 'form'])->name('cek-status.form');
-Route::post('/cek-status', [CekStatusController::class, 'hasil'])->name('cek-status.hasil');
+Route::post('/cek-status', [CekStatusController::class, 'cari'])->name('cek-status.cari');
+// GET dengan kode di URL — stabil (bisa di-bookmark/refresh) supaya setelah aksi seperti
+// "Batalkan" bisa redirect balik ke sini, bukan keluar ke form kosong.
+Route::get('/cek-status/{kode}', [CekStatusController::class, 'hasil'])->name('cek-status.hasil');
 Route::get('/cek-status/{kodeReservasi}/bukti-reservasi', [BuktiReservasiController::class, 'unduh'])->name('cek-status.bukti-reservasi');
 
 // Preview denah gedung BITC (visualisasi 5 lantai). Tidak melakukan reservasi.
@@ -65,6 +81,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AdminAuthController::class, 'login'])->name('login.attempt');
+
+        // Lupa kata sandi.
+        Route::get('/lupa-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+        Route::post('/lupa-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+        Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
     });
 
     // Area terproteksi. cache.headers:no_store mencegah browser menyimpan halaman ini di

@@ -186,7 +186,7 @@
             <h1>Cek Status Reservasi</h1>
             <p class="sub">Masukkan kode yang Anda terima setelah checkout untuk melihat progres verifikasi, jadwal, dan rincian biaya reservasi Anda.</p>
 
-            <form method="POST" action="{{ route('cek-status.hasil') }}">
+            <form method="POST" action="{{ route('cek-status.cari') }}">
                 @csrf
                 <div class="cs-search">
 

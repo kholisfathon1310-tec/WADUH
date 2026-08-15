@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
+use App\Notifications\AdminResetPasswordNotification;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * Admin login memakai guard `admin` (lihat config/auth.php). Extends Authenticatable —
  * dibutuhkan Stage 3 untuk autentikasi; password sudah bcrypt sejak seeder Stage 1.
  */
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements CanResetPasswordContract
 {
+    use Notifiable, CanResetPasswordTrait;
+
     protected $table = 'admin';
     protected $primaryKey = 'id_admin';
 
@@ -36,6 +42,17 @@ class Admin extends Authenticatable
     public function fotoUrl(): ?string
     {
         return $this->foto ? \Illuminate\Support\Facades\Storage::url($this->foto) : null;
+    }
+
+    /**
+     * Override default: link reset harus mengarah ke halaman admin (bukan `password.reset`
+     * milik guard `users`), pakai notifikasi berbahasa Indonesia tersendiri.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $url = route('admin.password.reset', ['token' => $token, 'email' => $this->email]);
+
+        $this->notify(new AdminResetPasswordNotification($url));
     }
 
     public function reservasi(): HasMany

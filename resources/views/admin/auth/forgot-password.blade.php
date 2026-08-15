@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk | WADUH</title>
+    <title>Lupa Kata Sandi | WADUH</title>
     <link href="{{ asset('vendor/fonts/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
@@ -19,11 +19,9 @@
             box-shadow:0 34px 76px -20px rgba(15,36,52,.28); overflow:hidden; animation:cardIn .5s cubic-bezier(.2,.7,.3,1) both;
             display:flex; min-height:560px; }
 
-        /* Panel kiri — identitas & sorotan singkat, tersembunyi di layar kecil */
         .login-visual { flex:1 1 46%; position:relative; overflow:hidden; padding:2.75rem 2.5rem; color:#fff;
             background:url('{{ asset('images/gedung_bitc.png') }}') center/cover no-repeat;
             display:flex; flex-direction:column; justify-content:center; gap:2.25rem; }
-        /* Gradasi sekarang hanya menggelapkan bagian bawah (tempat teks) supaya foto gedung terlihat jelas di bagian atas */
         .login-visual::before { content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
             background:linear-gradient(180deg, rgba(9,23,36,.12) 0%, rgba(9,23,36,.28) 38%, rgba(9,23,36,.62) 72%, rgba(9,23,36,.82) 100%); }
         .login-visual::after { content:''; position:absolute; z-index:0; pointer-events:none; border-radius:50%; filter:blur(6px); opacity:.22;
@@ -39,7 +37,6 @@
         .lv-points .ic { display:grid; place-items:center; width:1.9rem; height:1.9rem; border-radius:.6rem; background:rgba(255,255,255,.16); backdrop-filter:blur(2px); flex:none; font-size:.85rem; }
         .lv-foot { font-size:.72rem; color:#c9dade; text-shadow:0 2px 8px rgba(0,0,0,.4); }
 
-        /* Panel kanan — form */
         .login-form-panel { flex:1 1 54%; padding:3rem 3rem 2.25rem; display:flex; flex-direction:column; justify-content:center; }
         .login-form-head { margin-bottom:1.75rem; }
         .login-form-head h2 { font-size:1.5rem; font-weight:800; margin:0 0 .35rem; color:var(--ink); }
@@ -68,27 +65,26 @@
         <div class="login-visual">
             <div class="lv-grid"></div>
             <div>
-                <h1 class="lv-headline">Kelola reservasi fasilitas BITC dalam satu sistem</h1>
-                <p class="lv-sub">Pantau pengajuan, verifikasi dokumen, sampai buat laporan reservasi.</p>
+                <h1 class="lv-headline">Lupa kata sandi? Tenang, mudah kok</h1>
+                <p class="lv-sub">Masukkan email admin Anda, kami kirimkan tautan untuk membuat kata sandi baru.</p>
                 <ul class="lv-points">
-                    <li><span class="ic"><i class="bi bi-journal-check"></i></span>Verifikasi dan persetujuan reservasi</li>
-                    <li><span class="ic"><i class="bi bi-grid-3x3-gap"></i></span>Monitoring tiap lantai</li>
-                    <li><span class="ic"><i class="bi bi-file-earmark-bar-graph"></i></span>Laporan data reservasi bulanan</li>
+                    <li><span class="ic"><i class="bi bi-envelope-check"></i></span>Tautan dikirim ke email terdaftar</li>
+                    <li><span class="ic"><i class="bi bi-shield-lock"></i></span>Berlaku 60 menit demi keamanan</li>
                 </ul>
             </div>
         </div>
 
         <div class="login-form-panel">
             <div class="login-form-head">
-                <h2>Masuk ke Panel Admin</h2>
-                <p>Masukkan email dan kata sandi Anda untuk melanjutkan.</p>
+                <h2>Lupa Kata Sandi</h2>
+                <p>Masukkan email akun admin Anda untuk menerima tautan ubah kata sandi.</p>
             </div>
 
             @if ($errors->any())
                 <div class="alert alert-danger py-2 small"><ul class="mb-0 ps-3">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
             @endif
 
-            <form method="POST" action="{{ route('admin.login.attempt') }}">
+            <form method="POST" action="{{ route('admin.password.email') }}">
                 @csrf
                 <div class="mb-3">
                     <label class="form-label">Email</label>
@@ -97,28 +93,13 @@
                         <input type="email" name="email" class="form-control" placeholder="nama@waduh.test" value="{{ old('email') }}" required autofocus>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Kata Sandi</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                        <input type="password" name="password" class="form-control" placeholder="Masukkan kata sandi" required>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="form-check mb-0">
-                        <input type="checkbox" name="remember" class="form-check-input" id="remember">
-                        <label class="form-check-label small" for="remember">Ingat saya di perangkat ini</label>
-                    </div>
-                    <a href="{{ route('admin.password.request') }}" class="small text-decoration-none">Lupa kata sandi?</a>
-                </div>
-                <button class="btn btn-login w-100"><i class="bi bi-box-arrow-in-right me-1"></i> Masuk</button>
+                <button class="btn btn-login w-100"><i class="bi bi-send me-1"></i> Kirim Tautan</button>
             </form>
-            <p class="text-center text-muted small login-foot mb-0"><a href="{{ url('/') }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Kembali ke Situs Publik</a></p>
+            <p class="text-center text-muted small login-foot mb-0"><a href="{{ route('admin.login') }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Kembali ke Halaman Masuk</a></p>
         </div>
     </div>
     <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
     <script>
-        // Notifikasi hasil login, ditampilkan setelah pengalihan dari proses masuk atau keluar.
         @if (session('success'))
             Swal.fire({ icon: 'success', title: 'Berhasil', text: @json(session('success')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke' });
         @endif
@@ -126,7 +107,6 @@
             Swal.fire({ icon: 'error', title: 'Gagal', text: @json(session('error')), confirmButtonColor: '#176b87', confirmButtonText: 'Oke, Mengerti' });
         @endif
 
-        // Validasi klien di sisi peramban, tanpa pesan bawaan browser.
         document.querySelectorAll('form').forEach(f => {
             f.setAttribute('novalidate', '');
             f.addEventListener('submit', e => {
@@ -140,9 +120,7 @@
                     const note = document.createElement('div');
                     note.className = 'catatan-salah';
                     note.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i>' +
-                        (el.validity.valueMissing
-                            ? (el.type === 'password' ? 'Kata sandi belum diisi.' : 'Email belum diisi.')
-                            : 'Format email belum benar.');
+                        (el.validity.valueMissing ? 'Email belum diisi.' : 'Format email belum benar.');
                     grup.insertAdjacentElement('afterend', note);
                 });
                 salah[0].focus();

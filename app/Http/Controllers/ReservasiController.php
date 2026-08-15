@@ -311,17 +311,23 @@ class ReservasiController extends Controller
         return view('reservasi.sukses', ['checkout' => $checkout]);
     }
 
-    /** Pembatalan mandiri oleh pemesan. */
+    /**
+     * Pembatalan mandiri oleh pemesan — dari halaman Cek Status. Redirect BALIK ke halaman
+     * hasil pencarian yang sama (bukan back(), yang bisa jatuh ke form kosong karena hasil
+     * pencarian awalnya dirender dari POST), supaya pemesan tidak "terlempar keluar" dan
+     * reservasi yang baru dibatalkan tetap terlihat di tempatnya dengan status terbaru.
+     */
     public function batalkan(Request $request, string $kode_reservasi): RedirectResponse
     {
         $reservasi = Reservasi::where('kode_reservasi', $kode_reservasi)->firstOrFail();
+        $kembaliKe = route('cek-status.hasil', ['kode' => $request->input('kode', $kode_reservasi)]);
 
         // Hanya boleh dibatalkan selama masih proses verifikasi (Menunggu) dan belum lewat tanggal.
         $bolehStatus = $reservasi->status_reservasi === StatusReservasi::Menunggu;
         $belumLewat = $reservasi->tanggal_mulai->startOfDay()->gte(Carbon::today());
 
         if (! $bolehStatus || ! $belumLewat) {
-            return back()->with('error', 'Reservasi hanya dapat dibatalkan selama masih diverifikasi.');
+            return redirect($kembaliKe)->with('error', 'Reservasi hanya dapat dibatalkan selama masih diverifikasi.');
         }
 
         // Observer otomatis mencatat Riwayat_Status (id_admin null = dibatalkan pemesan).
@@ -329,7 +335,7 @@ class ReservasiController extends Controller
         $reservasi->status_reservasi = StatusReservasi::Dibatalkan;
         $reservasi->save();
 
-        return back()->with('success', "Reservasi {$reservasi->kode_reservasi} berhasil dibatalkan.");
+        return redirect($kembaliKe)->with('success', "Reservasi {$reservasi->kode_reservasi} berhasil dibatalkan.");
     }
 
     // ------------------------------------------------------------------

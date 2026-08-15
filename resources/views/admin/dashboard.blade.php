@@ -33,13 +33,16 @@
         $accPanjang += $panjang;
     }
 
-    // Fasilitas per kategori — warna monokrom (shade teal berbeda) supaya konsisten palet.
-    $maxKat = max(1, (int) collect($fasilitasPerKategori)->max());
+    // Reservasi per kategori — warna monokrom (shade teal berbeda) supaya konsisten palet.
+    // Kategori tanpa reservasi tetap tampil (0), bukan hilang dari daftar.
     $kategoriMeta = [
         'Working Space'    => ['ikon' => 'bi-briefcase', 'shade' => '#0e6b7d'],
         'Co-Working Space' => ['ikon' => 'bi-people',    'shade' => '#14b8a6'],
         'Convention Hall'  => ['ikon' => 'bi-bank',      'shade' => '#0891b2'],
     ];
+    $reservasiPerKategoriLengkap = collect($kategoriMeta)->keys()
+        ->mapWithKeys(fn ($k) => [$k => (int) ($reservasiPerKategori[$k] ?? 0)]);
+    $maxKat = max(1, $reservasiPerKategoriLengkap->max());
 
     // Data untuk bar chart trend 7 hari
     $maxTrend = max(1, collect($trend7Hari)->max('jumlah'));
@@ -111,21 +114,22 @@
                 <span><i class="bi bi-pie-chart-fill"></i> Distribusi Status</span>
                 <span class="dash-pill">{{ $statistik['total'] }} total</span>
             </div>
-            <div class="dash-card-body">
+            <div class="dash-card-body dash-card-body-split">
                 <div class="dash-donut-wrap">
                     <svg viewBox="0 0 120 120" class="dash-donut-svg" role="img" aria-label="Grafik distribusi status reservasi">
                         <circle class="donut-track" cx="60" cy="60" r="{{ $donutR }}"/>
                         @if ($statistik['total'] > 0)
                             @foreach ($segmen as $i => $s)
                                 @if ($s['jumlah'] > 0)
+                                    @php $pct = $statistik['total'] > 0 ? round($s['jumlah'] / $statistik['total'] * 100) : 0; @endphp
                                     <circle class="donut-seg" cx="60" cy="60" r="{{ $donutR }}"
                                             stroke="{{ $s['warna'] }}"
                                             stroke-dashoffset="{{ -$s['offset'] }}"
                                             data-dash="{{ $s['panjang'] }} {{ $donutKeliling }}"
+                                            data-tip-label="{{ $s['label'] }}" data-tip-value="{{ $s['jumlah'] }}"
+                                            data-tip-pct="{{ $pct }}" data-tip-color="{{ $s['warna'] }}"
                                             style="stroke-dasharray:0 {{ $donutKeliling }}; transition-delay:{{ $i * .12 }}s"
-                                            transform="rotate(-90 60 60)">
-                                        <title>{{ $s['label'] }}: {{ $s['jumlah'] }}</title>
-                                    </circle>
+                                            transform="rotate(-90 60 60)"></circle>
                                 @endif
                             @endforeach
                         @else
@@ -139,7 +143,10 @@
                 </div>
                 <div class="dash-legend">
                     @foreach ($segmen as $s)
-                        <div class="dash-legend-item" style="background:{{ $s['warna'] }}14">
+                        @php $pctLegend = $statistik['total'] > 0 ? round($s['jumlah'] / $statistik['total'] * 100) : 0; @endphp
+                        <div class="dash-legend-item" style="background:{{ $s['warna'] }}14"
+                             data-tip-label="{{ $s['label'] }}" data-tip-value="{{ $s['jumlah'] }}"
+                             data-tip-pct="{{ $pctLegend }}" data-tip-color="{{ $s['warna'] }}">
                             <span class="dot" style="background:{{ $s['warna'] }}"></span>
                             <span class="lbl">{{ $s['label'] }}</span>
                             <span class="n">{{ $s['jumlah'] }}</span>
@@ -185,9 +192,10 @@
                             <rect x="{{ $x }}" y="{{ $y }}" width="{{ $barW }}" height="{{ $h }}"
                                   rx="1.8" ry="1.8"
                                   fill="{{ $isHariIni ? 'url(#barToday)' : 'url(#barSoft)' }}"
-                                  class="dash-bar" style="--i:{{ $i }}">
-                                <title>{{ $d['tanggal']->translatedFormat('l, d M') }}: {{ $d['jumlah'] }} reservasi</title>
-                            </rect>
+                                  class="dash-bar" style="--i:{{ $i }}"
+                                  data-tip-label="{{ $d['tanggal']->translatedFormat('l, d F') }}"
+                                  data-tip-value="{{ $d['jumlah'] }}"
+                                  data-tip-color="{{ $isHariIni ? 'var(--dash-primary)' : 'var(--dash-primary-soft-2)' }}"></rect>
                             {{-- Angka di atas bar --}}
                             @if ($d['jumlah'] > 0)
                                 <text x="{{ $x + $barW / 2 }}" y="{{ $y - 1.8 }}"
@@ -212,17 +220,17 @@
     </div>
 
     {{-- ═══════════════════════════════════════════════════════════
-         ROW 2 — Fasilitas per Kategori + Reservasi Terbaru
+         ROW 2 — Reservasi per Kategori + Reservasi Terbaru
          ═══════════════════════════════════════════════════════════ --}}
     <div class="dash-grid-2b">
-        {{-- Fasilitas Aktif --}}
+        {{-- Reservasi per Kategori --}}
         <div class="dash-card" data-reveal>
             <div class="dash-card-head">
-                <span><i class="bi bi-building"></i> Fasilitas Aktif</span>
-                <span class="dash-pill">{{ collect($fasilitasPerKategori)->sum() }} unit</span>
+                <span><i class="bi bi-building"></i> Reservasi per Kategori</span>
+                <span class="dash-pill">{{ $reservasiPerKategoriLengkap->sum() }} reservasi</span>
             </div>
             <div class="dash-card-body">
-                @forelse ($fasilitasPerKategori as $kategori => $jumlah)
+                @forelse ($reservasiPerKategoriLengkap as $kategori => $jumlah)
                     @php
                         $meta = $kategoriMeta[$kategori] ?? ['ikon' => 'bi-door-open', 'shade' => 'var(--dash-primary)'];
                         $pct = round($jumlah / $maxKat * 100);
@@ -232,7 +240,7 @@
                         <div class="dash-meter-body">
                             <div class="dash-meter-top">
                                 <span class="dash-meter-name">{{ $kategori }}</span>
-                                <span class="dash-meter-count" style="color:{{ $meta['shade'] }}">{{ $jumlah }} <small>unit</small></span>
+                                <span class="dash-meter-count" style="color:{{ $meta['shade'] }}">{{ $jumlah }} <small>reservasi</small></span>
                             </div>
                             <div class="dash-meter-track">
                                 <div class="dash-meter-fill" style="width:{{ $pct }}%; background:{{ $meta['shade'] }}"></div>
@@ -240,7 +248,7 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-muted small mb-0">Belum ada fasilitas aktif.</p>
+                    <p class="text-muted small mb-0">Belum ada reservasi.</p>
                 @endforelse
                 <a href="{{ route('admin.laporan') }}" class="dash-btn dash-btn-outline w-100 mt-3 justify-content-center"><i class="bi bi-file-earmark-bar-graph me-1"></i>Lihat Laporan</a>
             </div>
@@ -275,6 +283,12 @@
                 @endforelse
             </div>
         </div>
+    </div>
+
+    {{-- Tooltip mengambang — muncul saat kursor di atas segmen donut, batang tren, atau legenda. --}}
+    <div class="dash-tip" id="dashTip" hidden>
+        <div class="dash-tip-label"><span class="dot" id="dashTipDot"></span><span id="dashTipLabel"></span></div>
+        <div class="dash-tip-value"><span id="dashTipValue"></span><small id="dashTipPct"></small></div>
     </div>
 </div>
 
@@ -400,6 +414,9 @@
 }
 .dash-card-head > span:first-child i { color:var(--dash-primary); margin-right:.5rem; }
 .dash-card-body { padding:1.3rem; flex:1; }
+/* Donut: donut di atas, legenda dipin ke bawah — supaya kartu yang di-stretch setinggi
+   kartu sebelahnya (tren 7 hari) tidak menyisakan ruang kosong di bawah legenda. */
+.dash-card-body-split { display:flex; flex-direction:column; justify-content:space-between; gap:1rem; }
 .dash-pill {
     background:var(--dash-primary-soft); color:var(--dash-primary-dark);
     font-size:.72rem; font-weight:700;
@@ -416,9 +433,11 @@
 }
 .donut-track { fill:none; stroke:var(--dash-line-soft); stroke-width:14; }
 .donut-seg {
-    fill:none; stroke-width:14; stroke-linecap:round;
-    transition:stroke-dasharray 1s cubic-bezier(.16,.84,.44,1);
+    fill:none; stroke-width:14; stroke-linecap:round; cursor:pointer;
+    transition:stroke-dasharray 1s cubic-bezier(.16,.84,.44,1), stroke-width .15s ease, opacity .15s ease;
 }
+.donut-seg:hover { stroke-width:17; }
+.dash-donut-svg:has(.donut-seg:hover) .donut-seg:not(:hover) { opacity:.45; }
 .dash-donut-hole {
     position:absolute; inset:0; margin:auto;
     width:138px; height:138px; border-radius:50%; background:#fff;
@@ -440,6 +459,7 @@
     padding:.45rem .65rem; border-radius:.7rem;
     transition:transform .15s ease;
 }
+.dash-legend-item { cursor:pointer; }
 .dash-legend-item:hover { transform:translateY(-1px); }
 .dash-legend-item .dot { width:.6rem; height:.6rem; border-radius:50%; flex:none; }
 .dash-legend-item .lbl { flex:1; }
@@ -533,6 +553,32 @@
     .dash-card-body { padding:1.1rem; }
     .dash-feed-badge { display:none; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   TOOLTIP MENGAMBANG — donut, bar tren, & legenda.
+   ══════════════════════════════════════════════════════════════ */
+.dash-tip {
+    position:fixed; z-index:1080; pointer-events:none;
+    background:#0f172a; color:#f1f5f9; border-radius:.85rem;
+    padding:.7rem .95rem; min-width:9rem;
+    font-family:'DM Sans',sans-serif;
+    box-shadow:0 16px 34px rgba(2,6,23,.32);
+    opacity:0; transform:translateY(4px) scale(.97);
+    transition:opacity .12s ease, transform .12s ease;
+}
+.dash-tip.show { opacity:1; transform:none; }
+.dash-tip-label {
+    display:flex; align-items:center; gap:.45rem;
+    font-size:.68rem; font-weight:700; color:#94a3b8;
+    text-transform:uppercase; letter-spacing:.04em; margin-bottom:.3rem;
+    white-space:nowrap;
+}
+.dash-tip-label .dot { width:.55rem; height:.55rem; border-radius:50%; flex:none; box-shadow:0 0 0 3px rgba(255,255,255,.08); }
+.dash-tip-value {
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.3rem; color:#fff;
+    display:flex; align-items:baseline; gap:.4rem; white-space:nowrap;
+}
+.dash-tip-value small { font-size:.7rem; font-weight:700; color:#5eead4; }
 </style>
 <script>
     // Cincin donut digambar dari 0 lalu ditransisikan ke panjang aslinya (data-dash)
@@ -542,5 +588,46 @@
             seg.style.strokeDasharray = seg.dataset.dash;
         });
     });
+
+    // Tooltip mengambang, mengikuti kursor — donut, bar tren 7 hari, & legenda status.
+    (function () {
+        const tip = document.getElementById('dashTip');
+        const elDot = document.getElementById('dashTipDot');
+        const elLabel = document.getElementById('dashTipLabel');
+        const elValue = document.getElementById('dashTipValue');
+        const elPct = document.getElementById('dashTipPct');
+        if (!tip) return;
+
+        const posisi = evt => {
+            const pad = 16;
+            let x = evt.clientX + pad;
+            let y = evt.clientY + pad;
+            const rect = tip.getBoundingClientRect();
+            if (x + rect.width > window.innerWidth - 8) x = evt.clientX - rect.width - pad;
+            if (y + rect.height > window.innerHeight - 8) y = evt.clientY - rect.height - pad;
+            tip.style.left = x + 'px';
+            tip.style.top = y + 'px';
+        };
+
+        const tampilkan = (el, evt) => {
+            elDot.style.background = el.dataset.tipColor || '#0e6b7d';
+            elLabel.textContent = el.dataset.tipLabel || '';
+            elValue.textContent = el.dataset.tipValue || '0';
+            elPct.textContent = el.dataset.tipPct ? el.dataset.tipPct + '%' : '';
+            tip.hidden = false;
+            requestAnimationFrame(() => tip.classList.add('show'));
+            posisi(evt);
+        };
+        const sembunyikan = () => {
+            tip.classList.remove('show');
+            tip.hidden = true;
+        };
+
+        document.querySelectorAll('[data-tip-value]').forEach(el => {
+            el.addEventListener('mouseenter', evt => tampilkan(el, evt));
+            el.addEventListener('mousemove', posisi);
+            el.addEventListener('mouseleave', sembunyikan);
+        });
+    })();
 </script>
 @endsection

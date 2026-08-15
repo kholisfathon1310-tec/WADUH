@@ -103,6 +103,14 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Broker khusus guard `admin` — dipakai fitur lupa password admin.
+        'admins' => [
+            'provider' => 'admins',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
 
     /*

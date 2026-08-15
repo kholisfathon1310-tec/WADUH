@@ -296,6 +296,7 @@
                                               data-confirm-title="Batalkan reservasi ini?" data-icon="warning"
                                               data-confirm-text="Ya, batalkan" data-confirm-color="#d95757">
                                             @csrf
+                                            <input type="hidden" name="kode" value="{{ $kode }}">
                                             <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle me-1"></i>Batalkan</button>
                                         </form>
                                     @endif

@@ -130,15 +130,17 @@
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ url('/') }}">Beranda</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('reservasi.index') ? 'active' : '' }}" href="{{ route('reservasi.index') }}">Reservasi</a></li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ request()->routeIs('reservasi.denah') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">Fasilitas</a>
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('fasilitas.*') ? 'active' : '' }}" href="{{ route('fasilitas.index') }}" role="button" data-bs-toggle="dropdown">Fasilitas</a>
                         <ul class="dropdown-menu shadow border-0" style="border-radius:1rem">
+                            <li><a class="dropdown-item fw-semibold" href="{{ route('fasilitas.index') }}"><i class="bi bi-grid-3x3-gap me-2"></i>Semua Lantai</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             @php
                                 $navLantai = \App\Models\Lantai::with(['fasilitas' => fn ($q) => $q->limit(1)])->orderBy('id_lantai')->get();
                             @endphp
                             @foreach ($navLantai as $nl)
                                 @if ($nl->fasilitas->isNotEmpty())
                                     <li>
-                                        <a class="dropdown-item fw-semibold" href="{{ route('reservasi.denah', ['kategori' => $nl->fasilitas->first()->kategori_fasilitas, 'lantai' => $nl->id_lantai]) }}">
+                                        <a class="dropdown-item fw-semibold" href="{{ route('fasilitas.denah', ['kategori' => $nl->fasilitas->first()->kategori_fasilitas, 'lantai' => $nl->id_lantai]) }}">
                                             <span class="d-inline-block rounded-circle me-2" style="width:.6rem;height:.6rem;background:var(--primary)"></span>
                                             Lantai {{ $nl->nomor_lantai }} · {{ $nl->fasilitas->first()->kategori_fasilitas }}
                                         </a>

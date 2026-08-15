@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservasi;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,8 +15,8 @@ class CekStatusController extends Controller
         return view('cek-status.form');
     }
 
-    /** Cari reservasi by kode_transaksi (banyak baris) ATAU kode_reservasi tunggal. */
-    public function hasil(Request $request): View
+    /** Validasi kode dari form pencarian, lalu redirect ke URL hasil (GET, stabil & bisa di-refresh). */
+    public function cari(Request $request): RedirectResponse
     {
         $data = $request->validate(
             ['kode' => ['required', 'string', 'max:100']],
@@ -25,8 +26,12 @@ class CekStatusController extends Controller
             ],
         );
 
-        $kode = trim($data['kode']);
+        return redirect()->route('cek-status.hasil', ['kode' => trim($data['kode'])]);
+    }
 
+    /** Cari reservasi by kode_transaksi (banyak baris) ATAU kode_reservasi tunggal. */
+    public function hasil(string $kode): View
+    {
         $reservasi = Reservasi::query()
             ->with([
                 'tarifSewa.fasilitas.lantai',
