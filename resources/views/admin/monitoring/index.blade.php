@@ -21,12 +21,10 @@
         <input type="hidden" name="lantai" value="{{ $lantai?->id_lantai }}">
         <div class="row g-2 g-md-3 align-items-end">
             <div class="col-6 col-md-3"><label class="form-label mb-1">Tanggal</label><input type="date" name="tanggal_mulai" class="form-control form-control-sm" value="{{ $slot['tanggal_mulai'] }}"></div>
-            <div class="col-6 col-md-3"><label class="form-label mb-1">s/d tanggal</label><input type="date" name="tanggal_selesai" class="form-control form-control-sm" value="{{ $slot['tanggal_selesai'] }}"></div>
-            <div class="col-6 col-md-2"><button class="btn btn-brand btn-sm w-100"><i class="bi bi-search me-1"></i>Cek</button></div>
             <div class="col-12 col-md-auto ms-md-auto d-flex flex-wrap align-items-center gap-2">
                 <span class="avail hijau"><i class="bi bi-check-circle"></i> Tersedia</span>
                 <span class="avail kuning"><i class="bi bi-exclamation-circle"></i> Sebagian terisi</span>
-                <span class="avail merah"><i class="bi bi-x-circle"></i> Penuh / tidak aktif</span>
+                <span class="avail merah"><i class="bi bi-x-circle"></i> Penuh</span>
             </div>
         </div>
         <small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Pilih lantai lewat submenu Monitoring di sidebar.</small>
