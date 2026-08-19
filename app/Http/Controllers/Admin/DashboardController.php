@@ -12,6 +12,11 @@ class DashboardController extends Controller
 {
     public function __invoke(): View
     {
+        // Periode chart tren: 'harian' (7 hari terakhir) atau 'bulanan' (12 bulan terakhir).
+        // Dipilih lewat query string ?periode=, default 'harian'. Nilai tak dikenal → fallback harian.
+        $periode = request('periode', 'harian');
+        $periode = in_array($periode, ['harian', 'bulanan'], true) ? $periode : 'harian';
+
         $perStatus = Reservasi::query()
             ->selectRaw('status_reservasi, COUNT(*) as jumlah')
             ->groupBy('status_reservasi')
@@ -42,29 +47,58 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        // Tren reservasi 7 hari terakhir (termasuk hari ini) — untuk bar chart di dashboard.
+        // Tren reservasi untuk bar chart di dashboard — dua mode:
+        // - harian : 7 hari terakhir (termasuk hari ini), label "Sen, Sel, ..."
+        // - bulanan: 12 bulan terakhir (termasuk bulan ini), label "Jan, Feb, ..."
         // Sama seperti grafik kategori: hanya yang Disetujui/Selesai (reservasi aktif/sah).
-        // Diagregasi per DATE(created_at) lalu di-pad ke tanggal yang hilang supaya bar
-        // selalu berjumlah tujuh, meskipun hari itu tidak ada reservasi.
-        $mulai = now()->startOfDay()->subDays(6);
-        $countPerHari = Reservasi::query()
-            ->whereIn('status_reservasi', [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value])
-            ->where('created_at', '>=', $mulai)
-            ->selectRaw('DATE(created_at) as tgl, COUNT(*) as jumlah')
-            ->groupBy('tgl')
-            ->pluck('jumlah', 'tgl');
+        // Selalu di-pad ke seluruh rentang supaya jumlah bar tetap konsisten meskipun
+        // ada hari/bulan tanpa reservasi sama sekali.
+        $statusAktif = [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value];
 
-        $trend7Hari = collect(range(0, 6))->map(function ($i) use ($mulai, $countPerHari) {
-            $tgl = $mulai->copy()->addDays($i);
-            $key = $tgl->toDateString();
+        if ($periode === 'bulanan') {
+            $mulai = now()->startOfMonth()->subMonths(11);
 
-            return [
-                'tanggal' => $tgl,
-                'label'   => $tgl->translatedFormat('D'),   // Sen, Sel, ...
-                'jumlah'  => (int) ($countPerHari[$key] ?? 0),
-            ];
-        })->all();
+            $countPerBulan = Reservasi::query()
+                ->whereIn('status_reservasi', $statusAktif)
+                ->where('created_at', '>=', $mulai)
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as bln, COUNT(*) as jumlah")
+                ->groupBy('bln')
+                ->pluck('jumlah', 'bln');
 
-        return view('admin.dashboard', compact('statistik', 'reservasiPerKategori', 'terbaru', 'trend7Hari'));
+            $trendChart = collect(range(0, 11))->map(function ($i) use ($mulai, $countPerBulan) {
+                $bln = $mulai->copy()->addMonths($i);
+                $key = $bln->format('Y-m');
+
+                return [
+                    'tanggal' => $bln,
+                    'label'   => $bln->translatedFormat('M'),   // Jan, Feb, ...
+                    'jumlah'  => (int) ($countPerBulan[$key] ?? 0),
+                    'isAktif' => $bln->isCurrentMonth(),
+                ];
+            })->all();
+        } else {
+            $mulai = now()->startOfDay()->subDays(6);
+
+            $countPerHari = Reservasi::query()
+                ->whereIn('status_reservasi', $statusAktif)
+                ->where('created_at', '>=', $mulai)
+                ->selectRaw('DATE(created_at) as tgl, COUNT(*) as jumlah')
+                ->groupBy('tgl')
+                ->pluck('jumlah', 'tgl');
+
+            $trendChart = collect(range(0, 6))->map(function ($i) use ($mulai, $countPerHari) {
+                $tgl = $mulai->copy()->addDays($i);
+                $key = $tgl->toDateString();
+
+                return [
+                    'tanggal' => $tgl,
+                    'label'   => $tgl->translatedFormat('D'),   // Sen, Sel, ...
+                    'jumlah'  => (int) ($countPerHari[$key] ?? 0),
+                    'isAktif' => $tgl->isToday(),
+                ];
+            })->all();
+        }
+
+        return view('admin.dashboard', compact('statistik', 'reservasiPerKategori', 'terbaru', 'trendChart', 'periode'));
     }
 }

@@ -44,11 +44,12 @@
         ->mapWithKeys(fn ($k) => [$k => (int) ($reservasiPerKategori[$k] ?? 0)]);
     $maxKat = max(1, $reservasiPerKategoriLengkap->max());
 
-    // Data untuk bar chart trend 7 hari
-    $maxTrend = max(1, collect($trend7Hari)->max('jumlah'));
+    // Data untuk bar chart tren — jumlah bar berubah sesuai periode (7 harian / 12 bulanan),
+    // jadi lebar bar disesuaikan otomatis biar tetap proporsional & tidak terlalu rapat.
+    $maxTrend = max(1, collect($trendChart)->max('jumlah'));
     $trendChartWidth = 100;   // percent-based SVG viewBox
-    $barCount = count($trend7Hari);
-    $barW = 8;                // width bar dalam viewBox unit
+    $barCount = count($trendChart);
+    $barW = $barCount > 7 ? 5 : 8;   // width bar dalam viewBox unit
     $gap  = (100 - $barW * $barCount) / max(1, $barCount - 1);
 @endphp
 
@@ -156,18 +157,26 @@
             </div>
         </div>
 
-        {{-- Bar chart Trend 7 Hari --}}
+        {{-- Bar chart Tren — toggle Harian (7 hari) / Bulanan (12 bulan) --}}
         <div class="dash-card" data-reveal>
-            <div class="dash-card-head">
-                <span><i class="bi bi-graph-up-arrow"></i> Tren 7 Hari Terakhir</span>
-                <span class="dash-pill">{{ collect($trend7Hari)->sum('jumlah') }} reservasi</span>
+            <div class="dash-card-head dash-card-head-trend">
+                <span><i class="bi bi-graph-up-arrow"></i> {{ $periode === 'bulanan' ? 'Tren 12 Bulan Terakhir' : 'Tren 7 Hari Terakhir' }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="dash-pill">{{ collect($trendChart)->sum('jumlah') }} reservasi</span>
+                    <div class="dash-toggle" role="group" aria-label="Pilih periode tren">
+                        <a href="{{ route('admin.dashboard', ['periode' => 'harian']) }}"
+                           class="dash-toggle-opt {{ $periode === 'harian' ? 'active' : '' }}">Harian</a>
+                        <a href="{{ route('admin.dashboard', ['periode' => 'bulanan']) }}"
+                           class="dash-toggle-opt {{ $periode === 'bulanan' ? 'active' : '' }}">Bulanan</a>
+                    </div>
+                </div>
             </div>
             <div class="dash-card-body">
                 <div class="dash-chart">
                     {{-- SVG bar chart custom: viewBox 100 unit lebar x 72 unit tinggi + label bawah.
                          preserveAspectRatio default (xMidYMid meet) dipakai — bukan "none" — supaya
                          bar/teks/grid selalu diskalakan proporsional, tidak gepeng saat kartu melebar. --}}
-                    <svg viewBox="0 0 100 72" class="dash-chart-svg" role="img" aria-label="Grafik tren reservasi 7 hari">
+                    <svg viewBox="0 0 100 72" class="dash-chart-svg" role="img" aria-label="Grafik tren reservasi">
                         <defs>
                             <linearGradient id="barToday" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stop-color="var(--teal)"/>
@@ -182,38 +191,39 @@
                         @for ($g = 1; $g <= 3; $g++)
                             <line x1="0" y1="{{ $g * 16 }}" x2="100" y2="{{ $g * 16 }}" stroke="#eef2f6" stroke-width=".25"/>
                         @endfor
-                        @foreach ($trend7Hari as $i => $d)
+                        @foreach ($trendChart as $i => $d)
                             @php
                                 $h = $d['jumlah'] > 0 ? max(3, round($d['jumlah'] / $maxTrend * 58)) : 1.5;
                                 $x = $i * ($barW + $gap);
                                 $y = 64 - $h;
-                                $isHariIni = $d['tanggal']->isToday();
+                                $isAktif = $d['isAktif'];
+                                $tipLabel = $periode === 'bulanan' ? $d['tanggal']->translatedFormat('F Y') : $d['tanggal']->translatedFormat('l, d F');
                             @endphp
                             <rect x="{{ $x }}" y="{{ $y }}" width="{{ $barW }}" height="{{ $h }}"
                                   rx="1.8" ry="1.8"
-                                  fill="{{ $isHariIni ? 'url(#barToday)' : 'url(#barSoft)' }}"
+                                  fill="{{ $isAktif ? 'url(#barToday)' : 'url(#barSoft)' }}"
                                   class="dash-bar" style="--i:{{ $i }}"
-                                  data-tip-label="{{ $d['tanggal']->translatedFormat('l, d F') }}"
+                                  data-tip-label="{{ $tipLabel }}"
                                   data-tip-value="{{ $d['jumlah'] }}"
-                                  data-tip-color="{{ $isHariIni ? 'var(--dash-primary)' : 'var(--dash-primary-soft-2)' }}"></rect>
-                            {{-- Angka di atas bar --}}
-                            @if ($d['jumlah'] > 0)
+                                  data-tip-color="{{ $isAktif ? 'var(--dash-primary)' : 'var(--dash-primary-soft-2)' }}"></rect>
+                            {{-- Angka di atas bar (disembunyikan di mode bulanan kalau bar terlalu rapat) --}}
+                            @if ($d['jumlah'] > 0 && $barCount <= 7)
                                 <text x="{{ $x + $barW / 2 }}" y="{{ $y - 1.8 }}"
                                       text-anchor="middle" font-size="3.4" font-weight="700"
-                                      fill="{{ $isHariIni ? 'var(--dash-primary)' : '#64748b' }}"
+                                      fill="{{ $isAktif ? 'var(--dash-primary)' : '#64748b' }}"
                                       font-family="'Plus Jakarta Sans',sans-serif">{{ $d['jumlah'] }}</text>
                             @endif
-                            {{-- Label hari di bawah --}}
+                            {{-- Label hari/bulan di bawah --}}
                             <text x="{{ $x + $barW / 2 }}" y="70.5"
-                                  text-anchor="middle" font-size="2.9" font-weight="600"
-                                  fill="{{ $isHariIni ? 'var(--dash-primary)' : '#94a3b8' }}"
+                                  text-anchor="middle" font-size="{{ $barCount > 7 ? 2.6 : 2.9 }}" font-weight="600"
+                                  fill="{{ $isAktif ? 'var(--dash-primary)' : '#94a3b8' }}"
                                   font-family="'DM Sans',sans-serif">{{ $d['label'] }}</text>
                         @endforeach
                     </svg>
                 </div>
                 <div class="dash-chart-foot">
-                    <span><span class="dot" style="background:var(--dash-primary)"></span> Hari ini</span>
-                    <span><span class="dot" style="background:var(--dash-primary-soft-2)"></span> 6 hari sebelumnya</span>
+                    <span><span class="dot" style="background:var(--dash-primary)"></span> {{ $periode === 'bulanan' ? 'Bulan ini' : 'Hari ini' }}</span>
+                    <span><span class="dot" style="background:var(--dash-primary-soft-2)"></span> {{ $periode === 'bulanan' ? '11 bulan sebelumnya' : '6 hari sebelumnya' }}</span>
                 </div>
             </div>
         </div>
@@ -484,6 +494,25 @@
     margin-top:.8rem; font-size:.78rem; color:var(--dash-muted); font-weight:600;
 }
 .dash-chart-foot .dot { display:inline-block; width:.65rem; height:.65rem; border-radius:.25rem; margin-right:.4rem; vertical-align:middle; }
+
+/* ══════════════════════════════════════════════════════════════
+   TOGGLE PERIODE (Harian / Bulanan) — di head card Tren
+   ══════════════════════════════════════════════════════════════ */
+.dash-card-head-trend { flex-wrap:wrap; gap:.6rem; }
+.dash-toggle {
+    display:inline-flex; padding:.2rem; border-radius:2rem;
+    background:var(--dash-line-soft); gap:.15rem;
+}
+.dash-toggle-opt {
+    padding:.32rem .85rem; border-radius:1.6rem;
+    font-size:.76rem; font-weight:700; text-decoration:none;
+    color:var(--dash-muted); transition:all .15s ease; white-space:nowrap;
+}
+.dash-toggle-opt:hover { color:var(--dash-primary); }
+.dash-toggle-opt.active { background:var(--dash-primary); color:#fff; box-shadow:var(--dash-shadow-sm); }
+@media (max-width: 575.98px) {
+    .dash-toggle-opt { padding:.28rem .65rem; font-size:.72rem; }
+}
 
 /* ══════════════════════════════════════════════════════════════
    FASILITAS AKTIF (progress bars)
