@@ -9,8 +9,10 @@
     $statusMeta = [
         'menunggu'   => ['label' => 'Menunggu',   'ikon' => 'bi-hourglass-split', 'ic' => '#b45309', 'bg' => '#fef3c7', 'dot' => '#f59e0b'],
         'disetujui'  => ['label' => 'Disetujui',  'ikon' => 'bi-check-circle',    'ic' => '#047857', 'bg' => '#d1fae5', 'dot' => '#10b981'],
+        'selesai'    => ['label' => 'Selesai',    'ikon' => 'bi-check2-all',      'ic' => '#1d4ed8', 'bg' => '#dbeafe', 'dot' => '#3b82f6'],
         'ditolak'    => ['label' => 'Ditolak',    'ikon' => 'bi-x-circle',        'ic' => '#b91c1c', 'bg' => '#fee2e2', 'dot' => '#ef4444'],
         'dibatalkan' => ['label' => 'Dibatalkan', 'ikon' => 'bi-slash-circle',    'ic' => '#475569', 'bg' => '#f1f5f9', 'dot' => '#94a3b8'],
+        'kadaluarsa' => ['label' => 'Kadaluarsa', 'ikon' => 'bi-clock-history',   'ic' => '#7c3aed', 'bg' => '#ede9fe', 'dot' => '#8b5cf6'],
     ];
 
     // Segmen donut (pakai `dot` color, soft tapi masih terbaca).
@@ -379,7 +381,7 @@
 /* ══════════════════════════════════════════════════════════════
    STAT TILES — 4 KPI card putih dengan icon soft.
    ══════════════════════════════════════════════════════════════ */
-.dash-tiles { display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:1.5rem; }
+.dash-tiles { display:grid; grid-template-columns:repeat(6, 1fr); gap:1rem; margin-bottom:1.5rem; }
 .dash-tile {
     background:#fff; border:1px solid var(--dash-line);
     border-radius:var(--dash-radius); padding:1.25rem 1.35rem;
@@ -568,7 +570,7 @@
    RESPONSIVE
    ══════════════════════════════════════════════════════════════ */
 @media (max-width: 1199.98px) {
-    .dash-tiles { grid-template-columns:repeat(4, 1fr); }
+    .dash-tiles { grid-template-columns:repeat(3, 1fr); }
 }
 @media (max-width: 991.98px) {
     .dash-grid-2, .dash-grid-2b { grid-template-columns:1fr; }

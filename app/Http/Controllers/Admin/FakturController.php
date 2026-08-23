@@ -28,13 +28,13 @@ class FakturController extends Controller
         $ref = Reservasi::where('kode_reservasi', $kodeReservasi)->firstOrFail();
 
         $items = Reservasi::where('kode_transaksi', $ref->kode_transaksi)
-            ->where('status_reservasi', StatusReservasi::Disetujui->value)
+            ->whereIn('status_reservasi', [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value])
             ->orderBy('id_reservasi')
             ->with(self::RELASI)
             ->get();
 
         if ($items->isEmpty()) {
-            return back()->with('error', 'Faktur hanya untuk reservasi berstatus Disetujui.');
+            return back()->with('error', 'Faktur hanya untuk reservasi berstatus Disetujui atau Selesai.');
         }
 
         // Anchor = baris pertama transaksi; buat faktur sekali, selanjutnya pakai yang sama.
@@ -53,7 +53,7 @@ class FakturController extends Controller
         $ref = Reservasi::where('kode_reservasi', $kodeReservasi)->firstOrFail();
 
         $items = Reservasi::where('kode_transaksi', $ref->kode_transaksi)
-            ->where('status_reservasi', StatusReservasi::Disetujui->value)
+            ->whereIn('status_reservasi', [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value])
             ->orderBy('id_reservasi')
             ->with(self::RELASI)
             ->get();

@@ -62,7 +62,7 @@
         .pf-chip-val { font-size:.9rem; font-weight:600; color:var(--ink); word-break:break-word; }
         .pf-chip-empty { color:var(--muted); font-style:italic; font-weight:500; }
 
-        /* ===== Panel form Edit Profil / Ubah Password — dibuka lewat tombol pill di atas ===== */
+        /* ===== Panel form Edit Profil / Ubah Kata Sandi — dibuka lewat tombol pill di atas ===== */
         .pf-panel { border:1px solid var(--line); border-radius:1rem; padding:1.3rem 1.4rem; background:#fff; }
         .pf-panel-title { display:flex; align-items:center; gap:.6rem; font-weight:700; color:var(--ink); font-size:.95rem; margin-bottom:1rem; }
         .pf-panel-title .ic {
@@ -81,7 +81,7 @@
                         <i class="bi bi-pencil-fill"></i>Edit Profil
                     </button>
                     <button type="button" class="pf-pill pf-pill-solid" data-bs-toggle="collapse" data-bs-target="#pfPassword" aria-expanded="false">
-                        <i class="bi bi-shield-lock-fill"></i>Ubah Password
+                        <i class="bi bi-shield-lock-fill"></i>Ubah Kata Sandi
                     </button>
                 </div>
             </div>
@@ -183,27 +183,27 @@
         {{-- ===== Ubah Password (dibuka dari tombol pill di banner) ===== --}}
         <div class="collapse mb-3" id="pfPassword">
             <div class="pf-panel">
-                <div class="pf-panel-title"><span class="ic"><i class="bi bi-shield-lock"></i></span>Ubah Password</div>
+                <div class="pf-panel-title"><span class="ic"><i class="bi bi-shield-lock"></i></span>Ubah Kata sandi</div>
                 <form method="POST" action="{{ route('admin.profil.password') }}">
                     @csrf
                     @method('PUT')
 
                     <div class="mb-3">
-                        <label class="form-label pf-field-label">Password Lama</label>
+                        <label class="form-label pf-field-label">Kata Sandi Lama</label>
                         <input type="password" name="password_lama" class="form-control" required>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label pf-field-label">Password Baru</label>
+                            <label class="form-label pf-field-label">Kata Sandi Baru</label>
                             <input type="password" name="password_baru" class="form-control" minlength="8" required>
                             <small class="hint">Minimal 8 karakter.</small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label pf-field-label">Konfirmasi Password Baru</label>
+                            <label class="form-label pf-field-label">Konfirmasi Kata Sandi Baru</label>
                             <input type="password" name="password_baru_confirmation" class="form-control" minlength="8" required>
                         </div>
                     </div>
-                    <button class="btn btn-brand"><i class="bi bi-shield-check me-1"></i>Ubah Password</button>
+                    <button class="btn btn-brand"><i class="bi bi-shield-check me-1"></i>Ubah Kata Sandi</button>
                 </form>
             </div>
         </div>

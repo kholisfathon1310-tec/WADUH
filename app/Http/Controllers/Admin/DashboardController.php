@@ -26,14 +26,17 @@ class DashboardController extends Controller
             'total'      => (int) $perStatus->sum(),
             'menunggu'   => (int) $perStatus->get(StatusReservasi::Menunggu->value, 0),
             'disetujui'  => (int) $perStatus->get(StatusReservasi::Disetujui->value, 0),
+            'selesai'    => (int) $perStatus->get(StatusReservasi::Selesai->value, 0),
             'ditolak'    => (int) $perStatus->get(StatusReservasi::Ditolak->value, 0),
             'dibatalkan' => (int) $perStatus->get(StatusReservasi::Dibatalkan->value, 0),
+            'kadaluarsa' => (int) $perStatus->get(StatusReservasi::Kadaluarsa->value, 0),
         ];
 
-        // Jumlah RESERVASI per kategori fasilitas — hanya yang Disetujui/Selesai (reservasi
-        // aktif/sah), sama seperti aturan di Laporan. Menunggu/Ditolak/Dibatalkan tidak dihitung.
+        // Jumlah RESERVASI per kategori fasilitas — snapshot yang SEDANG BERLANGSUNG (Disetujui
+        // saja). Begitu selesai dipakai (status Selesai), reservasinya lepas dari hitungan ini
+        // supaya panel ini selalu mencerminkan pemakaian aktif saat ini, bukan riwayat.
         $reservasiPerKategori = Reservasi::query()
-            ->whereIn('status_reservasi', [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value])
+            ->where('status_reservasi', StatusReservasi::Disetujui->value)
             ->join('tarif_sewa', 'reservasi.id_tarif_sewa', '=', 'tarif_sewa.id_tarif_sewa')
             ->join('fasilitas', 'tarif_sewa.id_fasilitas', '=', 'fasilitas.id_fasilitas')
             ->selectRaw('fasilitas.kategori_fasilitas, COUNT(*) as jumlah')
@@ -50,7 +53,9 @@ class DashboardController extends Controller
         // Tren reservasi untuk bar chart di dashboard — dua mode:
         // - harian : 7 hari terakhir (termasuk hari ini), label "Sen, Sel, ..."
         // - bulanan: 12 bulan terakhir (termasuk bulan ini), label "Jan, Feb, ..."
-        // Sama seperti grafik kategori: hanya yang Disetujui/Selesai (reservasi aktif/sah).
+        // Beda dengan panel kategori (yang cuma menghitung Disetujui): tren riwayat pemakaian
+        // ini tetap menghitung reservasi yang sudah Selesai, supaya angkanya tidak berkurang
+        // begitu masa pakainya berakhir — riwayat bulan/hari yang sudah lewat harus tetap utuh.
         // Selalu di-pad ke seluruh rentang supaya jumlah bar tetap konsisten meskipun
         // ada hari/bulan tanpa reservasi sama sekali.
         $statusAktif = [StatusReservasi::Disetujui->value, StatusReservasi::Selesai->value];

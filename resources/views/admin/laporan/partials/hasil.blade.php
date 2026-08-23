@@ -53,6 +53,6 @@
     <a href="{{ route('admin.laporan.pdf', request()->query()) }}" class="btn btn-danger"
        data-confirm="Laporan PDF akan dibuat sesuai filter yang aktif, dan tersimpan di riwayat laporan."
        data-confirm-title="Ekspor laporan ini?" data-icon="warning" data-confirm-text="Ya, ekspor">
-        <i class="bi bi-file-earmark-pdf me-1"></i>Ekspor PDF
+        <i class="bi bi-file-earmark-pdf me-1"></i>Unduh PDF
     </a>
 </div>

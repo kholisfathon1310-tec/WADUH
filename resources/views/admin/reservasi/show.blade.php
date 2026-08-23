@@ -3,7 +3,7 @@
 
 @php
     $r = $reservasi;
-    $adaDisetujui = $items->contains(fn ($it) => $it->status_reservasi->value === 'Disetujui');
+    $adaDisetujui = $items->contains(fn ($it) => in_array($it->status_reservasi->value, ['Disetujui', 'Selesai'], true));
     $totalSemua = $items->sum('total_biaya');
 @endphp
 
@@ -56,7 +56,7 @@
                     <form method="POST" action="{{ route('admin.reservasi.faktur.cetak', $r->kode_reservasi) }}"
                           data-confirm="Faktur PDF untuk pemesanan {{ $r->kode_transaksi }} akan diterbitkan/diunduh."
                           data-confirm-title="Cetak faktur ini?" data-icon="warning" data-confirm-text="Ya, cetak">@csrf
-                        <button class="btn btn-brand"><i class="bi bi-receipt me-1"></i>Cetak Faktur</button>
+                        <button class="btn btn-brand"><i class="bi bi-receipt me-1"></i>Unduh Faktur</button>
                     </form>
                 @endif
             </div>
@@ -107,7 +107,7 @@
                                 <div class="k">Pengguna · Keperluan</div>
                                 <div>{{ $it->jumlah_pengguna }} orang · {{ $it->keperluan }}</div>
                                 <div class="k">Fasilitas bawaan</div>
-                                <div class="small text-muted">{{ implode(' · ', app(\App\Services\FasilitasBawaanService::class)->untuk($fas, $satuan)) }}</div>
+                                <div class="small text-muted">{{ implode(' , ', app(\App\Services\FasilitasBawaanService::class)->untuk($fas, $satuan)) }}</div>
                                 <div class="k">Checklist kelayakan</div>
                                 <div>
                                     @foreach ($cl as $c)
@@ -229,13 +229,13 @@
 
             {{-- Zona berbahaya --}}
             <div class="xcard" style="border-color:#f0c9c9">
-                <div class="xhead" style="background:#fdf6f6"><span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Zona Berbahaya</span></div>
+                <div class="xhead" style="background:#fdf6f6"><span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Hapus Data Reservasi</span></div>
                 <div class="p-3">
                     <p class="small text-muted mb-2">Menghapus pemesanan ini menghilangkan seluruh data ({{ $items->count() }} ruangan, dokumen, riwayat, dan faktur) secara permanen. Tindakan ini tidak bisa dibatalkan.</p>
                     <form method="POST" action="{{ route('admin.reservasi.hapus', $r->kode_reservasi) }}"
                           data-confirm="Seluruh data pemesanan {{ $r->kode_transaksi }} ({{ $items->count() }} ruangan) akan dihapus permanen dan tidak bisa dikembalikan."
                           data-confirm-title="Hapus pemesanan ini?" data-icon="warning"
-                          data-confirm-text="Ya, hapus permanen" data-confirm-color="#d95757">
+                          data-confirm-text="Ya" data-confirm-color="#d95757">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-outline-danger w-100"><i class="bi bi-trash3 me-1"></i>Hapus Pemesanan Ini</button>
