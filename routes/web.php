@@ -41,6 +41,7 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
     Route::get('/sukses', [ReservasiController::class, 'sukses'])->name('sukses');
 
     Route::get('/fasilitas/{fasilitas}', [ReservasiController::class, 'fasilitas'])->name('fasilitas.show');
+    Route::get('/fasilitas/{fasilitas}/jam-terisi', [ReservasiController::class, 'jamTerisi'])->name('fasilitas.jam-terisi');
 
     Route::post('/keranjang', [ReservasiController::class, 'tambahKeranjang'])->name('keranjang.tambah');
     Route::delete('/keranjang/{index}', [ReservasiController::class, 'hapusKeranjang'])->name('keranjang.hapus');

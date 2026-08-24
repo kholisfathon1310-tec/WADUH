@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatusReservasi;
 use App\Models\Reservasi;
 use App\Support\Denah;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -33,10 +34,17 @@ class BuktiReservasiController extends Controller
             return redirect()->route('cek-status.form')->with('error', 'Kode reservasi tidak ditemukan.');
         }
 
+        // Ruangan yang sudah Dibatalkan tidak lagi bagian dari pemakaian yang berlaku —
+        // dikeluarkan dari bukti supaya tidak ditampilkan seolah masih dipesan/dipakai.
         $items = Reservasi::where('kode_transaksi', $ref->kode_transaksi)
+            ->where('status_reservasi', '!=', StatusReservasi::Dibatalkan->value)
             ->orderBy('id_reservasi')
             ->with(self::RELASI)
             ->get();
+
+        if ($items->isEmpty()) {
+            return redirect()->route('cek-status.form')->with('error', 'Reservasi ini sudah dibatalkan, bukti reservasi tidak tersedia.');
+        }
 
         $anchor = $items->first();
 

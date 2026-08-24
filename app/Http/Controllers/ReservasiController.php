@@ -18,6 +18,7 @@ use App\Models\Reservasi;
 use App\Models\TarifSewa;
 use App\Services\AvailabilityService;
 use App\Services\CartService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -124,11 +125,56 @@ class ReservasiController extends Controller
 
         abort_if($tarif === null, 404, 'Tarif untuk fasilitas & jenis sewa ini tidak tersedia.');
 
+        // Rentang jam yang sudah terisi pada tanggal yang sedang ditampilkan (Per Jam saja) —
+        // dipakai jam-picker supaya jam yang bentrok tidak bisa diklik & langsung kelihatan
+        // terisi sampai jam berapa. Selanjutnya di-refresh via AJAX (lihat jamTerisi()) tiap
+        // pemesan mengganti tanggal di form, tanpa reload halaman.
+        $jamTerisi = [];
+        if ($tarif->jenisSewa->satuan === SatuanSewa::Jam) {
+            $tanggalAwal = $request->input('tanggal_mulai', Carbon::today()->toDateString());
+            $jamTerisi = $this->hitungJamTerisi($fasilitas->id_fasilitas, $tanggalAwal);
+        }
+
         return view('reservasi.fasilitas', [
             'fasilitas' => $fasilitas->load('lantai'),
             'tarif'     => $tarif,
             'jenis'     => $tarif->jenisSewa,
+            'jamTerisi' => $jamTerisi,
         ]);
+    }
+
+    /**
+     * AJAX: rentang jam yang sudah terisi (Menunggu/Disetujui) untuk 1 fasilitas pada 1
+     * tanggal — dipanggil jam-picker (pilih-jam.blade.php) tiap tanggal di form diganti,
+     * supaya daftar jam yang bisa diklik selalu sesuai tanggal yang sedang dipilih.
+     */
+    public function jamTerisi(Request $request, Fasilitas $fasilitas): JsonResponse
+    {
+        $tanggal = $request->input('tanggal');
+
+        return response()->json($tanggal ? $this->hitungJamTerisi($fasilitas->id_fasilitas, $tanggal) : []);
+    }
+
+    /**
+     * Rentang jam terisi (Menunggu/Disetujui) fasilitas pada tanggal tsb. Reservasi
+     * Harian/Bulanan (jam_mulai kosong) mengunci SELURUH jam operasional hari itu.
+     *
+     * @return array<int, array{mulai: string, selesai: string}>
+     */
+    private function hitungJamTerisi(int $fasilitasId, string $tanggal): array
+    {
+        return Reservasi::query()
+            ->whereHas('tarifSewa', fn ($q) => $q->where('id_fasilitas', $fasilitasId))
+            ->whereIn('status_reservasi', AvailabilityService::statusAktif())
+            ->whereDate('tanggal_mulai', '<=', $tanggal)
+            ->whereDate('tanggal_selesai', '>=', $tanggal)
+            ->get(['jam_mulai', 'jam_selesai'])
+            ->map(fn (Reservasi $r) => [
+                'mulai'   => $r->jam_mulai ? Str::substr($r->jam_mulai, 0, 5) : '00:00',
+                'selesai' => $r->jam_selesai ? Str::substr($r->jam_selesai, 0, 5) : '24:00',
+            ])
+            ->values()
+            ->all();
     }
 
     /**

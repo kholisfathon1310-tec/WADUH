@@ -482,7 +482,10 @@
                             @if ($satuan === 'Jam')
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Jam mulai</label>
-                                    @include('reservasi.partials.pilih-jam', ['name' => 'jam_mulai', 'value' => old('jam_mulai')])
+                                    @include('reservasi.partials.pilih-jam', [
+                                        'name' => 'jam_mulai', 'value' => old('jam_mulai'),
+                                        'fasilitasId' => $fasilitas->id_fasilitas, 'terisiAwal' => $jamTerisi,
+                                    ])
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Jam selesai</label>

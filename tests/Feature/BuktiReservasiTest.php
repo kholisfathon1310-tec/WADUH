@@ -42,4 +42,63 @@ class BuktiReservasiTest extends TestCase
         $res->assertOk();
         $this->assertStringStartsWith('%PDF', $res->getContent());
     }
+
+    private function buatReservasi(TarifSewa $t, Pemesan $p, string $kodeReservasi, string $kodeTransaksi, string $status): Reservasi
+    {
+        return Reservasi::create([
+            'id_pemesan' => $p->id_pemesan, 'id_tarif_sewa' => $t->id_tarif_sewa, 'id_admin' => null,
+            'kode_reservasi' => $kodeReservasi, 'kode_transaksi' => $kodeTransaksi,
+            'tanggal_mulai' => Carbon::today()->addDays(11)->toDateString(),
+            'tanggal_selesai' => Carbon::today()->addDays(11)->toDateString(),
+            'jam_mulai' => '09:00', 'jam_selesai' => '11:00', 'durasi' => 2,
+            'jumlah_pengguna' => 2, 'keperluan' => 'Uji bukti reservasi', 'harga_satuan' => 50000,
+            'total_biaya' => 100000, 'status_reservasi' => $status,
+            'lock_status' => $status === 'Dibatalkan' ? 'released' : 'pending_approval',
+        ]);
+    }
+
+    /** Kalau kode reservasi yang diminta sendiri sudah Dibatalkan dan tidak ada ruangan lain
+     *  yang masih aktif dalam transaksi yang sama, bukti tidak tersedia — bukan PDF kosong. */
+    public function test_unduh_bukti_untuk_reservasi_yang_sudah_dibatalkan_ditolak(): void
+    {
+        $jenis = JenisSewa::where('satuan', 'Jam')->firstOrFail();
+        $f = Fasilitas::factory()->create(['status_aktif' => 'Aktif']);
+        $t = TarifSewa::factory()->create([
+            'id_fasilitas' => $f->id_fasilitas, 'id_jenis_sewa' => $jenis->id_jenis_sewa,
+            'status_aktif' => 'Aktif', 'harga' => 50000,
+        ]);
+        $p = Pemesan::factory()->create();
+
+        $r = $this->buatReservasi($t, $p, 'RSV-BATAL1', 'TRX-BATAL1', 'Dibatalkan');
+
+        $res = $this->get(route('cek-status.bukti-reservasi', $r->kode_reservasi));
+        $res->assertRedirect(route('cek-status.form'));
+        $res->assertSessionHas('error');
+    }
+
+    /** Transaksi multi-ruangan dengan satu ruangan Dibatalkan: bukti tetap terbit (ruangan lain
+     *  masih aktif) — ruangan yang dibatalkan seharusnya tidak lagi ikut ditampilkan. */
+    public function test_unduh_bukti_transaksi_multi_ruangan_mengecualikan_yang_dibatalkan(): void
+    {
+        $jenis = JenisSewa::where('satuan', 'Jam')->firstOrFail();
+        $p = Pemesan::factory()->create();
+
+        $fAktif = Fasilitas::factory()->create(['status_aktif' => 'Aktif']);
+        $tAktif = TarifSewa::factory()->create([
+            'id_fasilitas' => $fAktif->id_fasilitas, 'id_jenis_sewa' => $jenis->id_jenis_sewa,
+            'status_aktif' => 'Aktif', 'harga' => 50000,
+        ]);
+        $fBatal = Fasilitas::factory()->create(['status_aktif' => 'Aktif']);
+        $tBatal = TarifSewa::factory()->create([
+            'id_fasilitas' => $fBatal->id_fasilitas, 'id_jenis_sewa' => $jenis->id_jenis_sewa,
+            'status_aktif' => 'Aktif', 'harga' => 50000,
+        ]);
+
+        $rAktif = $this->buatReservasi($tAktif, $p, 'RSV-MULTI1', 'TRX-MULTI1', 'Menunggu');
+        $this->buatReservasi($tBatal, $p, 'RSV-MULTI2', 'TRX-MULTI1', 'Dibatalkan');
+
+        $res = $this->get(route('cek-status.bukti-reservasi', $rAktif->kode_reservasi));
+        $res->assertOk();
+        $this->assertStringStartsWith('%PDF', $res->getContent());
+    }
 }

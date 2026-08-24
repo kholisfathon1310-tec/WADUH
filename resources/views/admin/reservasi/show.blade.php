@@ -88,7 +88,7 @@
                             <div class="room-head">
                                 <div>
                                     <span class="fw-bold">{{ $fas->nama_fasilitas }}</span>
-                                    <span class="cell-sub d-block">{{ $fas->kategori_fasilitas }} · Lantai {{ $fas->lantai->nomor_lantai }} · {{ $fas->kode_fasilitas }}</span>
+                                    <span class="cell-sub d-block">{{ $fas->kategori_fasilitas }}, Lantai {{ $fas->lantai->nomor_lantai }}, {{ $fas->kode_fasilitas }}</span>
                                 </div>
                                 <span class="chip {{ strtolower($it->status_reservasi->value) }}">{{ $it->status_reservasi->value }}</span>
                             </div>
@@ -96,16 +96,18 @@
                                 <div class="k">Periode</div>
                                 <div>
                                     @if ($it->jam_mulai)
-                                        {{ $it->tanggal_mulai->translatedFormat('d M Y') }} · {{ \Illuminate\Support\Str::substr($it->jam_mulai,0,5) }}–{{ \Illuminate\Support\Str::substr($it->jam_selesai,0,5) }} WIB
+                                        {{ $it->tanggal_mulai->translatedFormat('d M Y') }}, {{ \Illuminate\Support\Str::substr($it->jam_mulai,0,5) }}–{{ \Illuminate\Support\Str::substr($it->jam_selesai,0,5) }} WIB
                                     @else
                                         {{ $it->tanggal_mulai->translatedFormat('d M Y') }} – {{ $it->tanggal_selesai->translatedFormat('d M Y') }}
                                     @endif
-                                    · {{ $it->durasi }} {{ strtolower($satuan) }}
+                                    , {{ $it->durasi }} {{ strtolower($satuan) }}
                                 </div>
                                 <div class="k">Harga</div>
                                 <div>Rp {{ number_format($it->harga_satuan, 0, ',', '.') }} / {{ strtolower($satuan) }}@if($satuan === 'Hari') <span class="text-muted small">(1 hari = 8 jam)</span>@endif → <strong style="color:var(--primary)">Rp {{ number_format($it->total_biaya, 0, ',', '.') }}</strong></div>
-                                <div class="k">Pengguna · Keperluan</div>
-                                <div>{{ $it->jumlah_pengguna }} orang · {{ $it->keperluan }}</div>
+                                <div class="k">Jumlah Pengguna</div>
+                                <div>{{ $it->jumlah_pengguna }} orang</div>
+                                <div class="k">Keperluan</div>
+                                <div>{{ $it->keperluan }}</div>
                                 <div class="k">Fasilitas bawaan</div>
                                 <div class="small text-muted">{{ implode(' , ', app(\App\Services\FasilitasBawaanService::class)->untuk($fas, $satuan)) }}</div>
                                 <div class="k">Checklist kelayakan</div>
@@ -176,7 +178,7 @@
                         <form method="POST" action="{{ route('admin.reservasi.setujui', $r->kode_reservasi) }}" class="d-grid mb-2"
                               data-confirm="Seluruh ruangan Menunggu pada {{ $r->kode_transaksi }} akan disetujui."
                               data-confirm-title="Setujui pemesanan ini?" data-icon="warning"
-                              data-confirm-text="Ya, setujui" data-confirm-color="#25b47e">@csrf
+                              data-confirm-text="Ya, setujui" data-confirm-color="#25b47e" data-nav-replace>@csrf
                             <button class="btn btn-success" @disabled(! $bolehSetujui)><i class="bi bi-check2-circle me-1"></i>Setujui Semua</button>
                         </form>
                         @unless ($bolehSetujui)
@@ -188,7 +190,7 @@
                             <form method="POST" action="{{ route('admin.reservasi.tolak', $r->kode_reservasi) }}"
                                   data-confirm="Seluruh ruangan Menunggu pada pemesanan ini akan ditolak."
                                   data-confirm-title="Kirim penolakan?" data-icon="warning"
-                                  data-confirm-text="Ya, tolak" data-confirm-color="#d95757">@csrf
+                                  data-confirm-text="Ya, tolak" data-confirm-color="#d95757" data-nav-replace>@csrf
                                 <label class="form-label">Alasan penolakan <span class="text-danger">*</span></label>
                                 <textarea name="alasan" class="form-control mb-2" rows="3" placeholder="Tulis alasan yang jelas untuk pemesan…" required>{{ old('alasan') }}</textarea>
                                 <button class="btn btn-danger btn-sm w-100">Kirim Penolakan</button>
@@ -205,7 +207,8 @@
                     <div class="k">Nama</div><div class="fw-semibold">{{ $r->pemesan->nama_lengkap }}</div>
                     <div class="k">Email</div><div>{{ $r->pemesan->email }}</div>
                     <div class="k">No. Telepon</div><div>{{ $r->pemesan->no_telepon }}</div>
-                    <div class="k">Usia · Pekerjaan</div><div>{{ $r->pemesan->usia }} tahun · {{ $r->pemesan->pekerjaan }}</div>
+                    <div class="k">Usia</div><div>{{ $r->pemesan->usia }} tahun</div>
+                    <div class="k">Pekerjaan</div><div>{{ $r->pemesan->pekerjaan }}</div>
                     <div class="k">Alamat</div><div>{{ $r->pemesan->alamat }}</div>
                 </div>
             </div>

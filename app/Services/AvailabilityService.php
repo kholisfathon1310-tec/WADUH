@@ -184,15 +184,37 @@ class AvailabilityService
      * Status warna sebuah fasilitas untuk slot yang sedang dilihat:
      *   hijau  = seluruh rentang bebas
      *   merah  = seluruh rentang bentrok
-     *   kuning = sebagian bebas, sebagian bentrok (khusus rentang harian/bulanan)
+     *   kuning = sebagian bebas, sebagian bentrok (per blok jam untuk Jam, per hari untuk Hari/Bulan)
      */
     public function statusFasilitas(Fasilitas $fasilitas, array $slot, string $currentSessionId): string
     {
         $fasilitasId = $fasilitas->id_fasilitas;
 
-        // Per Jam: satu slot waktu — hanya bebas atau bentrok.
+        // Per Jam: evaluasi per blok 1 jam dalam rentang slot, supaya reservasi jam tertentu
+        // HANYA mengunci jam itu (kuning = sebagian jam terisi), bukan seluruh rentang/hari
+        // yang ditampilkan (mis. rentang default 08.00–16.00 di denah).
         if (! empty($slot['jam_mulai'])) {
-            return $this->slotAvailable($fasilitasId, $slot, $currentSessionId) ? 'hijau' : 'merah';
+            $mulai = Carbon::parse($slot['tanggal_mulai'].' '.$slot['jam_mulai']);
+            $selesai = Carbon::parse($slot['tanggal_mulai'].' '.$slot['jam_selesai']);
+
+            $bebas = 0;
+            $bentrok = 0;
+            for ($jam = $mulai->copy(); $jam->lt($selesai); $jam->addHour()) {
+                $akhirBlok = $jam->copy()->addHour()->min($selesai);
+                $subSlot = [
+                    'tanggal_mulai'   => $slot['tanggal_mulai'],
+                    'tanggal_selesai' => $slot['tanggal_mulai'],
+                    'jam_mulai'       => $jam->format('H:i'),
+                    'jam_selesai'     => $akhirBlok->format('H:i'),
+                ];
+                $this->slotAvailable($fasilitasId, $subSlot, $currentSessionId) ? $bebas++ : $bentrok++;
+            }
+
+            if ($bentrok === 0) {
+                return 'hijau';
+            }
+
+            return $bebas === 0 ? 'merah' : 'kuning';
         }
 
         // Harian/Bulanan: evaluasi per hari agar bisa mendeteksi "kuning".

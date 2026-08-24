@@ -122,6 +122,9 @@ class ReservasiAdminController extends Controller
             $item->save();
         }
 
+        // Tetap di halaman detail (back()) — bukan redirect ke daftar. Duplikasi entri histori
+        // browser (yang bikin tombol back perlu 2x tekan) ditangani di sisi klien: form ini
+        // dikirim lewat fetch + location.replace() (lihat data-nav-replace di admin/layouts/app).
         return back()->with('success', "Reservasi {$reservasi->kode_transaksi} disetujui ({$pending->count()} ruangan).");
     }
 

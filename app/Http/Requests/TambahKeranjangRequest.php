@@ -92,6 +92,28 @@ class TambahKeranjangRequest extends FormRequest
                 if ($this->filled('jam_selesai') && $this->input('jam_selesai') > '16:00') {
                     $v->errors()->add('jam_selesai', 'Jam selesai paling lambat 16.00 (jam operasional gedung).');
                 }
+
+                // Tanggal hari ini tapi jam mulai sudah lewat waktu sekarang — tidak boleh,
+                // 'after_or_equal:today' di atas cuma memeriksa tanggal, bukan jam.
+                if (
+                    $this->filled('tanggal_mulai') && $this->filled('jam_mulai')
+                    && Carbon::parse($this->input('tanggal_mulai'))->isToday()
+                    && $this->input('jam_mulai') < now()->format('H:i')
+                ) {
+                    $v->errors()->add('jam_mulai', 'Jam mulai sudah lewat, pilih jam yang akan datang.');
+                }
+            }
+
+            // Sewa Hari/Bulan: kalau tanggal mulai hari ini tapi gedung sudah tutup (lewat jam
+            // operasional 16.00), tanggal itu sudah tidak bisa dipakai lagi — pemesan harus
+            // pilih tanggal berikutnya.
+            if (
+                in_array($tarif->jenisSewa?->satuan, [SatuanSewa::Hari, SatuanSewa::Bulan], true)
+                && $this->filled('tanggal_mulai')
+                && Carbon::parse($this->input('tanggal_mulai'))->isToday()
+                && now()->format('H:i') >= '16:00'
+            ) {
+                $v->errors()->add('tanggal_mulai', 'Gedung sudah tutup untuk hari ini (jam operasional berakhir 16.00), pilih tanggal mulai berikutnya.');
             }
 
             // Jumlah pengguna tidak boleh melebihi kapasitas.

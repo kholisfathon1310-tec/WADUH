@@ -101,6 +101,45 @@ class LayananTest extends TestCase
         $this->assertSame('hijau', $svc->statusFasilitas($f, $slot($d1->copy()->addDay()->toDateString(), $d1->copy()->addDay()->toDateString()), 'sess'));
     }
 
+    /**
+     * Reservasi Per Jam HANYA mengunci jam yang dipesan, bukan seluruh rentang 08.00–16.00 yang
+     * dicek denah — supaya ruangan dengan 1 jam terisi tetap "kuning" (sebagian, masih bisa
+     * diklik/dipilih), bukan "merah" (penuh/terkunci seharian).
+     */
+    public function test_status_warna_per_jam_hanya_mengunci_jam_terisi(): void
+    {
+        $svc = app(AvailabilityService::class);
+        $tarif = $this->tarif('Jam');
+        $f = $tarif->fasilitas;
+        $tgl = Carbon::today()->addDays(50)->toDateString();
+
+        // Hanya jam 10.00–11.00 yang terisi dari rentang 08.00–16.00.
+        $this->reservasiPada($tarif, [
+            'tanggal_mulai' => $tgl, 'tanggal_selesai' => $tgl,
+            'jam_mulai' => '10:00', 'jam_selesai' => '11:00',
+        ]);
+
+        $slotSeharian = ['tanggal_mulai' => $tgl, 'tanggal_selesai' => $tgl, 'jam_mulai' => '08:00', 'jam_selesai' => '16:00'];
+        $this->assertSame('kuning', $svc->statusFasilitas($f, $slotSeharian, 'sess'), 'Sebagian jam terisi harus kuning, bukan merah — jam lain masih bisa dipesan.');
+
+        // Slot spesifik yang persis bentrok dengan jam terisi tetap merah.
+        $slotBentrok = ['tanggal_mulai' => $tgl, 'tanggal_selesai' => $tgl, 'jam_mulai' => '10:00', 'jam_selesai' => '11:00'];
+        $this->assertSame('merah', $svc->statusFasilitas($f, $slotBentrok, 'sess'));
+
+        // Slot spesifik di jam lain (tidak bentrok) tetap hijau.
+        $slotBebas = ['tanggal_mulai' => $tgl, 'tanggal_selesai' => $tgl, 'jam_mulai' => '13:00', 'jam_selesai' => '14:00'];
+        $this->assertSame('hijau', $svc->statusFasilitas($f, $slotBebas, 'sess'));
+
+        // Seluruh rentang 08.00–16.00 terisi penuh → merah.
+        $tgl2 = Carbon::today()->addDays(51)->toDateString();
+        $this->reservasiPada($tarif, [
+            'tanggal_mulai' => $tgl2, 'tanggal_selesai' => $tgl2,
+            'jam_mulai' => '08:00', 'jam_selesai' => '16:00',
+        ]);
+        $slotSeharian2 = ['tanggal_mulai' => $tgl2, 'tanggal_selesai' => $tgl2, 'jam_mulai' => '08:00', 'jam_selesai' => '16:00'];
+        $this->assertSame('merah', $svc->statusFasilitas($f, $slotSeharian2, 'sess'));
+    }
+
     public function test_hold_milik_session_lain_memblokir_dan_bisa_dilepas(): void
     {
         $svc = app(AvailabilityService::class);

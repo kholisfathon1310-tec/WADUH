@@ -50,6 +50,35 @@ class AlurPemesanTest extends TestCase
         $this->get('/cek-status')->assertOk();
     }
 
+    public function test_jam_terisi_dikembalikan_untuk_jam_yang_sudah_dipesan(): void
+    {
+        $tarif = $this->tarifSatuan('Jam');
+        $fas = $tarif->fasilitas;
+        $tgl = Carbon::today()->addDays(20)->toDateString();
+
+        Reservasi::create([
+            'id_pemesan' => Pemesan::factory()->create()->id_pemesan, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+            'id_admin' => null, 'kode_reservasi' => 'RSV-JTERISI', 'kode_transaksi' => 'TRX-JTERISI',
+            'tanggal_mulai' => $tgl, 'tanggal_selesai' => $tgl, 'jam_mulai' => '10:00', 'jam_selesai' => '11:00',
+            'durasi' => 1, 'jumlah_pengguna' => 2, 'keperluan' => 'Uji jam terisi', 'harga_satuan' => 100000,
+            'total_biaya' => 100000, 'status_reservasi' => 'Menunggu', 'lock_status' => 'pending_approval',
+        ]);
+
+        // Endpoint AJAX dipanggil jam-picker tiap tanggal diganti.
+        $res = $this->getJson(route('reservasi.fasilitas.jam-terisi', $fas->id_fasilitas).'?tanggal='.$tgl);
+        $res->assertOk()->assertJson([['mulai' => '10:00', 'selesai' => '11:00']]);
+
+        // Halaman detail fasilitas juga membawa data terisi AWAL (tanpa perlu AJAX dulu).
+        $this->get('/reservasi/fasilitas/'.$fas->id_fasilitas.'?jenis='.$tarif->id_jenis_sewa.'&tanggal_mulai='.$tgl)
+            ->assertOk()
+            ->assertSee('data-terisi-awal="[{&quot;mulai&quot;:&quot;10:00&quot;,&quot;selesai&quot;:&quot;11:00&quot;}]"', false);
+
+        // Tanggal lain (belum ada reservasi) → tidak ada jam terisi.
+        $tglLain = Carbon::today()->addDays(21)->toDateString();
+        $this->getJson(route('reservasi.fasilitas.jam-terisi', $fas->id_fasilitas).'?tanggal='.$tglLain)
+            ->assertOk()->assertExactJson([]);
+    }
+
     public function test_tambah_keranjang_dan_hold_mengunci_session_lain(): void
     {
         $tarif = $this->tarifSatuan('Jam');
@@ -230,5 +259,61 @@ class AlurPemesanTest extends TestCase
                 'alamat'       => 'Jl. Korporat 9',
             ])
             ->assertSessionHasErrors('dokumen');
+    }
+
+    public function test_tambah_keranjang_tolak_jam_mulai_yang_sudah_lewat_hari_ini(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(14, 0)); // Bekukan waktu: hari ini jam 14.00.
+
+        try {
+            $tarif = $this->tarifSatuan('Jam');
+
+            // Jam mulai 10.00 sudah lewat (sekarang 14.00) → ditolak, sekalipun tanggalnya hari ini.
+            $lewat = $this->post('/reservasi/keranjang', [
+                'id_fasilitas'    => $tarif->fasilitas->id_fasilitas,
+                'id_tarif_sewa'   => $tarif->id_tarif_sewa,
+                'tanggal_mulai'   => Carbon::today()->toDateString(),
+                'jam_mulai'       => '10:00',
+                'jam_selesai'     => '12:00',
+                'jumlah_pengguna' => 2,
+                'keperluan'       => 'Rapat',
+            ]);
+            $lewat->assertSessionHasErrors('jam_mulai');
+
+            // Jam mulai 15.00 (akan datang, sesudah 14.00) tetap boleh.
+            $akanDatang = $this->post('/reservasi/keranjang', [
+                'id_fasilitas'    => $tarif->fasilitas->id_fasilitas,
+                'id_tarif_sewa'   => $tarif->id_tarif_sewa,
+                'tanggal_mulai'   => Carbon::today()->toDateString(),
+                'jam_mulai'       => '15:00',
+                'jam_selesai'     => '16:00',
+                'jumlah_pengguna' => 2,
+                'keperluan'       => 'Rapat',
+            ]);
+            $akanDatang->assertRedirect(route('reservasi.checkout.form'));
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_tambah_keranjang_tolak_tanggal_hari_ini_kalau_gedung_sudah_tutup(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(17, 0)); // Bekukan waktu: hari ini jam 17.00, gedung sudah tutup.
+
+        try {
+            $tarif = $this->tarifSatuan('Hari');
+
+            $res = $this->post('/reservasi/keranjang', [
+                'id_fasilitas'    => $tarif->fasilitas->id_fasilitas,
+                'id_tarif_sewa'   => $tarif->id_tarif_sewa,
+                'tanggal_mulai'   => Carbon::today()->toDateString(),
+                'tanggal_selesai' => Carbon::today()->toDateString(),
+                'jumlah_pengguna' => 2,
+                'keperluan'       => 'Rapat',
+            ]);
+            $res->assertSessionHasErrors('tanggal_mulai');
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 }

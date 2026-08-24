@@ -16,7 +16,7 @@
     <div class="dn-filter-grid">
         <div class="dn-filter-field">
             <label class="dn-filter-label">{{ $sehariSaja ? 'Tanggal pemakaian' : 'Tanggal mulai' }}</label>
-            <input type="date" name="tanggal_mulai" class="form-control dn-filter-input" value="{{ $jadwal['tanggal_mulai'] }}">
+            <input type="date" name="tanggal_mulai" class="form-control dn-filter-input" min="{{ now()->toDateString() }}" value="{{ $jadwal['tanggal_mulai'] }}">
         </div>
 
         @if ($sehariSaja)
@@ -26,7 +26,7 @@
         @else
             <div class="dn-filter-field">
                 <label class="dn-filter-label">Tanggal selesai</label>
-                <input type="date" name="tanggal_selesai" class="form-control dn-filter-input" value="{{ $jadwal['tanggal_selesai'] }}">
+                <input type="date" name="tanggal_selesai" class="form-control dn-filter-input" min="{{ $jadwal['tanggal_mulai'] ?: now()->toDateString() }}" value="{{ $jadwal['tanggal_selesai'] }}">
             </div>
         @endif
 

@@ -412,6 +412,18 @@
     // Dialog konfirmasi untuk form/tautan ber-atribut data-confirm — didelegasikan ke document
     // (bukan dipasang per elemen) supaya otomatis berlaku juga untuk konten yang disisipkan
     // belakangan lewat AJAX (mis. hasil filter interaktif), tanpa perlu pasang ulang listener.
+    // Form ber-atribut data-nav-replace redirect balik ke URL halaman yang SAMA (mis.
+    // setujui/tolak di halaman detail) — submit form NATIVE akan menambah entri histori
+    // kedua utk URL yang sama, jadi tombol back browser perlu ditekan DUA kali baru benar-benar
+    // keluar. Dikirim lewat fetch lalu location.replace() supaya entri histori DIGANTI, bukan
+    // ditambah, jadi satu kali tombol back sudah cukup. Form lain (mis. cetak faktur — respons
+    // langsung berupa file PDF, bukan redirect halaman) TETAP submit native seperti biasa.
+    const kirimTanpaDuplikatHistori = f => {
+        fetch(f.action, { method: f.method || 'POST', body: new FormData(f), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => window.location.replace(res.url))
+            .catch(() => f.submit()); // fallback: submit native kalau fetch gagal (mis. offline)
+    };
+
     document.addEventListener('submit', e => {
         const f = e.target.closest('form[data-confirm]');
         if (!f || f.dataset.confirmed) return;
@@ -426,7 +438,11 @@
             confirmButtonColor: f.dataset.confirmColor || '#176b87',
             cancelButtonColor: '#8a97a5',
             reverseButtons: true,
-        }).then(r => { if (r.isConfirmed) { f.dataset.confirmed = 1; f.submit(); } });
+        }).then(r => {
+            if (! r.isConfirmed) return;
+            f.dataset.confirmed = 1;
+            f.dataset.navReplace !== undefined ? kirimTanpaDuplikatHistori(f) : f.submit();
+        });
     });
 
     document.addEventListener('click', e => {

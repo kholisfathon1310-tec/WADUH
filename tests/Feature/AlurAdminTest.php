@@ -190,11 +190,21 @@ class AlurAdminTest extends TestCase
      * menampilkan flash sukses lagi (sudah dikonsumsi sekali), dan halaman admin harus
      * mengirim header Cache-Control: no-store supaya browser tidak menyimpan halaman lama
      * di back-forward cache.
+     *
+     * setujui()/tolak() TETAP redirect ke halaman detail yang sama (back()) — pemesanan tetap
+     * terlihat di sini setelah diproses. Duplikasi entri histori yang ditimbulkan pola ini
+     * (perlu 2x klik back browser) ditangani di sisi KLIEN lewat fetch + location.replace()
+     * pada form ber-atribut data-nav-replace (lihat admin/layouts/app.blade.php) — bukan bisa
+     * diuji lewat request HTTP biasa di sini, jadi cukup diverifikasi atributnya ada di view.
      */
     public function test_halaman_detail_tidak_menampilkan_flash_sukses_dua_kali_setelah_setujui(): void
     {
         $this->actingAs($this->admin(), 'admin');
         $r = $this->reservasiMenunggu('Hari', 270);
+
+        // Selagi masih Menunggu (form Setujui/Tolak tampil): harus punya data-nav-replace
+        // supaya fetch+replace di klien aktif untuk form ini.
+        $this->get(route('admin.reservasi.show', $r->kode_reservasi))->assertSee('data-nav-replace', false);
 
         // setujui() memakai back() → redirect ke halaman detail (referer). Ikuti redirect-nya
         // supaya "request pertama" di bawah adalah render halaman detail dengan flash sukses.
