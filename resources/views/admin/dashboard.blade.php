@@ -12,7 +12,7 @@
         'selesai'    => ['label' => 'Selesai',    'ikon' => 'bi-check2-all',      'ic' => '#1d4ed8', 'bg' => '#dbeafe', 'dot' => '#3b82f6'],
         'ditolak'    => ['label' => 'Ditolak',    'ikon' => 'bi-x-circle',        'ic' => '#b91c1c', 'bg' => '#fee2e2', 'dot' => '#ef4444'],
         'dibatalkan' => ['label' => 'Dibatalkan', 'ikon' => 'bi-slash-circle',    'ic' => '#475569', 'bg' => '#f1f5f9', 'dot' => '#94a3b8'],
-        'kadaluarsa' => ['label' => 'Kadaluarsa', 'ikon' => 'bi-clock-history',   'ic' => '#7c3aed', 'bg' => '#ede9fe', 'dot' => '#8b5cf6'],
+        'kadaluwarsa' => ['label' => 'Kadaluwarsa', 'ikon' => 'bi-clock-history',   'ic' => '#7c3aed', 'bg' => '#ede9fe', 'dot' => '#8b5cf6'],
     ];
 
     // Segmen donut (pakai `dot` color, soft tapi masih terbaca).

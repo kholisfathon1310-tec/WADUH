@@ -147,7 +147,7 @@
         .chip.ditolak { background:#fde4e4; color:#c02929; }
         .chip.dibatalkan { background:#e9edf1; color:#495663; }
         .chip.selesai { background:#dbeafe; color:#1d4ed8; }
-        .chip.kadaluarsa { background:#f3e8fd; color:#7c3aed; }
+        .chip.kadaluwarsa { background:#f3e8fd; color:#7c3aed; }
         .initial-chip { display:inline-grid; place-items:center; width:2.2rem; height:2.2rem; border-radius:.75rem; color:#fff; font-weight:700; font-size:.85rem; background:linear-gradient(135deg,var(--primary),var(--teal)); flex:none; box-shadow:0 6px 14px -4px rgba(23,107,135,.4); }
         .cell-main { font-weight:600; }
         .cell-sub { font-size:.78rem; color:var(--muted); }
@@ -179,7 +179,7 @@
     $sideLantai = \App\Models\Lantai::orderBy('id_lantai')->get(['id_lantai', 'nomor_lantai']);
     $menungguN = \App\Models\Reservasi::where('status_reservasi', 'Menunggu')->count();
     $warnaLantai = ['1' => '#2f7fd1', '2' => '#24aa9a', '3A' => '#7c5cd6', '3B' => '#e8833a', '5' => '#d6527c'];
-    $warnaStatus = ['Menunggu' => '#e5b94e', 'Disetujui' => '#25b47e', 'Ditolak' => '#d95757', 'Dibatalkan' => '#495663', 'Selesai' => '#1d4ed8', 'Kadaluarsa' => '#7c3aed'];
+    $warnaStatus = ['Menunggu' => '#e5b94e', 'Disetujui' => '#25b47e', 'Ditolak' => '#d95757', 'Dibatalkan' => '#495663', 'Selesai' => '#1d4ed8', 'Kadaluwarsa' => '#7c3aed'];
     $curStatus = request('status');
     $curLantai = request('lantai');
 @endphp

@@ -12,12 +12,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Bebaskan temporary_hold yang sudah kadaluarsa agar tidak menahan ketersediaan fasilitas.
+        // Bebaskan temporary_hold yang sudah kadaluwarsa agar tidak menahan ketersediaan fasilitas.
         $schedule->command('reservasi:release-expired-locks')
             ->everyMinute()
             ->withoutOverlapping();
 
-        // Disetujui -> Selesai & Menunggu -> Kadaluarsa otomatis begitu waktu penggunaan lewat.
+        // Disetujui -> Selesai & Menunggu -> Kadaluwarsa otomatis begitu waktu penggunaan lewat.
         $schedule->command('reservasi:perbarui-status-otomatis')
             ->everyMinute()
             ->withoutOverlapping();

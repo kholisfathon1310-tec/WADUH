@@ -2,7 +2,7 @@
 @section('title', 'Hasil Cek Status')
 
 @php
-    $badge = ['Menunggu' => 'warning', 'Disetujui' => 'success', 'Ditolak' => 'danger', 'Selesai' => 'primary', 'Dibatalkan' => 'dark', 'Kadaluarsa' => 'info'];
+    $badge = ['Menunggu' => 'warning', 'Disetujui' => 'success', 'Ditolak' => 'danger', 'Selesai' => 'primary', 'Dibatalkan' => 'dark', 'Kadaluwarsa' => 'info'];
 @endphp
 
 @section('content')
@@ -160,13 +160,13 @@
                 $steps = match ($status) {
                     'Ditolak'    => [['Diajukan','done','send'], ['Diverifikasi','done','hourglass-split'], ['Ditolak','bad','x-lg']],
                     'Dibatalkan' => [['Diajukan','done','send'], ['Diverifikasi','done','hourglass-split'], ['Dibatalkan','off','slash-circle']],
-                    'Kadaluarsa' => [['Diajukan','done','send'], ['Diverifikasi','bad','hourglass-split'], ['Kadaluarsa','bad','x-lg']],
+                    'Kadaluwarsa' => [['Diajukan','done','send'], ['Diverifikasi','bad','hourglass-split'], ['Kadaluwarsa','bad','x-lg']],
                     'Menunggu'   => [['Diajukan','done','send'], ['Diverifikasi','now','hourglass-split'], ['Disetujui','','check-lg']],
                     default      => [['Diajukan','done','send'], ['Diverifikasi','done','hourglass-split'], ['Disetujui','done','check-lg']], // Disetujui / Selesai
                 };
 
-                // Alasan penolakan/pembatalan/kadaluarsa diambil dari riwayat status terakhir yang relevan.
-                $alasan = in_array($status, ['Ditolak', 'Dibatalkan', 'Kadaluarsa'], true)
+                // Alasan penolakan/pembatalan/kadaluwarsa diambil dari riwayat status terakhir yang relevan.
+                $alasan = in_array($status, ['Ditolak', 'Dibatalkan', 'Kadaluwarsa'], true)
                     ? $r->riwayatStatus->last(fn ($h) => $h->status_baru->value === $status)?->keterangan
                     : null;
 
@@ -250,10 +250,10 @@
                                     <i class="bi bi-slash-circle flex-shrink-0 mt-1"></i>
                                     <div>Reservasi ini telah dibatalkan{{ $alasan ? '. '.$alasan : ' oleh pemesan.' }}</div>
                                 </div>
-                            @elseif ($status === 'Kadaluarsa')
+                            @elseif ($status === 'Kadaluwarsa')
                                 <div class="rs-alasan tolak mt-2">
                                     <i class="bi bi-clock-history flex-shrink-0 mt-1"></i>
-                                    <div>Reservasi ini kadaluarsa karena belum diproses admin hingga melewati waktu penggunaan yang diajukan.</div>
+                                    <div>Reservasi ini kadaluwarsa karena belum diproses admin hingga melewati waktu penggunaan yang diajukan.</div>
                                 </div>
                             @elseif ($status === 'Disetujui' && $r->tanggal_diproses)
                                 <div class="small mt-2" style="color:#0d8a5f"><i class="bi bi-patch-check-fill me-1"></i>Disetujui pada {{ $r->tanggal_diproses->translatedFormat('d M Y H:i') }}. Tunjukkan kode reservasi Anda saat datang.</div>

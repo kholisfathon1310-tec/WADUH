@@ -9,5 +9,5 @@ enum StatusReservasi: string
     case Ditolak = 'Ditolak';
     case Selesai = 'Selesai';
     case Dibatalkan = 'Dibatalkan';
-    case Kadaluarsa = 'Kadaluarsa';
+    case Kadaluwarsa = 'Kadaluwarsa';
 }

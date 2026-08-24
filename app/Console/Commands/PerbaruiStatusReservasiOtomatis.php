@@ -18,7 +18,7 @@ class PerbaruiStatusReservasiOtomatis extends Command
     /**
      * @var string
      */
-    protected $description = 'Ubah status Reservasi otomatis berdasarkan waktu penggunaan: Disetujui -> Selesai, dan Menunggu (belum diproses admin) -> Kadaluarsa';
+    protected $description = 'Ubah status Reservasi otomatis berdasarkan waktu penggunaan: Disetujui -> Selesai, dan Menunggu (belum diproses admin) -> Kadaluwarsa';
 
     /**
      * Jam tutup operasional gedung — sama dengan batas jam_selesai di TambahKeranjangRequest
@@ -35,14 +35,14 @@ class PerbaruiStatusReservasiOtomatis extends Command
             keterangan: 'Waktu penggunaan reservasi ini sudah berakhir.',
         );
 
-        $jadiKadaluarsa = $this->transisi(
+        $jadiKadaluwarsa = $this->transisi(
             dari: StatusReservasi::Menunggu,
-            ke: StatusReservasi::Kadaluarsa,
+            ke: StatusReservasi::Kadaluwarsa,
             keterangan: 'Tidak diproses sampai melewati waktu penggunaan yang diajukan.',
             releaseLock: true,
         );
 
-        $this->info("Selesai. {$jadiSelesai} reservasi diubah menjadi 'Selesai', {$jadiKadaluarsa} reservasi diubah menjadi 'Kadaluarsa'.");
+        $this->info("Selesai. {$jadiSelesai} reservasi diubah menjadi 'Selesai', {$jadiKadaluwarsa} reservasi diubah menjadi 'Kadaluwarsa'.");
 
         return self::SUCCESS;
     }

@@ -29,7 +29,7 @@ class DashboardController extends Controller
             'selesai'    => (int) $perStatus->get(StatusReservasi::Selesai->value, 0),
             'ditolak'    => (int) $perStatus->get(StatusReservasi::Ditolak->value, 0),
             'dibatalkan' => (int) $perStatus->get(StatusReservasi::Dibatalkan->value, 0),
-            'kadaluarsa' => (int) $perStatus->get(StatusReservasi::Kadaluarsa->value, 0),
+            'kadaluwarsa' => (int) $perStatus->get(StatusReservasi::Kadaluwarsa->value, 0),
         ];
 
         // Jumlah RESERVASI per kategori fasilitas — snapshot yang SEDANG BERLANGSUNG (Disetujui
