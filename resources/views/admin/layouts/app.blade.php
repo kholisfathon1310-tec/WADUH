@@ -40,8 +40,6 @@
         /* Sidebar diciutkan (desktop) — hanya ikon, teks & submenu disembunyikan. */
         @media (min-width: 992px) {
             body.sidebar-collapsed .sidebar { width:84px; }
-            body.sidebar-collapsed .side-brand { padding:1.5rem .5rem 1.2rem; justify-content:center; }
-            body.sidebar-collapsed .side-brand .brand-font { display:none; }
             body.sidebar-collapsed .side-section { display:none; }
             body.sidebar-collapsed .side-link { justify-content:center; padding:.62rem; }
             body.sidebar-collapsed .side-link .lbl,
@@ -49,27 +47,19 @@
             body.sidebar-collapsed .side-link .badge { display:none; }
             body.sidebar-collapsed .side-sub { display:none !important; }
         }
-        .collapse-toggle-btn { border:none; background:var(--surface); border-radius:.7rem; padding:.35rem .6rem; transition:background .15s, color .15s; flex:none; color:#4b5a6e; }
-        .collapse-toggle-btn:hover { background:#e9eff4; color:var(--primary-dark); }
-        .collapse-toggle-btn i { transition:transform .22s ease; }
-        body.sidebar-collapsed .collapse-toggle-btn i { transform:rotate(180deg); }
-
         /* Sidebar */
-        /* Logo (lockup memanjang) di baris sendiri di atas, nama+tagline di bawahnya —
-           dipisah jadi dua baris supaya logo tidak berebut ruang sempit dengan teks. */
-        .side-brand-row { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; padding:1.4rem 1.4rem 1.15rem; border-bottom:1px solid var(--line); margin-bottom:.6rem; }
-        .side-brand { display:flex; flex-direction:column; align-items:flex-start; gap:.6rem; min-width:0; color:var(--ink); text-decoration:none; font-weight:800; font-size:1.05rem; }
+        /* Logo dobel-fungsi sebagai tombol ciutkan/lebarkan sidebar — klik logo untuk
+           toggle, tidak perlu tombol terpisah. */
+        .side-brand-row { display:flex; align-items:center; justify-content:center; padding:1.1rem 1.4rem; border-bottom:1px solid var(--line); margin-bottom:.6rem; }
+        .side-brand { display:flex; align-items:center; justify-content:center; gap:.6rem; min-width:0; border:none; background:none; padding:.5rem .7rem; border-radius:.9rem; cursor:pointer; transition:background .15s ease, transform .15s ease; }
+        .side-brand:hover { background:var(--surface); }
+        .side-brand:active { transform:scale(.96); }
         .side-brand .brand-mark { display:block; max-width:100%; }
-        .side-brand .brand-mark img { height:auto; width:100%; max-width:7rem; display:block; }
-        .side-brand .brand-font { line-height:1.3; }
-        .side-brand small { display:block; font-size:.6rem; font-weight:600; color:var(--muted); letter-spacing:.09em; text-transform:uppercase; margin-top:.1rem; }
-        .side-brand-row .collapse-toggle-btn { flex:none; }
-        /* Sidebar ciut — hanya logo yang tersisa, dipusatkan dan dibatasi lebarnya; tombol
-           ciutkan/lebarkan ikut turun ke bawah logo supaya tetap kelihatan & bisa dipencet
-           lagi untuk melebarkan (satu-satunya cara membuka lagi saat sudah ciut di desktop). */
-        body.sidebar-collapsed .side-brand-row { flex-direction:column; align-items:center; padding:1.5rem .5rem 1.2rem; }
-        body.sidebar-collapsed .side-brand { align-items:center; }
-        body.sidebar-collapsed .side-brand .brand-mark img { max-width:3.2rem; }
+        .side-brand .brand-mark img { height:auto; width:100%; max-width:4.4rem; display:block; }
+        /* Sidebar ciut — logo mengecil & tetap terpusat, tetap bisa dipencet untuk melebarkan
+           lagi (satu-satunya cara membuka lagi saat sudah ciut di desktop). */
+        body.sidebar-collapsed .side-brand-row { padding:1.2rem .5rem; }
+        body.sidebar-collapsed .side-brand .brand-mark img { max-width:2.3rem; }
         .side-section { padding:1rem 1.4rem .5rem; font-size:.62rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#94a3b8; }
         .side-nav { list-style:none; margin:0; padding:0 .85rem; display:flex; flex-direction:column; gap:.2rem; }
         .side-link { position:relative; display:flex; align-items:center; gap:.7rem; padding:.62rem .8rem; color:#4b5a6e; text-decoration:none; border-radius:.85rem; font-weight:600; font-size:.88rem; transition:background .18s ease, color .18s ease; }
@@ -186,11 +176,9 @@
 <div class="frame">
     <aside class="sidebar" id="sidebar">
         <div class="side-brand-row">
-            <a href="{{ route('admin.dashboard') }}" class="side-brand">
+            <button type="button" class="side-brand" id="collapseBtn" title="Ciutkan/lebarkan sidebar">
                 <span class="brand-mark"><img src="{{ asset('images/logo_bitc_crop.png') }}" alt="Logo BITC"></span>
-                <span class="brand-font">BITC<span style="color:var(--teal)">.</span><small>Panel Admin</small></span>
-            </a>
-            <button class="collapse-toggle-btn d-none d-lg-inline-flex" id="collapseBtn" title="Ciutkan/lebarkan sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
+            </button>
         </div>
 
         <div class="side-section">Menu Utama</div>

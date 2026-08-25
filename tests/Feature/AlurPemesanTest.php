@@ -8,6 +8,7 @@ use App\Models\TarifSewa;
 use App\Services\AvailabilityService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -410,5 +411,58 @@ class AlurPemesanTest extends TestCase
         ])->assertRedirect(route('reservasi.checkout.form'));
 
         $this->assertCount(2, session('reservasi_cart'));
+    }
+
+    public function test_tambah_keranjang_dikunci_per_session_agar_tidak_race_klik_ganda(): void
+    {
+        // Regresi bug nyata: dua request tambahKeranjang yang HAMPIR BERSAMAAN untuk session
+        // yang sama (mis. klik ganda / beberapa tab) bisa lolos bersamaan lewat pengecekan
+        // bentrok kalau baca-cek-tulis keranjangnya tidak dikunci — keduanya sama-sama membaca
+        // keranjang SEBELUM salah satu sempat menyimpan, jadi jadwal yang sebenarnya tumpang
+        // tindih bisa sama-sama masuk. Disimulasikan di sini dengan menahan lock milik session
+        // ini secara manual SEBELUM request masuk: request harus menunggu, lalu gagal dengan
+        // pesan ramah (bukan 500 / lolos begitu saja) begitu batas block() habis.
+        $tarif = $this->tarifSatuan('Jam');
+        $fas = $tarif->fasilitas;
+        $tgl = Carbon::today()->addDays(8)->toDateString();
+
+        // Request pertama seperti biasa (tanpa lock ditahan) — sekaligus dipakai untuk
+        // mendapatkan session ID NYATA yang dipakai controller (pola yang sama seperti
+        // test_tambah_keranjang_dan_hold_mengunci_session_lain di atas).
+        $res1 = $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $fas->id_fasilitas, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '09:00', 'jam_selesai' => '10:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat pertama',
+        ]);
+        $res1->assertRedirect(route('reservasi.checkout.form'));
+        $this->assertCount(1, session('reservasi_cart'));
+        $sessionId = session()->getId();
+
+        // Simulasi HTTP test Laravel tidak otomatis mengirim ulang cookie session di antara
+        // panggilan $this->post() terpisah (beda dengan browser sungguhan) — set eksplisit
+        // supaya request kedua di bawah benar-benar dianggap session yang SAMA oleh
+        // StartSession, sama seperti dua tab/klik ganda dari browser yang sama.
+        $this->withCookie(config('session.cookie'), $sessionId);
+
+        // Tahan lock milik session yang sama secara manual → simulasikan request lain yang
+        // sedang memproses tambahKeranjang untuk session ini di saat yang bersamaan.
+        $lock = Cache::lock("keranjang-lock:{$sessionId}", 10);
+        $this->assertTrue($lock->get(), 'Gagal menahan lock untuk simulasi request bersamaan');
+
+        try {
+            // Jadwal BERBEDA & TIDAK bentrok dengan item pertama — andai lock tidak ada,
+            // request ini akan lolos normal. Dengan lock, ia harus menunggu lalu gagal
+            // dengan pesan ramah begitu batas block() habis, bukan lolos begitu saja.
+            $res2 = $this->post('/reservasi/keranjang', [
+                'id_fasilitas' => $fas->id_fasilitas, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+                'tanggal_mulai' => $tgl, 'jam_mulai' => '13:00', 'jam_selesai' => '14:00',
+                'jumlah_pengguna' => 2, 'keperluan' => 'Rapat kedua (bersamaan)',
+            ]);
+
+            $res2->assertSessionHasErrors();
+            $this->assertCount(1, session('reservasi_cart'), 'Item kedua tidak boleh masuk selama lock masih ditahan pihak lain');
+        } finally {
+            $lock->release();
+        }
     }
 }

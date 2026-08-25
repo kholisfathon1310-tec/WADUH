@@ -18,10 +18,12 @@ use App\Models\Reservasi;
 use App\Models\TarifSewa;
 use App\Services\AvailabilityService;
 use App\Services\CartService;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -181,6 +183,12 @@ class ReservasiController extends Controller
      * Tambah ke keranjang + pasang cache hold. Multi-select denah: SATU form jadwal
      * berlaku untuk semua ruangan terpilih (?antrian=id2,id3) — semua masuk sekaligus,
      * atomic (kalau satu ruangan bermasalah, tidak ada yang ditambahkan).
+     *
+     * Seluruh baca-cek-tulis keranjang dikunci per session (Cache::lock) supaya dua
+     * request yang hampir bersamaan dari session yang sama (mis. klik ganda, atau
+     * beberapa tab) tidak lolos bersamaan lewat pengecekan bentrok — tanpa lock, keduanya
+     * bisa membaca isi keranjang SEBELUM salah satu sempat menyimpan, jadi keduanya sama-sama
+     * menganggap tidak ada bentrok dan menyimpan jadwal yang sebenarnya tumpang tindih.
      */
     public function tambahKeranjang(TambahKeranjangRequest $request): RedirectResponse
     {
@@ -188,62 +196,82 @@ class ReservasiController extends Controller
         $data = $request->validated();
         $sessionId = $request->session()->getId();
 
-        // Kumpulkan tarif semua ruangan: utama + antrian (jenis sewa sama dengan ruangan utama).
-        $daftarTarif = collect([$tarifUtama]);
-        $idsLain = array_values(array_filter(explode(',', (string) $request->input('antrian'))));
-        foreach ($idsLain as $idFasilitas) {
-            $t = TarifSewa::where('status_aktif', StatusAktif::Aktif->value)
-                ->where('id_fasilitas', $idFasilitas)
-                ->where('id_jenis_sewa', $tarifUtama->id_jenis_sewa)
-                ->whereHas('fasilitas', fn ($q) => $q->where('status_aktif', StatusAktif::Aktif->value))
-                ->with('fasilitas', 'jenisSewa')
-                ->first();
+        try {
+            return Cache::lock("keranjang-lock:{$sessionId}", 10)->block(5, function () use ($request, $tarifUtama, $data, $sessionId) {
+                // PENTING: session ini sudah dimuat ke memori SEBELUM request menunggu giliran
+                // lock di atas, jadi isinya bisa basi begitu giliran tiba — mis. keranjang baru
+                // saja ditulis oleh request lain untuk session yang sama, tepat sebelum lock ini
+                // didapat. start() memuat ulang dari storage supaya pengecekan bentrok di bawah
+                // memakai isi keranjang yang benar-benar terbaru, bukan salinan basi.
+                $request->session()->start();
 
-            if (! $t) {
-                return back()->withInput()->withErrors([
-                    'antrian' => 'Salah satu ruangan yang dipilih sudah tidak tersedia untuk jenis sewa ini. Silakan pilih ulang di denah.',
-                ]);
-            }
-            $daftarTarif->push($t);
+                // Kumpulkan tarif semua ruangan: utama + antrian (jenis sewa sama dengan ruangan utama).
+                $daftarTarif = collect([$tarifUtama]);
+                $idsLain = array_values(array_filter(explode(',', (string) $request->input('antrian'))));
+                foreach ($idsLain as $idFasilitas) {
+                    $t = TarifSewa::where('status_aktif', StatusAktif::Aktif->value)
+                        ->where('id_fasilitas', $idFasilitas)
+                        ->where('id_jenis_sewa', $tarifUtama->id_jenis_sewa)
+                        ->whereHas('fasilitas', fn ($q) => $q->where('status_aktif', StatusAktif::Aktif->value))
+                        ->with('fasilitas', 'jenisSewa')
+                        ->first();
+
+                    if (! $t) {
+                        return back()->withInput()->withErrors([
+                            'antrian' => 'Salah satu ruangan yang dipilih sudah tidak tersedia untuk jenis sewa ini. Silakan pilih ulang di denah.',
+                        ]);
+                    }
+                    $daftarTarif->push($t);
+                }
+
+                // Bangun & periksa SEMUA item dulu — kapasitas & ketersediaan per ruangan.
+                $items = [];
+                $galat = [];
+                foreach ($daftarTarif as $t) {
+                    $item = $this->cart->buildItem($t, $data);
+                    $slot = [
+                        'tanggal_mulai'   => $item['tanggal_mulai'],
+                        'tanggal_selesai' => $item['tanggal_selesai'],
+                        'jam_mulai'       => $item['jam_mulai'],
+                        'jam_selesai'     => $item['jam_selesai'],
+                    ];
+
+                    if ((int) $data['jumlah_pengguna'] > $t->fasilitas->kapasitas) {
+                        $galat[] = "{$t->fasilitas->nama_fasilitas}: kapasitas maksimal {$t->fasilitas->kapasitas} orang.";
+                    } elseif ($this->cart->hasConflict($item, $this->availability) || $this->bentrokDiBatch($items, $item)) {
+                        $galat[] = "{$t->fasilitas->nama_fasilitas}: ruangan ini sudah ada di keranjang dengan jadwal yang bentrok.";
+                    } elseif (! $this->availability->slotAvailable($item['id_fasilitas'], $slot, $sessionId)) {
+                        $galat[] = "{$t->fasilitas->nama_fasilitas}: jadwal tersebut baru saja terisi, pilih jadwal lain.";
+                    } else {
+                        $items[] = $item;
+                    }
+                }
+
+                if ($galat !== []) {
+                    return back()->withInput()->withErrors($galat);
+                }
+
+                foreach ($items as $item) {
+                    $this->availability->putHold($item, $sessionId);
+                    $this->cart->add($item);
+                }
+
+                // Simpan session SEKARANG (bukan menunggu StartSession menyimpannya belakangan
+                // di akhir request) — supaya begitu lock ini dilepas, request lain yang tadi
+                // antre langsung melihat keranjang yang sudah ter-update, bukan versi lama.
+                $request->session()->save();
+
+                $n = count($items);
+
+                return redirect()->route('reservasi.checkout.form')->with('success', $n > 1
+                    ? "{$n} ruangan ditambahkan ke keranjang dengan jadwal yang sama. 🎉"
+                    : "\"{$items[0]['nama_fasilitas']}\" ditambahkan ke keranjang.");
+            });
+        } catch (LockTimeoutException) {
+            return back()->withInput()->withErrors([
+                'antrian' => 'Keranjang Anda sedang diproses permintaan lain, coba lagi sesaat lagi.',
+            ]);
         }
-
-        // Bangun & periksa SEMUA item dulu — kapasitas & ketersediaan per ruangan.
-        $items = [];
-        $galat = [];
-        foreach ($daftarTarif as $t) {
-            $item = $this->cart->buildItem($t, $data);
-            $slot = [
-                'tanggal_mulai'   => $item['tanggal_mulai'],
-                'tanggal_selesai' => $item['tanggal_selesai'],
-                'jam_mulai'       => $item['jam_mulai'],
-                'jam_selesai'     => $item['jam_selesai'],
-            ];
-
-            if ((int) $data['jumlah_pengguna'] > $t->fasilitas->kapasitas) {
-                $galat[] = "{$t->fasilitas->nama_fasilitas}: kapasitas maksimal {$t->fasilitas->kapasitas} orang.";
-            } elseif ($this->cart->hasConflict($item, $this->availability) || $this->bentrokDiBatch($items, $item)) {
-                $galat[] = "{$t->fasilitas->nama_fasilitas}: ruangan ini sudah ada di keranjang dengan jadwal yang bentrok.";
-            } elseif (! $this->availability->slotAvailable($item['id_fasilitas'], $slot, $sessionId)) {
-                $galat[] = "{$t->fasilitas->nama_fasilitas}: jadwal tersebut baru saja terisi, pilih jadwal lain.";
-            } else {
-                $items[] = $item;
-            }
-        }
-
-        if ($galat !== []) {
-            return back()->withInput()->withErrors($galat);
-        }
-
-        foreach ($items as $item) {
-            $this->availability->putHold($item, $sessionId);
-            $this->cart->add($item);
-        }
-
-        $n = count($items);
-
-        return redirect()->route('reservasi.checkout.form')->with('success', $n > 1
-            ? "{$n} ruangan ditambahkan ke keranjang dengan jadwal yang sama. 🎉"
-            : "\"{$items[0]['nama_fasilitas']}\" ditambahkan ke keranjang.");
     }
 
     /** Ruangan yang sama dengan jadwal bentrok sudah ada di antara item yang baru dikumpulkan pada batch ini? */

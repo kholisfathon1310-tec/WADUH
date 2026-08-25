@@ -9,7 +9,6 @@ use App\Models\Reservasi;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class PerbaruiStatusReservasiOtomatis extends Command
 {
@@ -21,7 +20,7 @@ class PerbaruiStatusReservasiOtomatis extends Command
     /**
      * @var string
      */
-    protected $description = 'Ubah status Reservasi otomatis berdasarkan waktu: Disetujui -> Selesai setelah masa penggunaan berakhir, dan Menunggu (belum diproses admin) -> Kadaluwarsa setelah batas persetujuan terlewati (beda per jenis sewa, digabung per pemesanan)';
+    protected $description = 'Ubah status Reservasi otomatis berdasarkan waktu: Disetujui -> Selesai setelah masa penggunaan berakhir, dan Menunggu (belum diproses admin) -> Kadaluwarsa setelah batas persetujuan terlewati (beda per jenis sewa, dievaluasi per ruangan/baris)';
 
     /**
      * Jam tutup operasional gedung — sama dengan batas jam_selesai di TambahKeranjangRequest
@@ -39,7 +38,7 @@ class PerbaruiStatusReservasiOtomatis extends Command
             scope: $this->scopeMasaPenggunaanBerakhir(...),
         );
 
-        $jadiKadaluwarsa = $this->kadaluwarsakanPemesananTerlambat();
+        $jadiKadaluwarsa = $this->kadaluwarsakanRuanganTerlambat();
 
         $this->info("Selesai. {$jadiSelesai} reservasi diubah menjadi 'Selesai', {$jadiKadaluwarsa} reservasi diubah menjadi 'Kadaluwarsa'.");
 
@@ -85,19 +84,18 @@ class PerbaruiStatusReservasiOtomatis extends Command
     }
 
     /**
-     * Menunggu -> Kadaluwarsa, digabung per PEMESANAN (kode_transaksi) — bukan per baris.
-     * Admin menyetujui/menolak seluruh ruangan dalam satu pemesanan sekaligus (lihat
-     * ReservasiAdminController::setujui), jadi kadaluwarsa juga harus berlaku untuk seluruh
-     * pemesanan sekaligus: SELURUH ruangan baru jadi Kadaluwarsa begitu ruangan dengan batas
-     * waktu PALING AKHIR pada pemesanan itu sudah lewat. Kalau masih ada satu ruangan saja
-     * yang belum lewat batasnya, semua ruangan di pemesanan itu tetap Menunggu.
+     * Menunggu -> Kadaluwarsa, dievaluasi per RUANGAN/BARIS — bukan digabung per pemesanan.
+     * Kalau 1 pemesanan berisi 2+ ruangan berbeda, tiap ruangan kadaluwarsa mengikuti batas
+     * waktunya sendiri-sendiri (sama seperti transisi Disetujui -> Selesai di atas, yang juga
+     * per baris): ruangan yang batasnya sudah lewat jadi Kadaluwarsa duluan, sementara ruangan
+     * lain di pemesanan yang sama yang belum lewat batasnya tetap Menunggu.
      *
      * Batas waktu per ruangan beda per jenis sewa:
      *   - Per Jam   : begitu jam_selesai (pada tanggal_mulai) yang diajukan sudah lewat.
      *   - Per Hari  : begitu jam operasional (16.00) di tanggal_mulai sudah lewat.
      *   - Per Bulan : begitu tanggal_mulai sudah terlewati (jadi keesokan harinya).
      */
-    private function kadaluwarsakanPemesananTerlambat(): int
+    private function kadaluwarsakanRuanganTerlambat(): int
     {
         $now = now();
 
@@ -108,26 +106,16 @@ class PerbaruiStatusReservasiOtomatis extends Command
 
         $count = 0;
 
-        /** @var Collection<string, Collection<int, Reservasi>> $pemesanan */
-        $pemesanan = $menunggu->groupBy(fn (Reservasi $r) => $r->kode_transaksi ?? $r->kode_reservasi);
-
-        foreach ($pemesanan as $items) {
-            $batasTerakhir = $items->max(fn (Reservasi $r) => $this->batasPersetujuan($r));
-
-            // Selama masih ada 1 ruangan yang belum lewat batasnya, seluruh pemesanan
-            // ini (termasuk ruangan lain yang batasnya sudah lewat) tetap Menunggu —
-            // supaya admin tetap punya kesempatan memutuskan pemesanan secara utuh.
-            if ($batasTerakhir === null || $batasTerakhir->gt($now)) {
+        foreach ($menunggu as $item) {
+            if ($this->batasPersetujuan($item)->gt($now)) {
                 continue;
             }
 
-            foreach ($items as $item) {
-                $item->keteranganRiwayat = 'Tidak diproses admin sampai melewati batas waktu persetujuan seluruh ruangan pada pemesanan ini.';
-                $item->status_reservasi = StatusReservasi::Kadaluwarsa;
-                $item->lock_status = LockStatus::Released;
-                $item->save();
-                $count++;
-            }
+            $item->keteranganRiwayat = 'Tidak diproses admin sampai melewati batas waktu persetujuan ruangan ini.';
+            $item->status_reservasi = StatusReservasi::Kadaluwarsa;
+            $item->lock_status = LockStatus::Released;
+            $item->save();
+            $count++;
         }
 
         return $count;
