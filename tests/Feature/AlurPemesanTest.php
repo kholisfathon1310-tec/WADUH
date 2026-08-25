@@ -316,4 +316,99 @@ class AlurPemesanTest extends TestCase
             Carbon::setTestNow();
         }
     }
+
+    public function test_tambah_keranjang_tolak_ruangan_dan_jadwal_yang_sama_dua_kali(): void
+    {
+        $tarif = $this->tarifSatuan('Jam');
+        $fas = $tarif->fasilitas;
+        $tgl = Carbon::today()->addDays(8)->toDateString();
+
+        $payload = [
+            'id_fasilitas'    => $fas->id_fasilitas,
+            'id_tarif_sewa'   => $tarif->id_tarif_sewa,
+            'tanggal_mulai'   => $tgl,
+            'jam_mulai'       => '09:00',
+            'jam_selesai'     => '11:00',
+            'jumlah_pengguna' => 2,
+            'keperluan'       => 'Rapat',
+        ];
+
+        $this->post('/reservasi/keranjang', $payload)->assertRedirect(route('reservasi.checkout.form'));
+        $this->assertCount(1, session('reservasi_cart'));
+
+        // Submit persis sama lagi (mis. double-click / resubmit) → ditolak, keranjang tetap 1 item.
+        $this->post('/reservasi/keranjang', $payload)->assertSessionHasErrors();
+        $this->assertCount(1, session('reservasi_cart'), 'Ruangan+jadwal yang sama tidak boleh masuk keranjang dua kali');
+    }
+
+    public function test_tambah_keranjang_tolak_ruangan_sama_jam_mulai_sama_walau_jam_selesai_beda(): void
+    {
+        // Ruangan sama, jam_mulai SAMA (09:00) tapi jam_selesai beda (11:00 vs 10:00) — tetap
+        // bentrok (overlap 09:00-10:00), bukan cuma dicek identik persis.
+        $tarif = $this->tarifSatuan('Jam');
+        $fas = $tarif->fasilitas;
+        $tgl = Carbon::today()->addDays(8)->toDateString();
+
+        $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $fas->id_fasilitas, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '09:00', 'jam_selesai' => '11:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat',
+        ])->assertRedirect(route('reservasi.checkout.form'));
+        $this->assertCount(1, session('reservasi_cart'));
+
+        $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $fas->id_fasilitas, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '09:00', 'jam_selesai' => '10:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat lain',
+        ])->assertSessionHasErrors();
+        $this->assertCount(1, session('reservasi_cart'), 'jam_mulai yang sama pada ruangan yang sama harus tetap dianggap bentrok');
+    }
+
+    public function test_tambah_keranjang_boleh_ruangan_sama_jadwal_berbeda(): void
+    {
+        $tarif = $this->tarifSatuan('Jam');
+        $fas = $tarif->fasilitas;
+        $tgl = Carbon::today()->addDays(8)->toDateString();
+
+        $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $fas->id_fasilitas, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '09:00', 'jam_selesai' => '11:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat pagi',
+        ])->assertRedirect(route('reservasi.checkout.form'));
+
+        // Ruangan SAMA, jam BERBEDA (tidak bentrok) → harus boleh masuk keranjang.
+        $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $fas->id_fasilitas, 'id_tarif_sewa' => $tarif->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '13:00', 'jam_selesai' => '15:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat siang',
+        ])->assertRedirect(route('reservasi.checkout.form'));
+
+        $this->assertCount(2, session('reservasi_cart'));
+    }
+
+    public function test_tambah_keranjang_boleh_ruangan_berbeda_jadwal_sama(): void
+    {
+        $jenis = \App\Models\JenisSewa::where('satuan', 'Jam')->firstOrFail();
+        $tarifA = $this->tarifSatuan('Jam');
+        $fasB = \App\Models\Fasilitas::factory()->create(['status_aktif' => 'Aktif', 'kapasitas' => 20]);
+        $tarifB = TarifSewa::factory()->create([
+            'id_fasilitas' => $fasB->id_fasilitas, 'id_jenis_sewa' => $jenis->id_jenis_sewa, 'status_aktif' => 'Aktif',
+        ]);
+        $tgl = Carbon::today()->addDays(8)->toDateString();
+
+        $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $tarifA->fasilitas->id_fasilitas, 'id_tarif_sewa' => $tarifA->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '09:00', 'jam_selesai' => '11:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat A',
+        ])->assertRedirect(route('reservasi.checkout.form'));
+
+        // Ruangan BERBEDA, jadwal SAMA → harus boleh masuk keranjang.
+        $this->post('/reservasi/keranjang', [
+            'id_fasilitas' => $fasB->id_fasilitas, 'id_tarif_sewa' => $tarifB->id_tarif_sewa,
+            'tanggal_mulai' => $tgl, 'jam_mulai' => '09:00', 'jam_selesai' => '11:00',
+            'jumlah_pengguna' => 2, 'keperluan' => 'Rapat B',
+        ])->assertRedirect(route('reservasi.checkout.form'));
+
+        $this->assertCount(2, session('reservasi_cart'));
+    }
 }

@@ -77,6 +77,28 @@ class CartService
     }
 
     /**
+     * Ruangan (id_fasilitas) yang sama di keranjang dengan jadwal yang BENTROK (bukan cuma
+     * identik persis) dengan $item — dicek pakai overlap yang sama dengan pengecekan
+     * ketersediaan (AvailabilityService::slotsConflict), supaya mis. 09.00–11.00 vs
+     * 09.00–10.00 pada ruangan yang sama tetap tertangkap walau jam_selesai-nya beda.
+     * Ruangan berbeda dengan jadwal bentrok, atau ruangan sama dengan jadwal TIDAK bentrok,
+     * TIDAK dianggap konflik.
+     */
+    public function hasConflict(array $item, AvailabilityService $availability): bool
+    {
+        foreach ($this->items() as $existing) {
+            if (
+                (int) $existing['id_fasilitas'] === (int) $item['id_fasilitas']
+                && $availability->slotsConflict($existing, $item)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Bangun satu item keranjang lengkap dari tarif + input jadwal yang sudah tervalidasi.
      * Menghitung tanggal_selesai (Jam), durasi, dan total_biaya sesuai satuan.
      *

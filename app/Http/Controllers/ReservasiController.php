@@ -221,6 +221,8 @@ class ReservasiController extends Controller
 
             if ((int) $data['jumlah_pengguna'] > $t->fasilitas->kapasitas) {
                 $galat[] = "{$t->fasilitas->nama_fasilitas}: kapasitas maksimal {$t->fasilitas->kapasitas} orang.";
+            } elseif ($this->cart->hasConflict($item, $this->availability) || $this->bentrokDiBatch($items, $item)) {
+                $galat[] = "{$t->fasilitas->nama_fasilitas}: ruangan ini sudah ada di keranjang dengan jadwal yang bentrok.";
             } elseif (! $this->availability->slotAvailable($item['id_fasilitas'], $slot, $sessionId)) {
                 $galat[] = "{$t->fasilitas->nama_fasilitas}: jadwal tersebut baru saja terisi, pilih jadwal lain.";
             } else {
@@ -242,6 +244,21 @@ class ReservasiController extends Controller
         return redirect()->route('reservasi.checkout.form')->with('success', $n > 1
             ? "{$n} ruangan ditambahkan ke keranjang dengan jadwal yang sama. 🎉"
             : "\"{$items[0]['nama_fasilitas']}\" ditambahkan ke keranjang.");
+    }
+
+    /** Ruangan yang sama dengan jadwal bentrok sudah ada di antara item yang baru dikumpulkan pada batch ini? */
+    private function bentrokDiBatch(array $items, array $item): bool
+    {
+        foreach ($items as $existing) {
+            if (
+                (int) $existing['id_fasilitas'] === (int) $item['id_fasilitas']
+                && $this->availability->slotsConflict($existing, $item)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Hapus item dari keranjang + lepas cache hold. */

@@ -27,6 +27,10 @@ class ReservasiApprovalService
     }
 
     /**
+     * Item checklist menyesuaikan jenis sewa — syarat durasi & dokumen Bulan cuma relevan
+     * (dan cuma ditampilkan) untuk reservasi Bulan, supaya reservasi Jam/Hari tidak melihat
+     * baris "tidak berlaku" yang percuma.
+     *
      * @return array<int, array{label: string, passed: bool, note: string}>
      */
     public function checklist(Reservasi $reservasi): array
@@ -36,12 +40,18 @@ class ReservasiApprovalService
         $jenis = $reservasi->tarifSewa->jenisSewa;
         $satuan = $jenis->satuan;
 
-        return [
-            $this->cekBentrok($reservasi, $fasilitas),
+        $checklist = [
+            $this->cekBentrok($reservasi, $fasilitas, $satuan),
             $this->cekJenisKategori($fasilitas->kategori_fasilitas, $satuan),
-            $this->cekBulan($reservasi, $jenis, $satuan),
-            $this->cekKapasitas($reservasi, $fasilitas),
         ];
+
+        if ($satuan === SatuanSewa::Bulan) {
+            $checklist[] = $this->cekBulan($reservasi, $jenis);
+        }
+
+        $checklist[] = $this->cekKapasitas($reservasi, $fasilitas);
+
+        return $checklist;
     }
 
     public function passes(Reservasi $reservasi): bool
@@ -55,7 +65,7 @@ class ReservasiApprovalService
         return true;
     }
 
-    private function cekBentrok(Reservasi $reservasi, $fasilitas): array
+    private function cekBentrok(Reservasi $reservasi, $fasilitas, SatuanSewa $satuan): array
     {
         $slot = [
             'tanggal_mulai'   => $reservasi->tanggal_mulai->toDateString(),
@@ -67,10 +77,18 @@ class ReservasiApprovalService
         // Abaikan baris ini sendiri (statusnya Menunggu = aktif, akan cocok dengan dirinya).
         $bentrok = $this->availability->hasReservationConflict($fasilitas->id_fasilitas, $slot, $reservasi->id_reservasi);
 
+        $lingkup = match ($satuan) {
+            SatuanSewa::Jam => 'jam',
+            SatuanSewa::Hari => 'tanggal',
+            SatuanSewa::Bulan => 'periode',
+        };
+
         return [
-            'label'  => 'Tidak bentrok dengan Reservasi Menunggu/Disetujui lain pada periode yang sama',
+            'label'  => 'Tidak bentrok jadwal',
             'passed' => ! $bentrok,
-            'note'   => $bentrok ? 'Ada reservasi lain yang bentrok pada fasilitas & periode ini.' : 'Tidak ada bentrok.',
+            'note'   => $bentrok
+                ? "Ada reservasi lain yang bentrok pada {$lingkup} yang sama."
+                : "Tidak ada reservasi lain pada {$lingkup} yang sama.",
         ];
     }
 
@@ -80,18 +98,15 @@ class ReservasiApprovalService
         $ok = in_array($satuan->value, $allowed, true);
 
         return [
-            'label'  => 'Jenis sewa sesuai kategori fasilitas',
+            'label'  => 'Jenis sewa sesuai kategori',
             'passed' => $ok,
             'note'   => $ok ? "Sewa {$satuan->value} diperbolehkan untuk {$kategori}." : "Kategori {$kategori} tidak menerima sewa {$satuan->value}.",
         ];
     }
 
-    private function cekBulan(Reservasi $reservasi, $jenis, SatuanSewa $satuan): array
+    /** Hanya dipanggil untuk reservasi Bulan — lihat gating di checklist(). */
+    private function cekBulan(Reservasi $reservasi, $jenis): array
     {
-        if ($satuan !== SatuanSewa::Bulan) {
-            return ['label' => 'Syarat sewa Bulan (durasi & dokumen)', 'passed' => true, 'note' => 'Tidak berlaku (bukan sewa Bulan).'];
-        }
-
         $min = (int) $jenis->durasi_minimum;
         $durasiOk = $reservasi->durasi >= $min;
 
@@ -107,7 +122,7 @@ class ReservasiApprovalService
             default       => "Durasi ≥ {$min} bulan dan semua dokumen Valid.",
         };
 
-        return ['label' => "Sewa Bulan: durasi ≥ {$min} bulan & semua dokumen Valid", 'passed' => $passed, 'note' => $note];
+        return ['label' => 'Durasi & dokumen sewa Bulan', 'passed' => $passed, 'note' => $note];
     }
 
     private function cekKapasitas(Reservasi $reservasi, $fasilitas): array
@@ -115,7 +130,7 @@ class ReservasiApprovalService
         $ok = $reservasi->jumlah_pengguna <= $fasilitas->kapasitas;
 
         return [
-            'label'  => 'Jumlah pengguna tidak melebihi kapasitas',
+            'label'  => 'Kapasitas ruangan',
             'passed' => $ok,
             'note'   => "{$reservasi->jumlah_pengguna} dari kapasitas {$fasilitas->kapasitas} orang.",
         ];

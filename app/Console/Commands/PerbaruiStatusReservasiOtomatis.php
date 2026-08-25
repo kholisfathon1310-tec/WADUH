@@ -3,10 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Enums\LockStatus;
+use App\Enums\SatuanSewa;
 use App\Enums\StatusReservasi;
 use App\Models\Reservasi;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class PerbaruiStatusReservasiOtomatis extends Command
 {
@@ -18,12 +21,12 @@ class PerbaruiStatusReservasiOtomatis extends Command
     /**
      * @var string
      */
-    protected $description = 'Ubah status Reservasi otomatis berdasarkan waktu penggunaan: Disetujui -> Selesai, dan Menunggu (belum diproses admin) -> Kadaluwarsa';
+    protected $description = 'Ubah status Reservasi otomatis berdasarkan waktu: Disetujui -> Selesai setelah masa penggunaan berakhir, dan Menunggu (belum diproses admin) -> Kadaluwarsa setelah batas persetujuan terlewati (beda per jenis sewa, digabung per pemesanan)';
 
     /**
      * Jam tutup operasional gedung — sama dengan batas jam_selesai di TambahKeranjangRequest
      * (08.00–16.00). Reservasi Harian/Bulanan tidak punya jam_selesai, jadi waktu penggunaannya
-     * dianggap berakhir begitu gedung tutup di tanggal_selesai, bukan tengah malam.
+     * dianggap berakhir begitu gedung tutup, bukan tengah malam.
      */
     private const JAM_TUTUP_OPERASIONAL = '16:00:00';
 
@@ -33,14 +36,10 @@ class PerbaruiStatusReservasiOtomatis extends Command
             dari: StatusReservasi::Disetujui,
             ke: StatusReservasi::Selesai,
             keterangan: 'Waktu penggunaan reservasi ini sudah berakhir.',
+            scope: $this->scopeMasaPenggunaanBerakhir(...),
         );
 
-        $jadiKadaluwarsa = $this->transisi(
-            dari: StatusReservasi::Menunggu,
-            ke: StatusReservasi::Kadaluwarsa,
-            keterangan: 'Tidak diproses sampai melewati waktu penggunaan yang diajukan.',
-            releaseLock: true,
-        );
+        $jadiKadaluwarsa = $this->kadaluwarsakanPemesananTerlambat();
 
         $this->info("Selesai. {$jadiSelesai} reservasi diubah menjadi 'Selesai', {$jadiKadaluwarsa} reservasi diubah menjadi 'Kadaluwarsa'.");
 
@@ -48,15 +47,15 @@ class PerbaruiStatusReservasiOtomatis extends Command
     }
 
     /**
-     * Ambil baris berstatus $dari yang waktu penggunaannya sudah lewat, lalu ubah satu per
-     * satu ke $ke lewat save() — BUKAN query()->update() massal — supaya ReservasiObserver
-     * tetap mencatat baris Riwayat_Status untuk tiap perubahan.
+     * Ambil baris berstatus $dari yang cocok $scope, lalu ubah satu per satu ke $ke lewat
+     * save() — BUKAN query()->update() massal — supaya ReservasiObserver tetap mencatat
+     * baris Riwayat_Status untuk tiap perubahan.
      */
-    private function transisi(StatusReservasi $dari, StatusReservasi $ke, string $keterangan, bool $releaseLock = false): int
+    private function transisi(StatusReservasi $dari, StatusReservasi $ke, string $keterangan, callable $scope, bool $releaseLock = false): int
     {
         $items = Reservasi::query()
             ->where('status_reservasi', $dari->value)
-            ->where($this->scopeWaktuPenggunaanLewat(...))
+            ->where($scope)
             ->get();
 
         foreach ($items as $item) {
@@ -72,15 +71,77 @@ class PerbaruiStatusReservasiOtomatis extends Command
     }
 
     /**
-     * Reservasi Per Jam mengikuti jam_selesai pilihan pemesan sendiri; Reservasi Harian/Bulanan
-     * (jam_selesai kosong) mengikuti jam operasional gedung — dianggap berakhir jam 16.00 di
-     * tanggal_selesai, bukan tengah malam.
+     * Disetujui -> Selesai: masa penggunaan berakhir begitu tanggal_selesai (+ jam_selesai
+     * kalau Per Jam, atau jam tutup operasional untuk Harian/Bulanan) sudah lewat. Dievaluasi
+     * per baris (bukan per pemesanan) karena tiap ruangan genuinely selesai dipakai pada
+     * tanggalnya masing-masing, walau disetujui bersamaan dalam satu pemesanan.
      */
-    private function scopeWaktuPenggunaanLewat(Builder $query): void
+    private function scopeMasaPenggunaanBerakhir(Builder $query): void
     {
         $query->whereRaw(
-            "TIMESTAMP(tanggal_selesai, COALESCE(jam_selesai, ?)) <= ?",
+            'TIMESTAMP(tanggal_selesai, COALESCE(jam_selesai, ?)) <= ?',
             [self::JAM_TUTUP_OPERASIONAL, now()],
         );
+    }
+
+    /**
+     * Menunggu -> Kadaluwarsa, digabung per PEMESANAN (kode_transaksi) — bukan per baris.
+     * Admin menyetujui/menolak seluruh ruangan dalam satu pemesanan sekaligus (lihat
+     * ReservasiAdminController::setujui), jadi kadaluwarsa juga harus berlaku untuk seluruh
+     * pemesanan sekaligus: SELURUH ruangan baru jadi Kadaluwarsa begitu ruangan dengan batas
+     * waktu PALING AKHIR pada pemesanan itu sudah lewat. Kalau masih ada satu ruangan saja
+     * yang belum lewat batasnya, semua ruangan di pemesanan itu tetap Menunggu.
+     *
+     * Batas waktu per ruangan beda per jenis sewa:
+     *   - Per Jam   : begitu jam_selesai (pada tanggal_mulai) yang diajukan sudah lewat.
+     *   - Per Hari  : begitu jam operasional (16.00) di tanggal_mulai sudah lewat.
+     *   - Per Bulan : begitu tanggal_mulai sudah terlewati (jadi keesokan harinya).
+     */
+    private function kadaluwarsakanPemesananTerlambat(): int
+    {
+        $now = now();
+
+        $menunggu = Reservasi::query()
+            ->where('status_reservasi', StatusReservasi::Menunggu->value)
+            ->with('tarifSewa.jenisSewa')
+            ->get();
+
+        $count = 0;
+
+        /** @var Collection<string, Collection<int, Reservasi>> $pemesanan */
+        $pemesanan = $menunggu->groupBy(fn (Reservasi $r) => $r->kode_transaksi ?? $r->kode_reservasi);
+
+        foreach ($pemesanan as $items) {
+            $batasTerakhir = $items->max(fn (Reservasi $r) => $this->batasPersetujuan($r));
+
+            // Selama masih ada 1 ruangan yang belum lewat batasnya, seluruh pemesanan
+            // ini (termasuk ruangan lain yang batasnya sudah lewat) tetap Menunggu —
+            // supaya admin tetap punya kesempatan memutuskan pemesanan secara utuh.
+            if ($batasTerakhir === null || $batasTerakhir->gt($now)) {
+                continue;
+            }
+
+            foreach ($items as $item) {
+                $item->keteranganRiwayat = 'Tidak diproses admin sampai melewati batas waktu persetujuan seluruh ruangan pada pemesanan ini.';
+                $item->status_reservasi = StatusReservasi::Kadaluwarsa;
+                $item->lock_status = LockStatus::Released;
+                $item->save();
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    private function batasPersetujuan(Reservasi $reservasi): Carbon
+    {
+        $satuan = $reservasi->tarifSewa->jenisSewa->satuan;
+        $tanggalMulai = $reservasi->tanggal_mulai->toDateString();
+
+        return match ($satuan) {
+            SatuanSewa::Jam   => Carbon::parse($tanggalMulai.' '.($reservasi->jam_selesai ?: self::JAM_TUTUP_OPERASIONAL)),
+            SatuanSewa::Hari  => Carbon::parse($tanggalMulai.' '.self::JAM_TUTUP_OPERASIONAL),
+            SatuanSewa::Bulan => $reservasi->tanggal_mulai->copy()->addDay()->startOfDay(),
+        };
     }
 }

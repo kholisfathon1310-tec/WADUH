@@ -241,7 +241,7 @@ class AvailabilityService
     // ---------------------------------------------------------------------
 
     /** Dua slot bentrok? Kalau salah satu memakai seluruh hari, cukup overlap tanggal. */
-    private function slotsConflict(array $a, array $b): bool
+    public function slotsConflict(array $a, array $b): bool
     {
         if (! $this->datesOverlap($a['tanggal_mulai'], $a['tanggal_selesai'], $b['tanggal_mulai'], $b['tanggal_selesai'])) {
             return false;

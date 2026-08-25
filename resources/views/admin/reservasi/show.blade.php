@@ -38,6 +38,11 @@
     .room-card:hover { box-shadow:0 6px 18px rgba(21,36,59,.07); }
     .room-card + .room-card { margin-top:1rem; }
     .room-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:.5rem; padding:.85rem 1.1rem; background:#f7fafc; border-bottom:1px solid var(--line); }
+    .checklist-kelayakan { display:flex; flex-direction:column; gap:.55rem; }
+    .checklist-kelayakan .ck-item { display:flex; align-items:flex-start; gap:.55rem; }
+    .checklist-kelayakan .ck-item > i { flex:none; margin-top:.2rem; font-size:.85rem; }
+    .checklist-kelayakan .ck-label { font-size:.85rem; font-weight:600; line-height:1.3; }
+    .checklist-kelayakan .ck-note { font-size:.78rem; color:var(--muted); line-height:1.3; }
 </style>
 
     {{-- Hero pemesanan --}}
@@ -111,11 +116,14 @@
                                 <div class="k">Fasilitas bawaan</div>
                                 <div class="small text-muted">{{ implode(' , ', app(\App\Services\FasilitasBawaanService::class)->untuk($fas, $satuan)) }}</div>
                                 <div class="k">Checklist kelayakan</div>
-                                <div>
+                                <div class="checklist-kelayakan">
                                     @foreach ($cl as $c)
-                                        <div class="small">
+                                        <div class="ck-item">
                                             <i class="bi bi-{{ $c['passed'] ? 'check-circle-fill text-success' : 'x-circle-fill text-danger' }}"></i>
-                                            {{ $c['label'] }} <span class="text-muted">({{ $c['note'] }})</span>
+                                            <div>
+                                                <div class="ck-label">{{ $c['label'] }}</div>
+                                                <div class="ck-note">{{ $c['note'] }}</div>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
