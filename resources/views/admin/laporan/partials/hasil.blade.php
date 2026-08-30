@@ -40,7 +40,6 @@
                 <tr class="fw-bold">
                     <td colspan="7" class="text-end">TOTAL</td>
                     <td class="text-end">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
-                    <td></td>
                 </tr>
             @endif
             </tbody>
@@ -51,8 +50,8 @@
 {{-- Ekspor di bawah tabel, rata kanan --}}
 <div class="d-flex justify-content-end mt-3">
     <a href="{{ route('admin.laporan.pdf', request()->query()) }}" class="btn btn-danger"
-       data-confirm="Laporan PDF akan dibuat sesuai filter yang aktif, dan tersimpan di riwayat laporan."
-       data-confirm-title="Ekspor laporan ini?" data-icon="warning" data-confirm-text="Ya, ekspor">
+       data-confirm="Laporan PDF akan diunduh."
+       data-confirm-title="Unduh laporan ini?" data-icon="warning" data-confirm-text="Ya, Unduh">
         <i class="bi bi-file-earmark-pdf me-1"></i>Unduh PDF
     </a>
 </div>

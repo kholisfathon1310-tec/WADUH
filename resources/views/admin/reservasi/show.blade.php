@@ -59,8 +59,8 @@
                 @if ($adaDisetujui)
                     {{-- Idempotent: klik pertama menerbitkan, berikutnya mengunduh PDF yang sama (1 faktur utk semua ruangan). --}}
                     <form method="POST" action="{{ route('admin.reservasi.faktur.cetak', $r->kode_reservasi) }}"
-                          data-confirm="Faktur PDF untuk pemesanan {{ $r->kode_transaksi }} akan diterbitkan/diunduh."
-                          data-confirm-title="Cetak faktur ini?" data-icon="warning" data-confirm-text="Ya, cetak">@csrf
+                          data-confirm="Faktur PDF untuk pemesanan {{ $r->kode_transaksi }} akan didiunduh."
+                          data-confirm-title="Unduh faktur ini?" data-icon="warning" data-confirm-text="Ya, unduh">@csrf
                         <button class="btn btn-brand"><i class="bi bi-receipt me-1"></i>Unduh Faktur</button>
                     </form>
                 @endif

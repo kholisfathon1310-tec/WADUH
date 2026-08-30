@@ -130,6 +130,8 @@
     .dot-setujui  { background:#e2f7ef; color:#0d8a5f; }
     .dot-tolak    { background:#fde4e4; color:#c02929; }
     .dot-batal    { background:#eef1f5; color:#475569; }
+    .dot-selesai  { background:#e2ecfb; color:#1d4ed8; }
+    .dot-expired  { background:#f4e8d8; color:#a15c07; }
 
     /* ────────── PANDUAN CARD ────────── */
     .guide-card {
@@ -212,8 +214,10 @@
             ['bi-check-circle',    'dot-setujui',  'Disetujui',    'Reservasi diterima. Fasilitas siap digunakan sesuai jadwal yang dipesan.'],
             ['bi-x-circle',        'dot-tolak',    'Ditolak',      'Reservasi tidak dapat diproses. Alasan penolakan tercantum di halaman hasil.'],
             ['bi-slash-circle',    'dot-batal',    'Dibatalkan',   'Reservasi dibatalkan oleh pemesan sebelum diproses admin.'],
+            ['bi-flag-fill',       'dot-selesai',  'Selesai',      'Masa penggunaan fasilitas telah berakhir. Reservasi ini sudah lampau dan tidak dapat diubah lagi.'],
+            ['bi-clock-history',   'dot-expired',  'Kadaluwarsa',  'Batas waktu verifikasi terlewati sebelum admin memproses reservasi ini.'],
         ] as [$ikon, $kelasWarna, $judul, $desk])
-            <div class="col-6 col-lg-3">
+            <div class="col-6 col-lg-4">
                 <div class="status-card">
                     <div class="head">
                         <span class="dot {{ $kelasWarna }}"><i class="bi {{ $ikon }}"></i></span>
@@ -245,14 +249,14 @@
                     <span class="n">2</span>
                     <div class="body">
                         <b>Lihat progres verifikasi</b>
-                        <span>Pantau tahapan <em>Diajukan → Diverifikasi → Disetujui</em> beserta rincian jadwal dan biaya.</span>
+                        <span>Pantau tahapan Diajukan → Diverifikasi → Disetujui beserta rincian jadwal dan biaya.</span>
                     </div>
                 </div>
                 <div class="step-row">
                     <span class="n">3</span>
                     <div class="body">
                         <b>Batalkan bila perlu</b>
-                        <span>Selama status masih <em>Diverifikasi</em> dan tanggal belum lewat, reservasi dapat dibatalkan langsung dari halaman hasil.</span>
+                        <span>Selama status masih Diverifikasi dan tanggal belum lewat, reservasi dapat dibatalkan langsung dari halaman hasil.</span>
                     </div>
                 </div>
             </div>

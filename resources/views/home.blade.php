@@ -653,11 +653,11 @@
                     <div class="section-head">
                         <p class="eyebrow">Kontak</p>
                         <h2>Butuh bantuan? Hubungi admin BITC.</h2>
-                        <p class="lead">Mau reservasi secara langsung atau ingin melakukan pembayaran? Tim admin BITC siap membantu. Cara tercepat lewat WhatsApp.</p>
+                        <p class="lead">Mau reservasi secara langsung atau ingin melakukan pembayaran? Admin BITC siap membantu.</p>
                         <a class="btn-wa mt-3"
                            href="https://wa.me/{{ $waDigit }}?text={{ urlencode('Halo Admin BITC, saya ingin bertanya tentang reservasi fasilitas lewat WADUH.') }}"
                            target="_blank" rel="noopener">
-                            <i class="bi bi-whatsapp"></i> Chat WhatsApp Admin BITC
+                            <i class="bi bi-whatsapp"></i> Chat WhatsApp 
                         </a>
                     </div>
                 </div>
